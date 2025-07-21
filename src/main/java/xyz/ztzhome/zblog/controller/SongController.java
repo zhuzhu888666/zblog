@@ -2,14 +2,15 @@ package xyz.ztzhome.zblog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
+import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.impl.SongServiceImpl;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/song")
@@ -32,5 +33,19 @@ public class SongController {
         }catch (Exception e){
             return new ResponseMessage(0,"接收对象构建失败:"+e.getMessage());
         }
+    }
+
+    //根据id查找歌曲
+    @GetMapping("/selectSongById")
+    @PostMapping
+    ResponseMessage<SongVO> getSongById(@RequestParam("id") long id){
+        return songService.getSong(id);
+    }
+
+    @GetMapping("/selectSongsByName")
+    @PostMapping
+    //根据名称模糊查找
+    ResponseMessage<List<SongVO>> getSongsByName(@RequestParam("songName") String songName){
+        return songService.getSongsByName(songName);
     }
 }

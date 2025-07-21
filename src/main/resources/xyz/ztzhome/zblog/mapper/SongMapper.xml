@@ -5,10 +5,16 @@
 
 <mapper namespace="xyz.ztzhome.zblog.mapper.SongMapper">
 
-    <resultMap id="SongResultMap" type="xyz.ztzhome.zblog.entity.Bean.Song">
-        <result property="id" column="id"/>
+    <resultMap id="songResultMap" type="xyz.ztzhome.zblog.entity.Bean.Song">
+        <id property="id" column="id"/>
         <result property="singerId" column="singer_id"/>
         <result property="name" column="name"/>
+        <result property="album" column="album"/>
+        <result property="duration" column="duration"/>
+        <result property="style" column="style"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="audioUrl" column="audio_url"/>
+        <result property="releaseTime" column="release_time"/>
     </resultMap>
     <insert id="insertSong" parameterType="xyz.ztzhome.zblog.entity.Bean.Song" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO tb_song
@@ -49,4 +55,27 @@
           AND name = #{songName}
     </select>
 
+    <!-- 根据名称模糊查询 -->
+    <select id="selectSongsByNameLike" resultMap="songResultMap">
+        SELECT * FROM tb_song
+        WHERE name LIKE CONCAT('%', #{name}, '%')
+    </select>
+
+    <!-- 根据歌曲名称模糊查询(带歌手信息) -->
+    <select id="selectSongVOsByNameLike" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
+        SELECT
+            s.id as song_id,
+            s.singer_id,
+            si.singer_name,
+            s.name as song_name,
+            s.album,
+            s.duration,
+            s.style,
+            s.cover_url,
+            s.audio_url,
+            s.release_time
+        FROM tb_song s
+                 LEFT JOIN tb_singer si ON s.singer_id = si.id
+        WHERE s.name LIKE CONCAT('%', #{name}, '%')
+    </select>
 </mapper>

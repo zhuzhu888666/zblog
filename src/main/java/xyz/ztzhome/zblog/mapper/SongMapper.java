@@ -3,6 +3,9 @@ package xyz.ztzhome.zblog.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import xyz.ztzhome.zblog.entity.Bean.Song;
+import xyz.ztzhome.zblog.entity.VO.SongVO;
+
+import java.util.List;
 
 
 @Mapper
@@ -17,4 +20,7 @@ public interface SongMapper {
     Song selectBySingerIdAndName(@Param("singerId") long singerId,
                                  @Param("songName") String songName);
 
+    //根据歌曲名称模糊查询
+    List<Song> selectSongsByNameLike(String songName);
+    List<SongVO> selectSongVOsByNameLike(String songName);
 }

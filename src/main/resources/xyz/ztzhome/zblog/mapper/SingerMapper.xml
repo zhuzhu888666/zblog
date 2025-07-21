@@ -30,4 +30,7 @@
     <select id="selectBySingerName" resultType="xyz.ztzhome.zblog.entity.Bean.Singer">
         select * from tb_singer where singer_name=#{singerName}
     </select>
+    <select id="selectBySingerId" resultType="xyz.ztzhome.zblog.entity.Bean.Singer">
+        SELECT * from tb_singer where id=#{singerId}
+    </select>
 </mapper>

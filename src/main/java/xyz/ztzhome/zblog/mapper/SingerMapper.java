@@ -11,4 +11,5 @@ public interface SingerMapper {
     //根据名字查询歌手
     Singer selectBySingerName(String singerName);
 
+    Singer selectBySingerId(long singerId);
 }
