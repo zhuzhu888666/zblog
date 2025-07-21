@@ -2,35 +2,39 @@ server:
   port: 8080
 
 spring:
-  # ?????
+  # 配置数据源
   datasource:
-    url: jdbc:mysql://ztzhome.xyz:3306/blog?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC  # ???????
-    username: ztz            # ??????
-    password: ztz15277504089            # ?????
-    driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC????
-#mybati??
-mybatis:
-  configuration:
-    #??????
-    map-underscore-to-camel-case: true
+    url: jdbc:mysql://ztzhome.xyz:3306/blog?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC  # 数据库连接地址
+    username: ztz            # 数据库用户名
+    password: ztz15277504089            # 数据库密码
+    driver-class-name: com.mysql.cj.jdbc.Driver  # JDBC驱动类名
 
-  # Redis??????
+  # Redis服务连接配置
   data:
     redis:
       database: 1
       host: 114.67.228.38
       port: 6379
-      password: Ztz15277504089.
+      password: Ztz15277504089
+
+
+#mybati配置
+mybatis:
+  configuration:
+    #下划线转驼峰
+    map-underscore-to-camel-case: true
+
+
 
 minio:
-  endpoint: http://114.67.228.38:9000 # ???? MinIO ??
-  accessKey: ztz # ???? MinIO Access Key
-  secretKey: ztz15277504089 # ???? MinIO Secret Key
-  bucket: zblog  # ?? Bucket ?????????
+  endpoint: http://8.134.185.250:9000 # 修改你的 MinIO 端点
+  accessKey: ztz # 修改你的 MinIO Access Key
+  secretKey: ztz15277504089 # 修改你的 MinIO Secret Key
+  bucket: zblog  # 确认 Bucket 名称与你创建的一致
 
 
 pagehelper:
-  helper-dialect: mysql       # ??????mysql/oracle/postgresql??
-  reasonable: true            # ??????pageNum?0???????pageNum>???????????
-  support-methods-arguments: true # ????Mapper??????????
-  params: count=countSql      # ???????SQL
+  helper-dialect: mysql       # 数据库方言（mysql/oracle/postgresql等）
+  reasonable: true            # 分页合理化（pageNum≤0时查询第一页，pageNum>总页数时查询最后一页）
+  support-methods-arguments: true # 支持通过Mapper接口参数传递分页参数
+  params: count=countSql      # 配置统计查询的SQL

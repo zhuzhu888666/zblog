@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.SongMapper">
+
+    <resultMap id="SongResultMap" type="xyz.ztzhome.zblog.entity.Bean.Song">
+        <result property="id" column="id"/>
+        <result property="singerId" column="singer_id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+
+    <insert id="insertSong" parameterType="xyz.ztzhome.zblog.entity.Bean.Song" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_song
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="singerId != null">singer_id,</if>
+            <if test="name != null">name,</if>
+            <if test="album != null">album,</if>
+            <if test="duration != null">duration,</if>
+            <if test="style != null">style,</if>
+            <if test="coverUrl != null">cover_url,</if>
+            <if test="audioUrl != null">audio_url,</if>
+            <if test="releaseTime != null">release_time,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="singerId != null">#{singerId},</if>
+            <if test="name != null">#{name},</if>
+            <if test="album != null">#{album},</if>
+            <if test="duration != null">#{duration},</if>
+            <if test="style != null">#{style},</if>
+            <if test="coverUrl != null">#{coverUrl},</if>
+            <if test="audioUrl != null">#{audioUrl},</if>
+            <if test="releaseTime != null">#{releaseTime},</if>
+        </trim>
+    </insert>
+
+    <select id="getRandomSongsWithArtist" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
+        SELECT * from tb_song
+    </select>
+    <select id="selectSongById" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
+        select * from tb_song where id=#{songId}
+    </select>
+    <select id="selectBySingerName" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
+        select * from tb_song where name=#{songName}
+    </select>
+
+    <!-- 根据歌手ID和歌曲名称查询 -->
+    <select id="selectBySingerIdAndName" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
+        SELECT *
+        FROM tb_song
+        WHERE singer_id = #{singerId}
+          AND name = #{songName}
+    </select>
+
+</mapper>
