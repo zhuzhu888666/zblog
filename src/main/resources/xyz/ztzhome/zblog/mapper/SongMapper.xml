@@ -10,8 +10,6 @@
         <result property="singerId" column="singer_id"/>
         <result property="name" column="name"/>
     </resultMap>
-
-
     <insert id="insertSong" parameterType="xyz.ztzhome.zblog.entity.Bean.Song" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO tb_song
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -41,9 +39,6 @@
     </select>
     <select id="selectSongById" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
         select * from tb_song where id=#{songId}
-    </select>
-    <select id="selectBySingerName" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
-        select * from tb_song where name=#{songName}
     </select>
 
     <!-- 根据歌手ID和歌曲名称查询 -->

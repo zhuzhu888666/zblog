@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import xyz.ztzhome.zblog.config.MinioConfig;
 
 import xyz.ztzhome.zblog.constant.PathCosntant;
 import xyz.ztzhome.zblog.entity.Bean.Singer;
@@ -21,10 +20,6 @@ public class SongServiceImpl implements ISongService {
     private SongMapper songMapper;
     @Autowired
     private SingerMapper singerMapper;
-
-    @Autowired
-    MinioConfig minioConfig;
-
     @Autowired
     MinioServiceImpl minioService;
 
@@ -77,7 +72,6 @@ public class SongServiceImpl implements ISongService {
         //6.上传歌曲文件
         String fileName = audioFile.getOriginalFilename();
         try {
-            String bucketName=minioConfig.getBucket();
             //上传文件
             int isUpload=minioService.uploadFile(audioFile, PathCosntant.SONG_SAVE_PATH +fileName);
             if(isUpload==1){

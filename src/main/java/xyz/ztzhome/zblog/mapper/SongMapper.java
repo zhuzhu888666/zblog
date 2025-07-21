@@ -12,9 +12,8 @@ public interface SongMapper {
 
     //根据id查找歌曲
     Song selectSongById(long songId);
-    //根据名称查询歌手
-    Song selectBySingerName(String songName);
 
+    //根据歌手id和歌曲名称查询歌曲
     Song selectBySingerIdAndName(@Param("singerId") long singerId,
                                  @Param("songName") String songName);
 
