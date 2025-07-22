@@ -162,6 +162,9 @@ public class SongServiceImpl implements ISongService {
      * */
     @Override
     public ResponseMessage updateSong(UpdateSongDTO updateSongDTO) {
+        if (updateSongDTO==null||updateSongDTO.getName()==null) {
+            return new ResponseMessage<>(0,"缺少必要参数");
+        }
         return null;
     }
 
