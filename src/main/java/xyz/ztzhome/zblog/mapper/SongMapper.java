@@ -25,4 +25,6 @@ public interface SongMapper {
     List<SongVO> selectSongVOsByNameLike(String songName);
 
     int deleteSong(long id);
+
+    int updateSong(Song song);
 }

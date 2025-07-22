@@ -39,6 +39,21 @@
             <if test="releaseTime != null">#{releaseTime},</if>
         </trim>
     </insert>
+    <!-- 更新歌曲信息 (动态字段更新) -->
+    <update id="updateSong" parameterType="xyz.ztzhome.zblog.entity.Bean.Song">
+        UPDATE tb_song
+        <set>
+            <if test="singerId != null">singer_id = #{singerId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="album != null and album != ''">album = #{album},</if>
+            <if test="duration != null and duration != ''">duration = #{duration},</if>
+            <if test="style != null and style != ''">style = #{style},</if>
+            <if test="coverUrl != null and coverUrl != ''">cover_url = #{coverUrl},</if>
+            <if test="audioUrl != null and audioUrl != ''">audio_url = #{audioUrl},</if>
+            <if test="releaseTime != null">release_time = #{releaseTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
     <!--删除-->
     <delete id="deleteSong">
         delete from tb_song where id=#{id}
