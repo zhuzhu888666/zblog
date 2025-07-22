@@ -2,6 +2,7 @@ package xyz.ztzhome.zblog.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
+import xyz.ztzhome.zblog.entity.DTO.UpdateSongDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 
@@ -22,7 +23,7 @@ public interface ISongService {
     ResponseMessage<String> getSongURL(long id);
 
     //更新歌曲
-    ResponseMessage updateSong();
+    ResponseMessage updateSong(UpdateSongDTO updateSongDTO);
 
 
     ResponseMessage deleteSong(long id);

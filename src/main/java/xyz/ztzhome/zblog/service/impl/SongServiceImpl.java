@@ -10,6 +10,7 @@ import xyz.ztzhome.zblog.constant.PathCosntant;
 import xyz.ztzhome.zblog.entity.Bean.Singer;
 import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
+import xyz.ztzhome.zblog.entity.DTO.UpdateSongDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.mapper.SingerMapper;
@@ -160,7 +161,7 @@ public class SongServiceImpl implements ISongService {
      * 更新
      * */
     @Override
-    public ResponseMessage updateSong(){
+    public ResponseMessage updateSong(UpdateSongDTO updateSongDTO) {
         return null;
     }
 

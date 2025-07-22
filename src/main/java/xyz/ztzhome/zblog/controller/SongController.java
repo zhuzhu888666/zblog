@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
+import xyz.ztzhome.zblog.entity.DTO.UpdateSongDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.impl.SongServiceImpl;
@@ -50,8 +51,8 @@ public class SongController {
     //更新歌曲
 
     @PostMapping("/updateSong")
-    ResponseMessage updateSong(){
-        return null;
+    ResponseMessage updateSong(@RequestBody UpdateSongDTO updateSongDTO){
+        return songService.updateSong(updateSongDTO);
     }
 
     //删除歌曲

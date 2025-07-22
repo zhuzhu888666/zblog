@@ -1,9 +1,11 @@
 package xyz.ztzhome.zblog.entity.DTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.util.Date;
 
+@Data
 public class UpdateSongDTO {
     /**
      * 歌曲 id
