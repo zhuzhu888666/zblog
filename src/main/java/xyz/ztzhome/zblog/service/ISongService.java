@@ -17,4 +17,13 @@ public interface ISongService {
 
    //根据名称模糊查询，获取歌曲集合
     ResponseMessage<List<SongVO>> getSongsByName(String songName);
+
+    //获取歌曲临时路径
+    ResponseMessage<String> getSongURL(long id);
+
+    //更新歌曲
+    ResponseMessage updateSong();
+
+
+    ResponseMessage deleteSong(long id);
 }

@@ -12,4 +12,5 @@ public interface SingerMapper {
     Singer selectBySingerName(String singerName);
 
     Singer selectBySingerId(long singerId);
+
 }

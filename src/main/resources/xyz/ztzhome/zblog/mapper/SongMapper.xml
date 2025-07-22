@@ -39,10 +39,16 @@
             <if test="releaseTime != null">#{releaseTime},</if>
         </trim>
     </insert>
+    <!--删除-->
+    <delete id="deleteSong">
+        delete from tb_song where id=#{id}
+    </delete>
 
+    <!--获取随机音乐-->
     <select id="getRandomSongsWithArtist" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
         SELECT * from tb_song
     </select>
+
     <select id="selectSongById" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
         select * from tb_song where id=#{songId}
     </select>

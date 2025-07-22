@@ -16,4 +16,11 @@ public interface IMinioService {
      * @return *
      */
     int uploadFile (MultipartFile file, String folder);
+
+    //获取文件临时路径
+    String getFileUrl(int timeOut, String filePath);
+
+    int deleteFile(String filePath);
+
+    Boolean fileIsExist(String filePath);
 }

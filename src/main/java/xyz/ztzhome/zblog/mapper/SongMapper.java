@@ -23,4 +23,6 @@ public interface SongMapper {
     //根据歌曲名称模糊查询
     List<Song> selectSongsByNameLike(String songName);
     List<SongVO> selectSongVOsByNameLike(String songName);
+
+    int deleteSong(long id);
 }

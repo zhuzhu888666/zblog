@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vite App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.css">
+    <link rel="stylesheet" href="//at.alicdn.com/t/c/font_4385882_37717hw7bsn.css">
+</head>
+<body>
+<div id="app">
+    默认页面
+    <p>页面将在 <span id="countdown">3</span> 秒后跳转...</p>
+</div>
+<script>
+    let seconds = 3;
+    const countdownElement = document.getElementById('countdown');
+
+    const timer = setInterval(function() {
+        seconds--;
+        countdownElement.textContent = seconds;
+
+        if (seconds <= 0) {
+            clearInterval(timer);
+            window.location.href = "http://ztzhome.xyz";
+        }
+    }, 1000);
+</script>
+</body>
+</html>

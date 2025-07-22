@@ -1,13 +1,14 @@
 package xyz.ztzhome.zblog.service.impl;
 
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.StatObjectArgs;
+import io.minio.*;
+import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.service.IMinioService;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class MinioServiceImpl implements IMinioService {
@@ -47,6 +48,45 @@ public class MinioServiceImpl implements IMinioService {
             return 1;
         }catch (Exception e){
             return -1;
+        }
+    }
+
+    @Override
+    public String getFileUrl(int timeOut, String filePath) {
+        try {
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .bucket(bucket)
+                    .method(Method.GET)
+                    .object(filePath)
+                    .expiry(timeOut, TimeUnit.MINUTES).build());
+        }catch (Exception e){
+            return "getURL_error:"+e.getMessage();
+        }
+    }
+
+    @Override
+    public int deleteFile(String filePath) {
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(filePath)
+                    .build());
+            return 1;
+        }catch (Exception e){
+            return -1;
+        }
+    }
+
+    @Override
+    public Boolean fileIsExist(String filePath) {
+        try {
+            StatObjectResponse statObjectResponse = minioClient.statObject(StatObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(filePath)
+                    .build());
+            return true;
+        }catch (Exception e){
+            return false;
         }
     }
 }

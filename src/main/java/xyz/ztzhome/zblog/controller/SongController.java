@@ -22,8 +22,6 @@ public class SongController {
     @PostMapping("addSong")
     public ResponseMessage addSong(@RequestPart("data") String data, @RequestPart("audioFile") MultipartFile audioFile){
 
-        System.out.println(data);
-
         AddSongDTO addSongDTO = new AddSongDTO();
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -47,5 +45,24 @@ public class SongController {
     //根据名称模糊查找
     ResponseMessage<List<SongVO>> getSongsByName(@RequestParam("songName") String songName){
         return songService.getSongsByName(songName);
+    }
+
+    //更新歌曲
+
+    @PostMapping("/updateSong")
+    ResponseMessage updateSong(){
+        return null;
+    }
+
+    //删除歌曲
+    @GetMapping("/deleteSong")
+    @PostMapping
+    ResponseMessage deleteSongById(@RequestParam("id") long id){
+        return songService.deleteSong(id);
+    }
+
+    //获取歌曲临时路径
+    ResponseMessage getSongURL(@RequestParam("id") long id){
+        return songService.getSongURL(id);
     }
 }
