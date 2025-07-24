@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.UserMapper">
+
+    <!-- 定义 resultMap -->
+    <resultMap id="UserResultMap" type="xyz.ztzhome.zblog.entity.Bean.User">
+        <result property="id" column="id"/>
+        <result property="account" column="account"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="status" column="status"/>
+        <result property="nickname" column="nickname"/>
+        <result property="age" column="age"/>
+        <result property="gender" column="gender"/>
+        <result property="address" column="address"/>
+        <result property="signature" column="signature"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+    <!-- 查询所有用户 -->
+
+    <select id="selectAll" resultMap="UserResultMap">
+        SELECT *
+        FROM tb_user
+    </select>
+
+    <!-- 查询单个用户 -->
+    <select id="selectById" parameterType="long" resultMap="UserResultMap">
+        SELECT *
+        FROM tb_user
+        WHERE id = #{id}
+    </select>
+    <!-- 根据账号查询 -->
+    <select id="selectByAccount" resultType="xyz.ztzhome.zblog.entity.Bean.User">
+        SELECT * from tb_user where account =#{account}
+    </select>
+    <select id="selectByEmail" resultType="xyz.ztzhome.zblog.entity.Bean.User">
+        SELECT * from tb_user where email = #{email}
+    </select>
+    <select id="existsByAccount" resultType="java.lang.Boolean">
+        SELECT * from tb_user where account=#{account}
+    </select>
+    <select id="existsByEmail" resultType="java.lang.Boolean">
+        SELECT * from tb_user where email=#{email}
+    </select>
+
+    <!-- 动态插入用户 -->
+    <insert id="insertUser" parameterType="xyz.ztzhome.zblog.entity.Bean.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <!-- 必填字段 -->
+            <if test="account != null">account,</if>
+            <if test="password != null">password,</if>
+
+            <!-- 可选字段 -->
+            <if test="email != null">email,</if>
+            <if test="phone != null">phone,</if>
+            <if test="userAvatar != null">user_avatar,</if>
+
+            <!-- 带默认值的字段 -->
+            <if test="status != null">status,</if>  <!-- 默认1 -->
+
+            <if test="nickname != null">nickname,</if>
+            <if test="age != 0">age,</if>
+            <if test="gender != null">gender,</if>
+            <if test="address != null">address,</if>
+            <if test="signature != null">signature,</if>
+
+            <!-- 时间字段 -->
+            <if test="createTime != null">create_time,</if>
+            <!-- 当createTime为空时自动填充当前时间 -->
+            <if test="createTime == null">create_time,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <!-- 必填字段 -->
+            <if test="account != null">#{account},</if>
+            <if test="password != null">#{password},</if>
+
+            <!-- 可选字段 -->
+            <if test="email != null">#{email},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="userAvatar != null">#{userAvatar},</if>
+
+            <!-- 带默认值的字段 -->
+            <if test="status != null">#{status},</if>
+
+            <if test="nickname != null">#{nickname},</if>
+            <if test="age != 0">#{age},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="address != null">#{address},</if>
+            <if test="signature != null">#{signature},</if>
+
+            <!-- 时间处理 -->
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createTime == null">NOW(),</if> <!-- MySQL时间函数 -->
+        </trim>
+    </insert>
+
+    <!-- 动态更新用户信息 -->
+    <update id="updateUser" parameterType="xyz.ztzhome.zblog.entity.Bean.User">
+        UPDATE tb_user
+        <set>
+            <if test="account != null">account = #{account},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="userAvatar != null">user_avatar = #{userAvatar},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="signature != null">signature = #{signature},</if>
+            <if test="createTime != null">create_time = #{createTime}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除用户 -->
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM tb_user
+        WHERE id = #{id}
+    </delete>
+    <delete id="deleteByAccount">
+        SELECT * from tb_user where account=#{account}
+    </delete>
+
+</mapper>
