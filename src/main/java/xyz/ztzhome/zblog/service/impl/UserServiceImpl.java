@@ -38,7 +38,7 @@ public class UserServiceImpl implements IUserService {
             return new ResponseMessage<>(ResponseConstant.error, "用户不存在");
         }
         if (BCryptPassword.matches(password, user.getPassword())) {
-            String token = JwtToken.createToken(user);
+            String token = JwtToken.generateToken(user.getAccount());
             return new ResponseMessage<>(ResponseConstant.success, "登录成功", token);
         } else {
             return new ResponseMessage<>(ResponseConstant.error, "密码错误");
@@ -52,7 +52,7 @@ public class UserServiceImpl implements IUserService {
             return new ResponseMessage<>(ResponseConstant.error, "用户不存在");
         }
         if (BCryptPassword.matches(password, user.getPassword())) {
-            String token = JwtToken.createToken(user);
+            String token = JwtToken.generateToken(user.getAccount());
             return new ResponseMessage<>(ResponseConstant.success, "登录成功", token);
         } else {
             return new ResponseMessage<>(ResponseConstant.error, "密码错误");
