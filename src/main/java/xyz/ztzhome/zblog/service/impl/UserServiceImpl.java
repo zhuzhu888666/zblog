@@ -17,18 +17,21 @@ public class UserServiceImpl implements IUserService {
     private UserMapper userMapper;
 
     @Override
-    public int register(User user) {
+    public ResponseMessage register(User user) {
         // 检查用户是否已存在
         if (userMapper.existsByAccount(user.getAccount())) {
-            return -1; // -1 表示用户已存在
+            return new ResponseMessage<>(ResponseConstant.error,"用户已存在");
         }
         if (userMapper.existsByEmail(user.getEmail())) {
-            return -2; // -2 表示邮箱已存在
+            return new ResponseMessage<>(ResponseConstant.error,"该邮箱已被其他账号绑定"); // -2 表示邮箱已存在
         }
         // 对密码进行加密
         user.setPassword(BCryptPassword.encode(user.getPassword()));
-        // 插入用户
-        return userMapper.insertUser(user);
+        // 插入用户，并判断是否注册成功
+       if ( userMapper.insertUser(user)<=0){
+           return new ResponseMessage<>(ResponseConstant.error,"服务异常");
+       }
+        return new ResponseMessage<>(ResponseConstant.success,"注册成功");
     }
 
     @Override
@@ -57,5 +60,10 @@ public class UserServiceImpl implements IUserService {
         } else {
             return new ResponseMessage<>(ResponseConstant.error, "密码错误");
         }
+    }
+
+    @Override
+    public ResponseMessage updateUser(User newUser) {
+        return new ResponseMessage<>(ResponseConstant.success,"更新成功");
     }
 }

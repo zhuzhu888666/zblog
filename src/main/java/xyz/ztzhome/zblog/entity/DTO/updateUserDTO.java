@@ -1,14 +1,13 @@
-package xyz.ztzhome.zblog.entity.Bean;
+package xyz.ztzhome.zblog.entity.DTO;
 
 import lombok.Data;
 
-import java.util.Date;
 
 @Data
-public class User {
+public class updateUserDTO {
     private long id;
     private String account;//账号
-    private String password;//密码
+
     String email;
     String phone;
     String userAvatar;//头像
@@ -18,6 +17,4 @@ public class User {
     String gender;
     String address;
     String signature;//个性签名
-    Date createTime=new Date();//创建的时间
-
 }

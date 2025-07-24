@@ -15,16 +15,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseMessage register(@RequestBody User user){
-        int result = userService.register(user);
-        if (result == 1) {
-            return new ResponseMessage<>(ResponseConstant.success, "注册成功");
-        } else if (result == -1) {
-            return new ResponseMessage<>(ResponseConstant.error, "用户已存在");
-        } else if (result == -2) {
-            return new ResponseMessage<>(ResponseConstant.error, "邮箱已注册");
-        } else {
-            return new ResponseMessage<>(ResponseConstant.error, "注册失败");
-        }
+        return userService.register(user);
     }
 
     @PostMapping("/login")
@@ -44,7 +35,7 @@ public class UserController {
 
     @PostMapping("/update")
     public ResponseMessage updateUser(@RequestBody User user){
-        return new ResponseMessage(1,"success");
+        return userService.updateUser(user);
     }
 
     @PostMapping("/updateAvatar")
