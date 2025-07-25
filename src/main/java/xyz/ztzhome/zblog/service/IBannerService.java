@@ -6,8 +6,9 @@ import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import java.util.List;
 
 public interface IBannerService {
-    ResponseMessage<Banner> getBanner(Banner banner);
+    ResponseMessage<Banner> getBanner(String path);
 
+    //随机返回指定数目
     ResponseMessage<List<Banner>> getBanners(Banner banner);
 
     //指定页数

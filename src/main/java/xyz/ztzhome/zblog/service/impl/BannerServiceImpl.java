@@ -8,7 +8,7 @@ import java.util.List;
 
 public class BannerServiceImpl implements IBannerService {
     @Override
-    public ResponseMessage<Banner> getBanner(Banner banner) {
+    public ResponseMessage<Banner> getBanner(String path) {
         return null;
     }
 
