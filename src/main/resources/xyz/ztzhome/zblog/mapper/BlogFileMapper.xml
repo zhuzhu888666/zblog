@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.BlogFileMapper">
+
+    <resultMap id="FileResultMap" type="xyz.ztzhome.zblog.entity.Bean.BlogFile">
+        <id property="id" column="id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="originalName" column="original_name"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileType" column="file_type"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <insert id="insertFile" parameterType="xyz.ztzhome.zblog.entity.Bean.BlogFile">
+        <!-- SQL to insert a file record -->
+    </insert>
+
+    <select id="selectFileById" parameterType="long" resultMap="FileResultMap">
+        <!-- SQL to select a file by id -->
+    </select>
+
+    <select id="selectAllFiles" resultMap="FileResultMap">
+        <!-- SQL to select all files -->
+    </select>
+
+    <update id="updateFile" parameterType="xyz.ztzhome.zblog.entity.Bean.BlogFile">
+        <!-- SQL to update a file record -->
+    </update>
+
+    <delete id="deleteFileById" parameterType="long">
+        <!-- SQL to delete a file by id -->
+    </delete>
+
+</mapper>
