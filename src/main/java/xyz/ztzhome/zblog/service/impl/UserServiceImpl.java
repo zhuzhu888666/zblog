@@ -1,5 +1,7 @@
 package xyz.ztzhome.zblog.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.ztzhome.zblog.entity.Bean.User;
@@ -14,6 +16,8 @@ import xyz.ztzhome.zblog.util.JwtToken;
 
 @Service
 public class UserServiceImpl implements IUserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private UserMapper userMapper;
@@ -40,12 +44,15 @@ public class UserServiceImpl implements IUserService {
     public ResponseMessage login(String account, String password) {
         User user = userMapper.selectByAccount(account);
         if (user == null) {
+            logger.warn("登录尝试失败：用户账号不存在 {}", account);
             return new ResponseMessage<>(ResponseConstant.error, "用户不存在");
         }
         if (BCryptPassword.matches(password, user.getPassword())) {
             String token = JwtToken.generateToken(user.getAccount());
+            logger.info("用户登录成功：{}", account);
             return new ResponseMessage<>(ResponseConstant.success, "登录成功", token);
         } else {
+            logger.warn("登录尝试失败：用户密码错误 {}", account);
             return new ResponseMessage<>(ResponseConstant.error, "密码错误");
         }
     }
@@ -87,28 +94,36 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ResponseMessage updateUserSecurity(UpdateUserSecurityDTO securityDTO) {
-        if(securityDTO==null||securityDTO.getAccount()==null){
-            return new ResponseMessage<>(ResponseConstant.error,"缺少必要字段");
-        }
+        logger.info("开始更新用户安全信息，账号：{}", securityDTO.getAccount());
+        try {
+            if(securityDTO==null||securityDTO.getAccount()==null){
+                return new ResponseMessage<>(ResponseConstant.error,"缺少必要字段");
+            }
 
-        if (userMapper.existsByEmail(securityDTO.getEmail())) {
-            return new ResponseMessage<>(ResponseConstant.error,"该邮箱已被其他账号绑定");
-        }
+            if (userMapper.existsByEmail(securityDTO.getEmail())) {
+                logger.warn("更新邮箱失败：邮箱 {} 已被绑定，操作账号：{}", securityDTO.getEmail(), securityDTO.getAccount());
+                return new ResponseMessage<>(ResponseConstant.error,"该邮箱已被其他账号绑定");
+            }
 
-        User user = new User();
-        user.setAccount(securityDTO.getAccount());
+            User user = new User();
+            user.setAccount(securityDTO.getAccount());
 
-        if(securityDTO.getEmail()!=null&& !securityDTO.getEmail().isEmpty()){
-            user.setEmail(securityDTO.getEmail());
-        }
-        if (securityDTO.getPassword()!=null&& !securityDTO.getPassword().isEmpty()) {
-            user.setPassword(BCryptPassword.encode(securityDTO.getPassword()));
-        }
+            if(securityDTO.getEmail()!=null&& !securityDTO.getEmail().isEmpty()){
+                user.setEmail(securityDTO.getEmail());
+            }
+            if (securityDTO.getPassword()!=null&& !securityDTO.getPassword().isEmpty()) {
+                user.setPassword(BCryptPassword.encode(securityDTO.getPassword()));
+            }
 
-        int result=userMapper.updateUserSecurity(user);
-        if(result>0){
-            return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+            int result=userMapper.updateUserSecurity(user);
+            if(result>0){
+                logger.info("用户安全信息更新成功，账号：{}", securityDTO.getAccount());
+                return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+            }
+            return new ResponseMessage<>(ResponseConstant.error,"服务异常");
+        } catch (Exception e) {
+            logger.error("更新用户安全信息时发生未知异常，账号：{}", securityDTO.getAccount(), e);
+            return new ResponseMessage<>(ResponseConstant.error, "服务异常，请联系管理员");
         }
-        return new ResponseMessage<>(ResponseConstant.error,"服务异常");
     }
 }
