@@ -3,7 +3,7 @@ package xyz.ztzhome.zblog.controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/blog-file")
