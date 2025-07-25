@@ -12,6 +12,7 @@ public class BannerServiceImpl implements IBannerService {
         return null;
     }
 
+    //
     @Override
     public ResponseMessage<List<Banner>> getBanners(Banner banner) {
         return null;
