@@ -119,6 +119,12 @@
         </set>
         WHERE id = #{id}
     </update>
+    <update id="updatePassword">
+        update tb_user set password=#{password} where account=#{account}
+    </update>
+    <update id="updateEmail">
+        update tb_user set email=#{email} where account=#{account}
+    </update>
 
     <!-- 删除用户 -->
     <delete id="deleteById" parameterType="string">

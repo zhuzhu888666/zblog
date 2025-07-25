@@ -3,6 +3,8 @@ package xyz.ztzhome.zblog.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.ztzhome.zblog.entity.Bean.User;
+import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
+import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
 import xyz.ztzhome.zblog.mapper.UserMapper;
 import xyz.ztzhome.zblog.service.IUserService;
 import xyz.ztzhome.zblog.util.BCryptPassword;
@@ -63,7 +65,31 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public ResponseMessage updateUser(User newUser) {
+    public ResponseMessage updateUserProfile(UpdateUserProfileDTO updateUserProfileDTO) {
         return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+    }
+
+    @Override
+    public ResponseMessage updateUserSecurity(UpdateUserSecurityDTO securityDTO) {
+        if(securityDTO==null||securityDTO.getAccount()==null){
+            return new ResponseMessage<>(ResponseConstant.error,"缺少必要字段");
+        }
+        if(securityDTO.getEmail()!=null&& !securityDTO.getEmail().isEmpty()){
+            int result=userMapper.updateEmail(securityDTO.getEmail(),securityDTO.getAccount());
+            if(result>0){
+                return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+            }else {
+                return new ResponseMessage<>(ResponseConstant.error,"服务异常");
+            }
+        }
+        if (securityDTO.getPassword()!=null&& !securityDTO.getPassword().isEmpty()) {
+            int result=userMapper.updatePassword(securityDTO.getPassword(),securityDTO.getAccount());
+            if(result>0){
+                return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+            }else {
+                return new ResponseMessage<>(ResponseConstant.error,"服务异常");
+            }
+        }
+        return new ResponseMessage<>(ResponseConstant.error,"非法请求");
     }
 }

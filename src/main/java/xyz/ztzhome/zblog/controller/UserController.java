@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.User;
+import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
+import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.IUserService;
 
@@ -33,9 +35,15 @@ public class UserController {
         }
     }
 
-    @PostMapping("/update")
-    public ResponseMessage updateUser(@RequestBody User user){
-        return userService.updateUser(user);
+    @PostMapping("/update/profile")
+    public ResponseMessage updateUser(@RequestBody UpdateUserProfileDTO profileDTO){
+        return userService.updateUserProfile(profileDTO);
+    }
+
+    @PostMapping("/update/security")
+    public ResponseMessage updateSecurity(@RequestBody UpdateUserSecurityDTO securityDTO){
+
+        return userService.updateUserSecurity(securityDTO);
     }
 
     @PostMapping("/updateAvatar")
