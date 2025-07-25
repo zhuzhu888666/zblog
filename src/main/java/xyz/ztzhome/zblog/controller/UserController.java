@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.User;
+import xyz.ztzhome.zblog.entity.DTO.LoginDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
+
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.IUserService;
 
@@ -21,14 +23,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseMessage login(@RequestParam(required = false) String account,
-                                   @RequestParam(required = false) String email,
-                                   @RequestParam String password){
-        if (account != null && !account.isEmpty()){
-            return userService.login(account,password);
+    public ResponseMessage login(@RequestBody LoginDTO loginDTO){
+        if (loginDTO.getAccount() != null){
+            return userService.login(loginDTO.getAccount(), loginDTO.getPassword());
         }
-        else if (email != null && !email.isEmpty()){
-            return userService.loginByEmail(email,password);
+        else if (loginDTO.getEmail() != null){
+            return userService.loginByEmail(loginDTO.getEmail(), loginDTO.getPassword());
         }
         else {
             return new ResponseMessage<>(ResponseConstant.error,"账号或邮箱不能为空！");
@@ -36,8 +36,8 @@ public class UserController {
     }
 
     @PostMapping("/update/profile")
-    public ResponseMessage updateUser(@RequestBody UpdateUserProfileDTO profileDTO){
-        return userService.updateUserProfile(profileDTO);
+    public ResponseMessage updateUserProfile(@RequestBody UpdateUserProfileDTO updateUserProfileDTO) {
+        return userService.updateUserProfile(updateUserProfileDTO);
     }
 
     @PostMapping("/update/security")
@@ -48,7 +48,7 @@ public class UserController {
 
     @PostMapping("/updateAvatar")
     public ResponseMessage updateUserAvatar(@RequestBody User user){
-        return new ResponseMessage(1,"success");
+        return null;
     }
 
     @PostMapping("/updatePassword")

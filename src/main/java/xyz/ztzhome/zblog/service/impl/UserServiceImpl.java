@@ -2,11 +2,13 @@ package xyz.ztzhome.zblog.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xyz.ztzhome.zblog.entity.Bean.User;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
+import xyz.ztzhome.zblog.entity.VO.UserLoginVO;
 import xyz.ztzhome.zblog.mapper.UserMapper;
 import xyz.ztzhome.zblog.service.IUserService;
 import xyz.ztzhome.zblog.util.BCryptPassword;
@@ -49,8 +51,11 @@ public class UserServiceImpl implements IUserService {
         }
         if (BCryptPassword.matches(password, user.getPassword())) {
             String token = JwtToken.generateToken(user.getAccount());
+            UserLoginVO   userLoginVO = new UserLoginVO();
+            BeanUtils.copyProperties(user,userLoginVO);
+            userLoginVO.setToken(token);
             logger.info("用户登录成功：{}", account);
-            return new ResponseMessage<>(ResponseConstant.success, "登录成功", token);
+            return new ResponseMessage<>(ResponseConstant.success, "登录成功", userLoginVO);
         } else {
             logger.warn("登录尝试失败：用户密码错误 {}", account);
             return new ResponseMessage<>(ResponseConstant.error, "密码错误");
@@ -83,7 +88,6 @@ public class UserServiceImpl implements IUserService {
         user.setGender(updateUserProfileDTO.getGender());
         user.setAddress(updateUserProfileDTO.getAddress());
         user.setSignature(updateUserProfileDTO.getSignature());
-        user.setUserAvatar(updateUserProfileDTO.getUserAvatar());
         user.setPhone(updateUserProfileDTO.getPhone());
         int result=userMapper.updateUserProfile(user);
         if (result>0){
@@ -94,12 +98,12 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ResponseMessage updateUserSecurity(UpdateUserSecurityDTO securityDTO) {
+        if(securityDTO==null||securityDTO.getAccount()==null){
+            return new ResponseMessage<>(ResponseConstant.error,"缺少必要字段");
+        }
+
         logger.info("开始更新用户安全信息，账号：{}", securityDTO.getAccount());
         try {
-            if(securityDTO==null||securityDTO.getAccount()==null){
-                return new ResponseMessage<>(ResponseConstant.error,"缺少必要字段");
-            }
-
             if (userMapper.existsByEmail(securityDTO.getEmail())) {
                 logger.warn("更新邮箱失败：邮箱 {} 已被绑定，操作账号：{}", securityDTO.getEmail(), securityDTO.getAccount());
                 return new ResponseMessage<>(ResponseConstant.error,"该邮箱已被其他账号绑定");

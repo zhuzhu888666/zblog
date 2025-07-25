@@ -130,6 +130,7 @@ class ZblogApplicationTests {
         UpdateUserProfileDTO profileDTO = new UpdateUserProfileDTO();
         profileDTO.setAccount("updateuser");
         profileDTO.setNickname("New Nick");
+        profileDTO.setNickname("New Nick");
         profileDTO.setAge(25);
 
         ResponseMessage response = userService.updateUserProfile(profileDTO);
