@@ -66,7 +66,23 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ResponseMessage updateUserProfile(UpdateUserProfileDTO updateUserProfileDTO) {
-        return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+        if(updateUserProfileDTO==null||updateUserProfileDTO.getAccount()==null){
+            return new ResponseMessage<>(ResponseConstant.error,"缺少必要字段");
+        }
+        User user = new User();
+        user.setAccount(updateUserProfileDTO.getAccount());
+        user.setNickname(updateUserProfileDTO.getNickname());
+        user.setAge(updateUserProfileDTO.getAge());
+        user.setGender(updateUserProfileDTO.getGender());
+        user.setAddress(updateUserProfileDTO.getAddress());
+        user.setSignature(updateUserProfileDTO.getSignature());
+        user.setUserAvatar(updateUserProfileDTO.getUserAvatar());
+        user.setPhone(updateUserProfileDTO.getPhone());
+        int result=userMapper.updateUserProfile(user);
+        if (result>0){
+            return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+        }
+        return new ResponseMessage<>(ResponseConstant.error,"服务异常");
     }
 
     @Override
@@ -74,22 +90,25 @@ public class UserServiceImpl implements IUserService {
         if(securityDTO==null||securityDTO.getAccount()==null){
             return new ResponseMessage<>(ResponseConstant.error,"缺少必要字段");
         }
+
+        if (userMapper.existsByEmail(securityDTO.getEmail())) {
+            return new ResponseMessage<>(ResponseConstant.error,"该邮箱已被其他账号绑定");
+        }
+
+        User user = new User();
+        user.setAccount(securityDTO.getAccount());
+
         if(securityDTO.getEmail()!=null&& !securityDTO.getEmail().isEmpty()){
-            int result=userMapper.updateEmail(securityDTO.getEmail(),securityDTO.getAccount());
-            if(result>0){
-                return new ResponseMessage<>(ResponseConstant.success,"更新成功");
-            }else {
-                return new ResponseMessage<>(ResponseConstant.error,"服务异常");
-            }
+            user.setEmail(securityDTO.getEmail());
         }
         if (securityDTO.getPassword()!=null&& !securityDTO.getPassword().isEmpty()) {
-            int result=userMapper.updatePassword(securityDTO.getPassword(),securityDTO.getAccount());
-            if(result>0){
-                return new ResponseMessage<>(ResponseConstant.success,"更新成功");
-            }else {
-                return new ResponseMessage<>(ResponseConstant.error,"服务异常");
-            }
+            user.setPassword(BCryptPassword.encode(securityDTO.getPassword()));
         }
-        return new ResponseMessage<>(ResponseConstant.error,"非法请求");
+
+        int result=userMapper.updateUserSecurity(user);
+        if(result>0){
+            return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+        }
+        return new ResponseMessage<>(ResponseConstant.error,"服务异常");
     }
 }

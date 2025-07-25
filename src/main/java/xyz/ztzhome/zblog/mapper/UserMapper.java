@@ -19,12 +19,11 @@ public interface UserMapper {
     // 插入用户
     int insertUser(User user);
 
-    // 更新用户信息（动态更新）
-    int updateUser(User user);
-    //更新密码
-    int updatePassword(@Param("account")  String account, @Param("password") String password);
-    //更换邮箱
-    int updateEmail(@Param("email") String email,@Param("account") String account);
+    // 更新用户基本信息
+    int updateUserProfile(User user);
+
+    // 更新用户安全信息
+    int updateUserSecurity(User user);
 
     // 根据ID删除用户
     int deleteById(String id);

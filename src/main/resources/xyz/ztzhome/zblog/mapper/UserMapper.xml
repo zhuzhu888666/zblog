@@ -42,10 +42,10 @@
         SELECT * from tb_user where email = #{email}
     </select>
     <select id="existsByAccount" resultType="java.lang.Boolean">
-        SELECT * from tb_user where account=#{account}
+        SELECT COUNT(1) from tb_user where account=#{account}
     </select>
     <select id="existsByEmail" resultType="java.lang.Boolean">
-        SELECT * from tb_user where email=#{email}
+        SELECT COUNT(1) from tb_user where email=#{email}
     </select>
 
     <!-- 动态插入用户 -->
@@ -100,30 +100,43 @@
         </trim>
     </insert>
 
-    <!-- 动态更新用户信息 -->
-    <update id="updateUser" parameterType="xyz.ztzhome.zblog.entity.Bean.User">
+    <!-- 更新用户基本信息 -->
+    <update id="updateUserProfile" parameterType="xyz.ztzhome.zblog.entity.Bean.User">
         UPDATE tb_user
         <set>
-            <if test="account != null">account = #{account},</if>
-            <if test="password != null">password = #{password},</if>
-            <if test="email != null">email = #{email},</if>
             <if test="phone != null">phone = #{phone},</if>
             <if test="userAvatar != null">user_avatar = #{userAvatar},</if>
-            <if test="status != null">status = #{status},</if>
             <if test="nickname != null">nickname = #{nickname},</if>
             <if test="age != null">age = #{age},</if>
             <if test="gender != null">gender = #{gender},</if>
             <if test="address != null">address = #{address},</if>
             <if test="signature != null">signature = #{signature},</if>
-            <if test="createTime != null">create_time = #{createTime}</if>
         </set>
-        WHERE id = #{id}
+        <where>
+            <if test="id != 0">
+                id = #{id}
+            </if>
+            <if test="account != null and account != ''">
+                AND account = #{account}
+            </if>
+        </where>
     </update>
-    <update id="updatePassword">
-        update tb_user set password=#{password} where account=#{account}
-    </update>
-    <update id="updateEmail">
-        update tb_user set email=#{email} where account=#{account}
+
+    <!-- 更新用户安全信息 -->
+    <update id="updateUserSecurity" parameterType="xyz.ztzhome.zblog.entity.Bean.User">
+        UPDATE tb_user
+        <set>
+            <if test="password != null">password = #{password},</if>
+            <if test="email != null">email = #{email},</if>
+        </set>
+        <where>
+            <if test="id != 0">
+                id = #{id}
+            </if>
+            <if test="account != null and account != ''">
+                AND account = #{account}
+            </if>
+        </where>
     </update>
 
     <!-- 删除用户 -->

@@ -9,15 +9,25 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import xyz.ztzhome.zblog.constant.PathCosntant;
+import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.Song;
+import xyz.ztzhome.zblog.entity.Bean.User;
+import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
+import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
+import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.mapper.SongMapper;
+import xyz.ztzhome.zblog.service.IUserService;
 import xyz.ztzhome.zblog.service.impl.MinioServiceImpl;
+import xyz.ztzhome.zblog.util.BCryptPassword;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@Transactional
 class ZblogApplicationTests {
 
     @Autowired
@@ -75,5 +85,73 @@ class ZblogApplicationTests {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    @Autowired
+    private IUserService userService;
+
+    @Test
+    void testRegister() {
+        User user = new User();
+        user.setAccount("testuser");
+        user.setPassword("password123");
+        user.setEmail("testuser@example.com");
+        ResponseMessage response = userService.register(user);
+        //assertEquals(ResponseConstant.success, response.getCode());
+        System.out.println(response.getMessage());
+    }
+
+    @Test
+    void testLogin() {
+        // 先注册一个用户
+        User user = new User();
+        user.setAccount("loginuser");
+        user.setPassword("password123");
+        user.setEmail("loginuser@example.com");
+        userService.register(user);
+
+        // 测试登录
+        ResponseMessage response = userService.login("loginuser", "password123");
+        assertEquals(ResponseConstant.success, response.getCode());
+    }
+
+
+
+    @Test
+    void testUpdateUserProfile() {
+        // 先注册一个用户
+        User user = new User();
+        user.setAccount("updateuser");
+        user.setPassword("password123");
+        user.setEmail("updateuser@example.com");
+        userService.register(user);
+
+        // 更新用户信息
+        UpdateUserProfileDTO profileDTO = new UpdateUserProfileDTO();
+        profileDTO.setAccount("updateuser");
+        profileDTO.setNickname("New Nick");
+        profileDTO.setAge(25);
+
+        ResponseMessage response = userService.updateUserProfile(profileDTO);
+        assertEquals(ResponseConstant.success, response.getCode());
+    }
+
+    @Test
+    void testUpdateUserSecurity() {
+        // 先注册一个用户
+        User user = new User();
+        user.setAccount("securityuser");
+        user.setPassword("password123");
+        user.setEmail("securityuser@example.com");
+        userService.register(user);
+
+        // 更新安全信息
+        UpdateUserSecurityDTO securityDTO = new UpdateUserSecurityDTO();
+        securityDTO.setAccount("securityuser");
+        securityDTO.setPassword(BCryptPassword.encode("newpassword456"));
+        securityDTO.setEmail("newsecurity@example.com");
+
+        ResponseMessage response = userService.updateUserSecurity(securityDTO);
+        assertEquals(ResponseConstant.success, response.getCode());
     }
 }
