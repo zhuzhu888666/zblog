@@ -25,6 +25,12 @@ public interface UserMapper {
     // 更新用户安全信息
     int updateUserSecurity(User user);
 
+    //更新全部信息
+    int updateUserAll(User user);
+    //更新用户状态
+    int updateUserStatus(@Param("account")  String account, @Param("status") int status);
+
+
     // 根据ID删除用户
     int deleteById(String id);
     int deleteByAccount(String account);

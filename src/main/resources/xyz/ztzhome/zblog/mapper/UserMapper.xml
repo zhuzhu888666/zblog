@@ -28,6 +28,8 @@
         FROM tb_user
     </select>
 
+
+
     <!-- 查询单个用户 -->
     <select id="selectById" parameterType="long" resultMap="UserResultMap">
         SELECT *
@@ -138,7 +140,42 @@
             </if>
         </where>
     </update>
-
+    <update id="updateUserStatus">
+        update tb_user set status=#{status} where account=#{account}
+    </update>
+    <!--用户管理-->
+    <!-- 动态更新用户信息 -->
+    <update id="updateUserAll" parameterType="xyz.ztzhome.zblog.entity.Bean.User">
+        UPDATE tb_user
+        <set>
+            <if test="account != null">account = #{account},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="userAvatar != null">user_avatar = #{userAvatar},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="signature != null">signature = #{signature},</if>
+            <if test="createTime != null">create_time = #{createTime}</if>
+        </set>
+        <where>
+            <choose>
+                <when test="id != null">
+                    id = #{id}
+                </when>
+                <when test="account != null">
+                    account = #{account}
+                </when>
+                <!-- 两个条件都不存在时防止全表更新 -->
+                <otherwise>
+                    1 = 0 <!-- 添加永假条件 -->
+                </otherwise>
+            </choose>
+        </where>
+    </update>
     <!-- 删除用户 -->
     <delete id="deleteById" parameterType="string">
         DELETE FROM tb_user

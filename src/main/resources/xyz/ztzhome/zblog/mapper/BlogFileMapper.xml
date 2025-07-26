@@ -15,8 +15,25 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
-    <insert id="insertFile" parameterType="xyz.ztzhome.zblog.entity.Bean.BlogFile">
+    <insert id="insertFile" parameterType="xyz.ztzhome.zblog.entity.Bean.BlogFile" useGeneratedKeys="true" keyProperty="id">
         <!-- SQL to insert a file record -->
+    insert into tb_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fileName != null">file_name,</if>
+            <if test="originalName !=null">original_name,</if>
+            <if test="filePath !=null">file_path,</if>
+            <if test="fileType !=null">file_type,</if>
+            <if test="fileSize !=null">file_size</if>
+            <if test="createTime !=null">create_time</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="fileName != null">#{fileName},</if>
+            <if test="originalName !=null">#{originalName},</if>
+            <if test="filePath !=null">#{filePath},</if>
+            <if test="fileType !=null">#{fileType},</if>
+            <if test="fileSize !=null">#{fileSize}</if>
+            <if test="createTime !=null">#{createTime}</if>
+        </trim>
     </insert>
 
     <select id="selectFileById" parameterType="long" resultMap="FileResultMap">
@@ -25,14 +42,26 @@
 
     <select id="selectAllFiles" resultMap="FileResultMap">
         <!-- SQL to select all files -->
+        SELECT * FROM tb_file
     </select>
 
     <update id="updateFile" parameterType="xyz.ztzhome.zblog.entity.Bean.BlogFile">
         <!-- SQL to update a file record -->
+        UPDATE tb_file
+        <set>
+            <if test="fileName != null">file_name=#{fileName},</if>
+            <if test="originalName !=null">original_Name=#{originalName},</if>
+            <if test="filePath !=null">file_Path=#{filePath},</if>
+            <if test="fileType !=null">file_type=#{fileType},</if>
+            <if test="fileSize !=null">file_size=#{fileSize}</if>
+            <if test="createTime !=null">create_time=#{createTime}</if>
+        </set>
+        WHERE id = #{id}
     </update>
 
     <delete id="deleteFileById" parameterType="long">
         <!-- SQL to delete a file by id -->
+        delete from blog.tb_file where id=#{id}
     </delete>
 
 </mapper>
