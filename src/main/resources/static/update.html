@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Banners</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a2b4d; }
+        .banner-list { list-style: none; padding: 0; }
+        .banner-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s; }
+        .banner-item:hover { background-color: #f8f9fa; }
+        .banner-info { display: flex; align-items: center; gap: 15px; }
+        .banner-info img { width: 100px; height: 50px; object-fit: cover; border-radius: 5px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 30px; border-radius: 10px; width: 80%; max-width: 500px; position: relative; }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 8px; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; }
+        .message { margin-top: 20px; padding: 10px; border-radius: 5px; text-align: center; display: none; }
+        .message.success { background-color: #d4edda; color: #155724; }
+        .message.error { background-color: #f8d7da; color: #721c24; }
+        .home-link { display: block; margin-top: 20px; text-align: center; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Update Banners</h1>
+    <p>Click on a banner to edit its details.</p>
+    <ul class="banner-list" id="banner-list"></ul>
+    <div id="message" class="message"></div>
+    <a href="/index.html" class="home-link">Back to Carousel</a>
+</div>
+
+<div id="updateModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="close-btn">&times;</span>
+        <h2>Edit Banner</h2>
+        <form id="update-form">
+            <input type="hidden" id="update-id">
+            <div class="form-group">
+                <label for="update-title">Title</label>
+                <input type="text" id="update-title" required>
+            </div>
+            <div class="form-group">
+                <label for="update-linkUrl">Link URL</label>
+                <input type="text" id="update-linkUrl">
+            </div>
+            <div class="form-group">
+                <label for="update-sortOrder">Sort Order</label>
+                <input type="number" id="update-sortOrder">
+            </div>
+            <div class="form-group">
+                <label for="update-isActive">Is Active</label>
+                <input type="checkbox" id="update-isActive">
+            </div>
+            <div class="form-group">
+                <label for="update-file">Replace Image (Optional)</label>
+                <input type="file" id="update-file" accept="image/*">
+            </div>
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', loadBanners);
+
+    const modal = document.getElementById('updateModal');
+    const closeBtn = document.getElementById('close-btn');
+    const updateForm = document.getElementById('update-form');
+    const messageDiv = document.getElementById('message');
+
+    closeBtn.onclick = () => modal.style.display = 'none';
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    async function loadBanners() {
+        const listElement = document.getElementById('banner-list');
+        listElement.innerHTML = '<p>Loading...</p>';
+        try {
+            const response = await fetch('/banners?pageSize=1000');
+            if (!response.ok) throw new Error('Failed to load.');
+            
+            const result = await response.json();
+            if (result.code !== 1) throw new Error(result.message);
+
+            const banners = result.data.list;
+            listElement.innerHTML = '';
+            banners.forEach(banner => {
+                const item = document.createElement('li');
+                item.classList.add('banner-item');
+                item.innerHTML = `
+                    <div class="banner-info">
+                        <img src="${banner.imageUrl}" alt="${banner.title}">
+                        <span>${banner.title}</span>
+                    </div>
+                    <span>Sort: ${banner.sortOrder} | Active: ${banner.isActive}</span>
+                `;
+                item.addEventListener('click', () => openUpdateModal(banner));
+                listElement.appendChild(item);
+            });
+        } catch (error) {
+            listElement.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+        }
+    }
+
+    function openUpdateModal(banner) {
+        document.getElementById('update-id').value = banner.id;
+        document.getElementById('update-title').value = banner.title;
+        document.getElementById('update-linkUrl').value = banner.linkUrl;
+        document.getElementById('update-sortOrder').value = banner.sortOrder;
+        document.getElementById('update-isActive').checked = banner.isActive;
+        document.getElementById('update-file').value = ''; // Clear file input
+        modal.style.display = 'block';
+    }
+
+    updateForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const bannerId = document.getElementById('update-id').value;
+        const formData = new FormData();
+        
+        formData.append('title', document.getElementById('update-title').value);
+        formData.append('linkUrl', document.getElementById('update-linkUrl').value);
+        formData.append('sortOrder', document.getElementById('update-sortOrder').value);
+        formData.append('isActive', document.getElementById('update-isActive').checked);
+
+        const fileInput = document.getElementById('update-file');
+        if (fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]);
+        }
+
+        messageDiv.style.display = 'none';
+
+        try {
+            const response = await fetch(`/banners/${bannerId}`, {
+                method: 'PUT',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.code === 1) {
+                modal.style.display = 'none';
+                messageDiv.textContent = 'Banner updated successfully.';
+                messageDiv.className = 'message success';
+                loadBanners(); // Reload list
+            } else {
+                throw new Error(result.message || 'Failed to update.');
+            }
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        } finally {
+            messageDiv.style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html> 

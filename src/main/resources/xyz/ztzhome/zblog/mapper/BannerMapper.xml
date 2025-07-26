@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.BannerMapper">
+
+    <resultMap id="BannerResultMap" type="xyz.ztzhome.zblog.entity.Bean.Banner">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="objectName" column="object_name"/>
+        <result property="linkUrl" column="link_url"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="xyz.ztzhome.zblog.entity.Bean.Banner" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_banner
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null and title != ''">
+                title,
+            </if>
+            <if test="objectName != null and objectName != ''">
+                object_name,
+            </if>
+            <if test="linkUrl != null">
+                link_url,
+            </if>
+            <if test="sortOrder != null">
+                sort_order,
+            </if>
+            <if test="isActive != null">
+                is_active,
+            </if>
+            create_time,
+            update_time
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="title != null and title != ''">
+                #{title},
+            </if>
+            <if test="objectName != null and objectName != ''">
+                #{objectName},
+            </if>
+            <if test="linkUrl != null">
+                #{linkUrl},
+            </if>
+            <if test="sortOrder != null">
+                #{sortOrder},
+            </if>
+            <if test="isActive != null">
+                #{isActive},
+            </if>
+            NOW(),
+            NOW()
+        </trim>
+    </insert>
+
+    <select id="selectById" parameterType="long" resultMap="BannerResultMap">
+        SELECT id, title, object_name, link_url, sort_order, is_active, create_time, update_time
+        FROM tb_banner
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BannerResultMap">
+        SELECT id, title, object_name, link_url, sort_order, is_active, create_time, update_time
+        FROM tb_banner
+        ORDER BY sort_order ASC, create_time DESC
+    </select>
+    
+    <select id="findActiveBanners" resultMap="BannerResultMap">
+        SELECT id, title, object_name, link_url, sort_order, is_active, create_time, update_time
+        FROM tb_banner
+        WHERE is_active = 1
+        ORDER BY sort_order ASC, create_time DESC
+    </select>
+
+    <update id="update" parameterType="xyz.ztzhome.zblog.entity.Bean.Banner">
+        UPDATE tb_banner
+        <set>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="objectName != null">
+                object_name = #{objectName},
+            </if>
+            <if test="linkUrl != null">
+                link_url = #{linkUrl},
+            </if>
+            <if test="sortOrder != null">
+                sort_order = #{sortOrder},
+            </if>
+            <if test="isActive != null">
+                is_active = #{isActive},
+            </if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM tb_banner
+        WHERE id = #{id}
+    </delete>
+
+</mapper> 

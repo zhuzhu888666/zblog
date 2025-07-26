@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Banners</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a2b4d; }
+        .banner-list { list-style: none; padding: 0; }
+        .banner-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; }
+        .banner-item:last-child { border-bottom: none; }
+        .banner-info { display: flex; align-items: center; gap: 15px; }
+        .banner-info img { width: 100px; height: 50px; object-fit: cover; border-radius: 5px; }
+        .delete-btn { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
+        .delete-btn:hover { background-color: #c82333; }
+        .message { margin-top: 20px; padding: 10px; border-radius: 5px; text-align: center; display: none; }
+        .message.success { background-color: #d4edda; color: #155724; }
+        .message.error { background-color: #f8d7da; color: #721c24; }
+        .home-link { display: block; margin-top: 20px; text-align: center; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Delete Banners</h1>
+    <ul class="banner-list" id="banner-list">
+        <!-- Banner items will be injected here -->
+    </ul>
+    <div id="message" class="message"></div>
+    <a href="/index.html" class="home-link">Back to Carousel</a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', loadBanners);
+
+    async function loadBanners() {
+        const listElement = document.getElementById('banner-list');
+        listElement.innerHTML = '<p>Loading banners...</p>';
+
+        try {
+            // We fetch all banners, so we set a large page size.
+            const response = await fetch('/banners?pageSize=1000');
+            if (!response.ok) throw new Error('Failed to load banners.');
+            
+            const result = await response.json();
+            if (result.code !== 1) throw new Error(result.message);
+
+            const banners = result.data.list;
+            if (!banners || banners.length === 0) {
+                listElement.innerHTML = '<p>No banners found.</p>';
+                return;
+            }
+
+            listElement.innerHTML = '';
+            banners.forEach(banner => {
+                const item = document.createElement('li');
+                item.classList.add('banner-item');
+                item.innerHTML = `
+                    <div class="banner-info">
+                        <img src="${banner.imageUrl}" alt="${banner.title}">
+                        <span>${banner.title} (ID: ${banner.id})</span>
+                    </div>
+                    <button class="delete-btn" data-id="${banner.id}">Delete</button>
+                `;
+                listElement.appendChild(item);
+            });
+
+            addDeleteEventListeners();
+
+        } catch (error) {
+            listElement.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+    }
+
+    function addDeleteEventListeners() {
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const bannerId = event.target.dataset.id;
+                if (!confirm(`Are you sure you want to delete banner with ID ${bannerId}?`)) {
+                    return;
+                }
+
+                const messageDiv = document.getElementById('message');
+                messageDiv.style.display = 'none';
+
+                try {
+                    const response = await fetch(`/banners/${bannerId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.code === 1) {
+                        messageDiv.textContent = `Banner ID ${bannerId} deleted successfully.`;
+                        messageDiv.className = 'message success';
+                        loadBanners(); // Reload the list
+                    } else {
+                        throw new Error(result.message || 'Failed to delete banner.');
+                    }
+                } catch (error) {
+                    messageDiv.textContent = `Error: ${error.message}`;
+                    messageDiv.className = 'message error';
+                } finally {
+                    messageDiv.style.display = 'block';
+                }
+            });
+        });
+    }
+</script>
+
+</body>
+</html> 

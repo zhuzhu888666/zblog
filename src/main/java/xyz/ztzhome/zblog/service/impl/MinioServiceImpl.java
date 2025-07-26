@@ -2,16 +2,23 @@ package xyz.ztzhome.zblog.service.impl;
 
 import io.minio.*;
 import io.minio.http.Method;
+import io.minio.messages.Item;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.service.IMinioService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class MinioServiceImpl implements IMinioService {
+    private static final Logger logger = LoggerFactory.getLogger(MinioServiceImpl.class);
+
     @Autowired
     private MinioClient minioClient;
 
@@ -65,6 +72,55 @@ public class MinioServiceImpl implements IMinioService {
     }
 
     @Override
+    public String getFileUrl(int timeOut, String filePath, TimeUnit timeUnit) {
+        try {
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .bucket(bucket)
+                    .method(Method.GET)
+                    .object(filePath)
+                    .expiry(timeOut, timeUnit).build());
+        } catch (Exception e) {
+            return "getURL_error:" + e.getMessage();
+        }
+    }
+
+    @Override
+    public List<String> getFolderFileUrls(String folderPath,int timeOut) {
+        List<String> urls = new ArrayList<>();
+        // 确保文件夹路径以 '/' 结尾
+        if (!folderPath.endsWith("/")) folderPath += "/";
+
+        try {
+            Iterable<Result<Item>> results = minioClient.listObjects(
+                    ListObjectsArgs.builder()
+                            .bucket(bucket)
+                            .prefix(folderPath)  // 设置文件夹前缀
+                            .recursive(false)      // 不递归子目录
+                            .build()
+            );
+            // 2. 为每个对象生成预签名 URL
+            for (Result<Item> result : results) {
+                Item item = result.get();
+                if (!item.isDir()) { // 跳过文件夹本身
+                    String url = minioClient.getPresignedObjectUrl(
+                            GetPresignedObjectUrlArgs.builder()
+                                    .method(Method.GET)
+                                    .bucket(bucket)
+                                    .object(item.objectName())
+                                    .expiry(timeOut, TimeUnit.MINUTES)
+                                    .build()
+                    );
+                    urls.add(url);
+                }
+            }
+        }catch (Exception e){
+            logger.error("获取文件夹内所有文件临时路径时发生异常：{}",folderPath, e);
+            return urls;
+        }
+        return urls;
+    }
+
+    @Override
     public int deleteFile(String filePath) {
         try {
             minioClient.removeObject(RemoveObjectArgs.builder()
@@ -88,5 +144,15 @@ public class MinioServiceImpl implements IMinioService {
         }catch (Exception e){
             return false;
         }
+    }
+
+    @Override
+    public void removeFile(String objectName) throws Exception {
+        minioClient.removeObject(
+            RemoveObjectArgs.builder()
+                .bucket(bucket)
+                .object(objectName)
+                .build()
+        );
     }
 }

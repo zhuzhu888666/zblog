@@ -2,6 +2,9 @@ package xyz.ztzhome.zblog.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 public interface IMinioService {
     //检查桶是否存在
     boolean isBucketExists(String bucketName);
@@ -19,6 +22,14 @@ public interface IMinioService {
 
     //获取文件临时路径
     String getFileUrl(int timeOut, String filePath);
+
+    String getFileUrl(int timeOut, String filePath, TimeUnit timeUnit);
+
+    //获取指定文件夹的所有文件临时路径，不包含子文件夹
+    public List<String> getFolderFileUrls(String folderPath, int timeOut);
+
+    // 删除文件
+    void removeFile(String objectName) throws Exception;
 
     int deleteFile(String filePath);
 

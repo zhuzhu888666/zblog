@@ -1,16 +1,15 @@
 package xyz.ztzhome.zblog.service;
 
-import org.springframework.boot.Banner;
+import com.github.pagehelper.PageInfo;
+import org.springframework.web.multipart.MultipartFile;
+import xyz.ztzhome.zblog.entity.Bean.Banner;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
-
 import java.util.List;
 
 public interface IBannerService {
-    ResponseMessage<Banner> getBanner(String path);
-
-    //随机返回指定数目
-    ResponseMessage<List<Banner>> getBanners(Banner banner);
-
-    //指定页数
-    ResponseMessage<List<Banner>> getBanners(Integer page, Integer rows);
+    ResponseMessage<Banner> createBanner(MultipartFile file, String title, String linkUrl, Integer sortOrder, Boolean isActive);
+    ResponseMessage<Banner> updateBanner(Long id, MultipartFile file, String title, String linkUrl, Integer sortOrder, Boolean isActive);
+    ResponseMessage<Void> deleteBanner(Long id);
+    ResponseMessage<PageInfo<Banner>> getAllBanners(int pageNum, int pageSize);
+    ResponseMessage<List<String>> getRandomBanners();
 }

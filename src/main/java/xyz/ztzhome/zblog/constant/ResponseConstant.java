@@ -7,4 +7,5 @@ public class ResponseConstant {
     public static final int error = 0;
 
     public static final String SUCCESS = "success";
+    public static final String ERROR = "error";
 }
