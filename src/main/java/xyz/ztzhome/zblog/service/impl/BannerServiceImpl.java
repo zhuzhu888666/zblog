@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,9 @@ public class BannerServiceImpl implements IBannerService {
 
     @Autowired
     private IMinioService minioService;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     @Override
     @Transactional
@@ -113,12 +117,8 @@ public class BannerServiceImpl implements IBannerService {
             PageInfo<Banner> pageInfo = new PageInfo<>(banners);
             
             pageInfo.getList().forEach(banner -> {
-                try {
-                    String url = minioService.getFileUrl(7, banner.getObjectName());
-                    banner.setImageUrl(url);
-                } catch (Exception e) {
-                    logger.error("获取轮播图URL失败, objectName: " + banner.getObjectName(), e);
-                }
+                String bannerUrl = getBannerUrlWithCache(banner.getObjectName(), 7, TimeUnit.DAYS);
+                banner.setImageUrl(bannerUrl);
             });
 
             return new ResponseMessage<>(ResponseConstant.success, "查询成功", pageInfo);
@@ -136,21 +136,40 @@ public class BannerServiceImpl implements IBannerService {
             
             List<String> randomUrls = activeBanners.stream()
                 .limit(10)
-                .map(banner -> {
-                    try {
-                        return minioService.getFileUrl(1, banner.getObjectName(), TimeUnit.HOURS);
-                    } catch (Exception e) {
-                        logger.error("获取随机轮播图URL失败, objectName: " + banner.getObjectName(), e);
-                        return null;
-                    }
-                })
-                .filter(url -> url != null)
+                .map(banner -> getBannerUrlWithCache(banner.getObjectName(), 1, TimeUnit.HOURS))
+                .filter(url -> url != null && !url.startsWith("getURL_error:"))
                 .collect(Collectors.toList());
             
             return new ResponseMessage<>(ResponseConstant.success, "查询成功", randomUrls);
         } catch (Exception e) {
             logger.error("获取随机轮播图失败", e);
             return new ResponseMessage<>(ResponseConstant.error, "服务异常，查询失败");
+        }
+    }
+
+    private String getBannerUrlWithCache(String objectName, int duration, TimeUnit timeUnit) {
+        String redisKey = "banner:url:" + objectName;
+        String cachedUrl = redisTemplate.opsForValue().get(redisKey);
+
+        if (cachedUrl != null) {
+            logger.debug("缓存命中，直接返回Banner URL: {}", objectName);
+            return cachedUrl;
+        }
+
+        logger.debug("缓存未命中，从MinIO生成新的Banner URL: {}", objectName);
+        try {
+            String newUrl = minioService.getFileUrl(duration, objectName, timeUnit);
+            if (newUrl != null && !newUrl.startsWith("getURL_error:")) {
+                // Set cache expiration slightly shorter than the URL's expiration
+                long cacheExpiration = timeUnit.toSeconds(duration) - 60; // 缓存提前60秒过期
+                if (cacheExpiration > 0) {
+                    redisTemplate.opsForValue().set(redisKey, newUrl, cacheExpiration, TimeUnit.SECONDS);
+                }
+            }
+            return newUrl;
+        } catch (Exception e) {
+            logger.error("从MinIO获取Banner URL时发生异常: " + objectName, e);
+            return null;
         }
     }
 }

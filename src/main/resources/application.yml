@@ -13,9 +13,9 @@ spring:
   data:
     redis:
       database: 1
-      host: 114.67.228.38
+      host: 8.134.185.250
       port: 6379
-      password: Ztz15277504089
+      password: ztz15277504089
 
 
 #mybati配置

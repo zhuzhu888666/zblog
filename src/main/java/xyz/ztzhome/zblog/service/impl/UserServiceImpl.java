@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import xyz.ztzhome.zblog.entity.Bean.User;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
@@ -16,6 +18,8 @@ import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.util.JwtToken;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class UserServiceImpl implements IUserService {
 
@@ -23,6 +27,9 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public ResponseMessage register(User user) {
@@ -51,10 +58,12 @@ public class UserServiceImpl implements IUserService {
         }
         if (BCryptPassword.matches(password, user.getPassword())) {
             String token = JwtToken.generateToken(user.getAccount());
-            UserLoginVO   userLoginVO = new UserLoginVO();
-            BeanUtils.copyProperties(user,userLoginVO);
-            userLoginVO.setToken(token);
             logger.info("用户登录成功：{}", account);
+            // Store token and user info in Redis for 7 days
+            redisTemplate.opsForValue().set("user:token:" + token, user, 7, TimeUnit.DAYS);
+            UserLoginVO userLoginVO = new UserLoginVO();
+            BeanUtils.copyProperties(user, userLoginVO);
+            userLoginVO.setToken(token);
             return new ResponseMessage<>(ResponseConstant.success, "登录成功", userLoginVO);
         } else {
             logger.warn("登录尝试失败：用户密码错误 {}", account);
@@ -70,7 +79,13 @@ public class UserServiceImpl implements IUserService {
         }
         if (BCryptPassword.matches(password, user.getPassword())) {
             String token = JwtToken.generateToken(user.getAccount());
-            return new ResponseMessage<>(ResponseConstant.success, "登录成功", token);
+            logger.info("用户通过邮箱登录成功：{}", email);
+            // Store token and user info in Redis for 7 days
+            redisTemplate.opsForValue().set("user:token:" + token, user, 7, TimeUnit.DAYS);
+            UserLoginVO userLoginVO = new UserLoginVO();
+            BeanUtils.copyProperties(user, userLoginVO);
+            userLoginVO.setToken(token);
+            return new ResponseMessage<>(ResponseConstant.success, "登录成功", userLoginVO);
         } else {
             return new ResponseMessage<>(ResponseConstant.error, "密码错误");
         }

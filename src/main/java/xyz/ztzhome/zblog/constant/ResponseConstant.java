@@ -8,4 +8,5 @@ public class ResponseConstant {
 
     public static final String SUCCESS = "success";
     public static final String ERROR = "error";
+    public static final String SERVER_ERROR = "server_error";
 }
