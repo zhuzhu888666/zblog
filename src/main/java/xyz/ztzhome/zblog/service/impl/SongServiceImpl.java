@@ -186,7 +186,7 @@ public class SongServiceImpl implements ISongService {
         }
         Singer singer = singerMapper.selectBySingerName(updateSongDTO.getSingerName());
         if (singer == null) {
-            return new ResponseMessage<>(ResponseConstant.error, "该歌手不存在，更新失败");
+            return new ResponseMessage<>(ResponseConstant.error, "新的歌手不存在，更新失败");
         }
         BeanUtils.copyProperties(updateSongDTO, song);
         song.setSingerId(singer.getId());
