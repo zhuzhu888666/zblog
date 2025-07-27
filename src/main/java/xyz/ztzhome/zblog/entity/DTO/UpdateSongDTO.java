@@ -13,14 +13,16 @@ public class UpdateSongDTO {
     private long id;
 
     /**
-     * 歌手
-     */
-    private long singerId;
-
-    /**
      * 歌手名称
      * */
     private String singerName;
+
+    /**
+     * 歌手id
+     */
+    private long singerId;
+
+
     /**
      * 歌名
      */

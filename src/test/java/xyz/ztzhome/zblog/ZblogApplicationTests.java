@@ -66,8 +66,10 @@ class ZblogApplicationTests {
 
     @Test
     void test1(){
-        String url= minioService.getFileUrl(6,PathCosntant.SONG_SAVE_PATH+"下载.webp");
-        System.out.println(url);
+//        String url= minioService.getFileUrl(6,PathCosntant.SONG_SAVE_PATH+"下载.webp");
+//        System.out.println(url);
+        Song song =  songMapper.selectSongById(563);
+        minioService.deleteFile(PathCosntant.SONG_COVER_PATH+song.getCoverPath());
     }
 
     @Test

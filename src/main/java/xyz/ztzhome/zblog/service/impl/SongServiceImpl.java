@@ -112,7 +112,7 @@ public class SongServiceImpl implements ISongService {
             return new ResponseMessage<>(ResponseConstant.error, "上传过程发生异常: " + e.getMessage());
         }
         // 6. 处理封面文件
-        String coverPath = PathCosntant.SINGER_COVER_PATH+"default.jpg";
+        String coverPath = "default_cover.jpg";
         if (coverFile != null && !coverFile.isEmpty()) {
             String coverFileName = song.getId() + "_cover" + FileTypeUtil.getFileExtension2(coverFile.getOriginalFilename());
             String coverSavePath = PathCosntant.SONG_COVER_PATH + coverFileName;
@@ -180,22 +180,40 @@ public class SongServiceImpl implements ISongService {
         if (updateSongDTO == null || updateSongDTO.getName() == null) {
             return new ResponseMessage<>(ResponseConstant.error, "缺少必要参数");
         }
-        Song song = songMapper.selectBySingerIdAndName(updateSongDTO.getSingerId(), updateSongDTO.getName());
+        // 2. 获取原始歌曲数据
+        Song song=songMapper.selectSongById(updateSongDTO.getId());
         if (song == null) {
             return new ResponseMessage<>(ResponseConstant.error, "该歌曲不存在，更新失败");
         }
-        Singer singer = singerMapper.selectBySingerName(updateSongDTO.getSingerName());
-        if (singer == null) {
-            return new ResponseMessage<>(ResponseConstant.error, "新的歌手不存在，更新失败");
+        //复制更改元素
+        BeanUtils.copyProperties(updateSongDTO,song);
+        //如果传入的歌手不为空，更新歌手
+        //优先使用歌手id更新歌手
+        if (updateSongDTO.getSingerId()!=0){
+            Singer singer=singerMapper.selectBySingerId(updateSongDTO.getSingerId());
+            if (singer == null) {
+                return new ResponseMessage<>(ResponseConstant.error,"新歌手不存在");
+            }
+            //更新歌手id
+            song.setSingerId(singer.getId());
+        }else if(updateSongDTO.getSingerName()!=null&& !updateSongDTO.getSingerName().isEmpty()){
+
+            Singer singer=singerMapper.selectBySingerName(updateSongDTO.getSingerName());
+            if (singer == null) {
+                return new ResponseMessage<>(ResponseConstant.error,"新歌手不存在");
+            }
+            //更新歌手id
+            song.setSingerId(singer.getId());
         }
-        BeanUtils.copyProperties(updateSongDTO, song);
-        song.setSingerId(singer.getId());
         // 处理封面文件
         if (coverFile != null && !coverFile.isEmpty()) {
             String coverFileName = song.getId() + "_cover" + FileTypeUtil.getFileExtension2(coverFile.getOriginalFilename());
-            String coverSavePath = PathCosntant.SONG_SAVE_PATH + coverFileName;
+            String coverSavePath = PathCosntant.SONG_COVER_PATH + coverFileName;
             int coverUpload = 0;
             try {
+                //删除旧的封面
+                minioService.deleteFile(PathCosntant.SONG_COVER_PATH+song.getCoverPath());
+                //上传新封面
                 coverUpload = minioService.uploadFile(coverFile, coverSavePath);
                 if (coverUpload == 1) {
                     song.setCoverPath(coverFileName);
@@ -208,6 +226,7 @@ public class SongServiceImpl implements ISongService {
             // 如果原本没有封面，设为默认
             song.setCoverPath("default.jpg");
         }
+        //更新歌曲
         songMapper.updateSong(song);
         return new ResponseMessage<>(ResponseConstant.success, "更新成功");
     }
@@ -352,10 +371,10 @@ public class SongServiceImpl implements ISongService {
         }
         String coverPath = song.getCoverPath();
         if (coverPath == null || coverPath.isEmpty() || "default.jpg".equals(coverPath)) {
-            // 返回默认图片的静态资源路径
-            return new ResponseMessage<>(ResponseConstant.success, "加载成功", "/default.jpg");
+            // 返回静态资源路径
+            return new ResponseMessage<>(ResponseConstant.success, "加载成功", "/files/image/default_cover.jpg");
         }
-        String minioPath = PathCosntant.SONG_SAVE_PATH + coverPath;
+        String minioPath = PathCosntant.SONG_COVER_PATH + coverPath;
         String url = minioService.getFileUrl(6, minioPath);
         if (url == null) {
             return new ResponseMessage<>(ResponseConstant.error, "存储库未找到该封面");
