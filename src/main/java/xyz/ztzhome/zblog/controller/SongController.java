@@ -22,16 +22,14 @@ public class SongController {
 
 
     @PostMapping("addSong")
-    public ResponseMessage addSong(@RequestPart("data") String data, @RequestPart("audioFile") MultipartFile audioFile){
-
+    public ResponseMessage addSong(@RequestPart("data") String data, @RequestPart("audioFile") MultipartFile audioFile, @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
         AddSongDTO addSongDTO = new AddSongDTO();
         try {
             ObjectMapper mapper = new ObjectMapper();
             addSongDTO = mapper.readValue(data, AddSongDTO.class);
-
-            return songService.addSong(addSongDTO,audioFile);
-        }catch (Exception e){
-            return new ResponseMessage(0,"接收对象构建失败:"+e.getMessage());
+            return songService.addSong(addSongDTO, audioFile, coverFile);
+        } catch (Exception e) {
+            return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
         }
     }
 
@@ -52,8 +50,15 @@ public class SongController {
     //更新歌曲
 
     @PostMapping("/updateSong")
-    ResponseMessage updateSong(@RequestBody UpdateSongDTO updateSongDTO){
-        return songService.updateSong(updateSongDTO);
+    public ResponseMessage updateSong(@RequestPart("data") String data, @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
+        UpdateSongDTO updateSongDTO = new UpdateSongDTO();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            updateSongDTO = mapper.readValue(data, UpdateSongDTO.class);
+            return songService.updateSong(updateSongDTO, coverFile);
+        } catch (Exception e) {
+            return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
+        }
     }
 
     //删除歌曲
@@ -67,6 +72,16 @@ public class SongController {
     @GetMapping("/getSongURL")
     public ResponseMessage getSongURL(@RequestParam("id") long id){
         return songService.getSongURL(id);
+    }
+
+    /**
+     * 获取歌曲封面临时路径
+     * @param id 歌曲id
+     * @return 封面url
+     */
+    @GetMapping("/getCoverURL")
+    public ResponseMessage getCoverURL(@RequestParam("id") long id) {
+        return songService.getCoverURL(id);
     }
 
     /**

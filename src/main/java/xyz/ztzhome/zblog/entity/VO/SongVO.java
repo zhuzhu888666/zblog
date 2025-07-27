@@ -21,9 +21,9 @@ public class SongVO {
 
     private String style;
 
-    private String coverUrl;
+    private String coverPath;
 
-    private String audioUrl;
+    private String audioPath;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date releaseTime;

@@ -20,10 +20,14 @@ import xyz.ztzhome.zblog.mapper.SongMapper;
 import xyz.ztzhome.zblog.service.ISongService;
 import xyz.ztzhome.zblog.util.FileTypeUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 @Service
 public class SongServiceImpl implements ISongService {
+    private static final Logger log = LoggerFactory.getLogger(SongServiceImpl.class);
     @Autowired
     private SongMapper songMapper;
     @Autowired
@@ -60,15 +64,15 @@ public class SongServiceImpl implements ISongService {
      * 添加歌曲
      * */
     @Override
-    public ResponseMessage addSong(AddSongDTO addSongDTO,MultipartFile audioFile) {
+    public ResponseMessage addSong(AddSongDTO addSongDTO, MultipartFile audioFile, MultipartFile coverFile) {
         // 1. 校验参数 //检查歌曲信息和文件信息
         if (addSongDTO == null || addSongDTO.getSong() == null || audioFile == null) {
-            return new ResponseMessage<>(ResponseConstant.error,"歌曲信息和文件不能为空");
+            return new ResponseMessage<>(ResponseConstant.error, "歌曲信息和文件不能为空");
         }
         //检验文件类型
         String fileName = audioFile.getOriginalFilename();
         if (!FileTypeUtil.getFileType(fileName).equals("music")) {
-            return new ResponseMessage<>(ResponseConstant.error,"暂不支持该文件类型");
+            return new ResponseMessage<>(ResponseConstant.error, "暂不支持该文件类型");
         }
         // 2. 检查歌手是否存在（通过名称）
         Singer singer = singerMapper.selectBySingerName(addSongDTO.getSinger().getSingerName());
@@ -81,34 +85,52 @@ public class SongServiceImpl implements ISongService {
                 // 并发情况下可能被其他请求先插入，重新查询
                 singer = singerMapper.selectBySingerName(addSongDTO.getSinger().getSingerName());
                 if (singer == null) {
-                    return new ResponseMessage<>(ResponseConstant.error,"添加歌手失败");
+                    return new ResponseMessage<>(ResponseConstant.error, "添加歌手失败");
                 }
             }
         }
         //检查歌曲是否已经存在
         Song song = songMapper.selectBySingerIdAndName(singer.getId(), addSongDTO.getSong().getName());
         if (song != null) {
-            return new ResponseMessage<>(ResponseConstant.error,"该歌曲已经存在");
+            return new ResponseMessage<>(ResponseConstant.error, "该歌曲已经存在");
         }
-        // 4. 先插入数据库（不带audioUrl），获取自增ID
+        // 4. 先插入数据库（不带audioPath/coverPath），获取自增ID
         song = addSongDTO.getSong();
         song.setSingerId(singer.getId());
-        song.setAudioUrl(null); // 先不设置音频路径
+        song.setAudioPath(null); // 先不设置音频路径
+        song.setCoverPath(null); // 先不设置封面路径
         songMapper.insertSong(song); // 此时song的id已被赋值
         // 5. 用ID生成音频文件名，上传到minio
         String audioFileName = song.getId() + song.getName() + FileTypeUtil.getFileExtension2(audioFile.getOriginalFilename());
-        String folder = PathCosntant.SONG_SAVE_PATH + audioFileName;
+        String audioSavePath = PathCosntant.SONG_SAVE_PATH + audioFileName;
         int isUpload = 0;
         try {
-            isUpload = minioService.uploadFile(audioFile, folder);
+            isUpload = minioService.uploadFile(audioFile, audioSavePath);
         } catch (Exception e) {
-            // 上传异常，删除数据库记录
+            log.error("音频文件上传异常，歌曲ID:{}，文件名:{}，异常:{}", song.getId(), audioFileName, e.getMessage(), e);
             songMapper.deleteSong(song.getId());
             return new ResponseMessage<>(ResponseConstant.error, "上传过程发生异常: " + e.getMessage());
         }
+        // 6. 处理封面文件
+        String coverPath = PathCosntant.SINGER_COVER_PATH+"default.jpg";
+        if (coverFile != null && !coverFile.isEmpty()) {
+            String coverFileName = song.getId() + "_cover" + FileTypeUtil.getFileExtension2(coverFile.getOriginalFilename());
+            String coverSavePath = PathCosntant.SONG_COVER_PATH + coverFileName;
+            int coverUpload = 0;
+            try {
+                coverUpload = minioService.uploadFile(coverFile, coverSavePath);
+                if (coverUpload == 1) {
+                    coverPath = coverFileName;
+                }
+            } catch (Exception e) {
+                log.warn("封面文件上传失败，歌曲ID:{}，文件名:{}，异常:{}", song.getId(), coverFileName, e.getMessage(), e);
+                // 封面上传失败不影响主流程，仍用默认封面
+            }
+        }
         if (isUpload == 1) {
-            // 上传成功，更新audioUrl字段
-            song.setAudioUrl(audioFileName);
+            // 上传成功，更新audioPath和coverPath字段
+            song.setAudioPath(audioFileName);
+            song.setCoverPath(coverPath);
             songMapper.updateSong(song);
             return new ResponseMessage<>(ResponseConstant.success, "上传成功");
         } else {
@@ -142,7 +164,7 @@ public class SongServiceImpl implements ISongService {
         if(song==null){
             return  new ResponseMessage<>(ResponseConstant.error,"歌曲不存在");
         }
-        String path=PathCosntant.SONG_SAVE_PATH+song.getId()+song.getAudioUrl();
+        String path=PathCosntant.SONG_SAVE_PATH+song.getAudioPath();
         String url=minioService.getFileUrl(6,path);
         if(url==null){
             return new ResponseMessage<>(ResponseConstant.error,"存储库未找到该歌曲");
@@ -154,22 +176,40 @@ public class SongServiceImpl implements ISongService {
      * 更新
      * */
     @Override
-    public ResponseMessage updateSong(UpdateSongDTO updateSongDTO) {
-        if (updateSongDTO==null||updateSongDTO.getName()==null) {
-            return new ResponseMessage<>(ResponseConstant.error,"缺少必要参数");
+    public ResponseMessage updateSong(UpdateSongDTO updateSongDTO, MultipartFile coverFile) {
+        if (updateSongDTO == null || updateSongDTO.getName() == null) {
+            return new ResponseMessage<>(ResponseConstant.error, "缺少必要参数");
         }
-        Song song=songMapper.selectBySingerIdAndName(updateSongDTO.getSingerId(),updateSongDTO.getName());
-        if(song==null){
-            return new ResponseMessage<>(ResponseConstant.error,"该歌曲不存在，更新失败");
+        Song song = songMapper.selectBySingerIdAndName(updateSongDTO.getSingerId(), updateSongDTO.getName());
+        if (song == null) {
+            return new ResponseMessage<>(ResponseConstant.error, "该歌曲不存在，更新失败");
         }
-        Singer singer=singerMapper.selectBySingerName(updateSongDTO.getSingerName());
-        if(singer==null){
-            return new ResponseMessage<>(ResponseConstant.error,"该歌手不存在，更新失败");
+        Singer singer = singerMapper.selectBySingerName(updateSongDTO.getSingerName());
+        if (singer == null) {
+            return new ResponseMessage<>(ResponseConstant.error, "该歌手不存在，更新失败");
         }
-        BeanUtils.copyProperties(updateSongDTO,song);
+        BeanUtils.copyProperties(updateSongDTO, song);
         song.setSingerId(singer.getId());
+        // 处理封面文件
+        if (coverFile != null && !coverFile.isEmpty()) {
+            String coverFileName = song.getId() + "_cover" + FileTypeUtil.getFileExtension2(coverFile.getOriginalFilename());
+            String coverSavePath = PathCosntant.SONG_SAVE_PATH + coverFileName;
+            int coverUpload = 0;
+            try {
+                coverUpload = minioService.uploadFile(coverFile, coverSavePath);
+                if (coverUpload == 1) {
+                    song.setCoverPath(coverFileName);
+                }
+            } catch (Exception e) {
+                log.warn("封面文件上传失败（更新），歌曲ID:{}，文件名:{}，异常:{}", song.getId(), coverFileName, e.getMessage(), e);
+                // 封面上传失败，保留原封面
+            }
+        } else if (song.getCoverPath() == null || song.getCoverPath().isEmpty()) {
+            // 如果原本没有封面，设为默认
+            song.setCoverPath("default.jpg");
+        }
         songMapper.updateSong(song);
-        return new ResponseMessage<>(ResponseConstant.success,"更新成功");
+        return new ResponseMessage<>(ResponseConstant.success, "更新成功");
     }
 
     /**
@@ -182,7 +222,7 @@ public class SongServiceImpl implements ISongService {
         if(song==null){
             return new ResponseMessage<>(ResponseConstant.error,"歌曲信息不存在，删除失败");
         }
-        String filePath=PathCosntant.SONG_SAVE_PATH+song.getId()+song.getAudioUrl();
+        String filePath=PathCosntant.SONG_SAVE_PATH+song.getId()+song.getAudioPath();
         minioService.deleteFile(filePath);
         if (!minioService.fileIsExist(filePath)){
             return new ResponseMessage<>(ResponseConstant.error,"服务异常，删除失败");
@@ -302,5 +342,24 @@ public class SongServiceImpl implements ISongService {
         }
         
         return new ResponseMessage<>(ResponseConstant.success, "查询成功", pageResponse);
+    }
+
+    @Override
+    public ResponseMessage<String> getCoverURL(long id) {
+        Song song = songMapper.selectSongById(id);
+        if (song == null) {
+            return new ResponseMessage<>(ResponseConstant.error, "歌曲不存在");
+        }
+        String coverPath = song.getCoverPath();
+        if (coverPath == null || coverPath.isEmpty() || "default.jpg".equals(coverPath)) {
+            // 返回默认图片的静态资源路径
+            return new ResponseMessage<>(ResponseConstant.success, "加载成功", "/default.jpg");
+        }
+        String minioPath = PathCosntant.SONG_SAVE_PATH + coverPath;
+        String url = minioService.getFileUrl(6, minioPath);
+        if (url == null) {
+            return new ResponseMessage<>(ResponseConstant.error, "存储库未找到该封面");
+        }
+        return new ResponseMessage<>(ResponseConstant.success, "加载成功", url);
     }
 }

@@ -42,12 +42,12 @@ public class UpdateSongDTO {
     /**
      * 歌曲封面 url
      */
-    private String coverUrl;
+    private String coverPath;
 
     /**
      * 歌曲 url
      */
-    private String audioUrl;
+    private String audioPath;
 
     /**
      * 歌曲发行时间

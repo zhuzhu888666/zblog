@@ -12,8 +12,8 @@
         <result property="album" column="album"/>
         <result property="duration" column="duration"/>
         <result property="style" column="style"/>
-        <result property="coverUrl" column="cover_url"/>
-        <result property="audioUrl" column="audio_url"/>
+        <result property="coverPath" column="cover_path"/>
+        <result property="audioPath" column="audio_path"/>
         <result property="releaseTime" column="release_time"/>
     </resultMap>
     <insert id="insertSong" parameterType="xyz.ztzhome.zblog.entity.Bean.Song" useGeneratedKeys="true" keyProperty="id">
@@ -24,8 +24,8 @@
             <if test="album != null">album,</if>
             <if test="duration != null">duration,</if>
             <if test="style != null">style,</if>
-            <if test="coverUrl != null">cover_url,</if>
-            <if test="audioUrl != null">audio_url,</if>
+            <if test="coverPath != null">cover_path,</if>
+            <if test="audioPath != null">audio_path,</if>
             <if test="releaseTime != null">release_time,</if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
@@ -34,8 +34,8 @@
             <if test="album != null">#{album},</if>
             <if test="duration != null">#{duration},</if>
             <if test="style != null">#{style},</if>
-            <if test="coverUrl != null">#{coverUrl},</if>
-            <if test="audioUrl != null">#{audioUrl},</if>
+            <if test="coverPath != null">#{coverPath},</if>
+            <if test="audioPath != null">#{audioPath},</if>
             <if test="releaseTime != null">#{releaseTime},</if>
         </trim>
     </insert>
@@ -48,8 +48,8 @@
             <if test="album != null and album != ''">album = #{album},</if>
             <if test="duration != null and duration != ''">duration = #{duration},</if>
             <if test="style != null and style != ''">style = #{style},</if>
-            <if test="coverUrl != null and coverUrl != ''">cover_url = #{coverUrl},</if>
-            <if test="audioUrl != null and audioUrl != ''">audio_url = #{audioUrl},</if>
+            <if test="coverPath != null and coverPath != ''">cover_path = #{coverPath},</if>
+            <if test="audioPath != null and audioPath != ''">audio_path = #{audioPath},</if>
             <if test="releaseTime != null">release_time = #{releaseTime},</if>
         </set>
         WHERE id = #{id}
@@ -92,8 +92,8 @@
             s.album,
             s.duration,
             s.style,
-            s.cover_url as coverUrl,
-            s.audio_url as audioUrl,
+            s.cover_path as coverPath,
+            s.audio_path as audioPath,
             s.release_time as releaseTime
         FROM tb_song s
                  LEFT JOIN tb_singer si ON s.singer_id = si.id
@@ -110,8 +110,8 @@
             s.album,
             s.duration,
             s.style,
-            s.cover_url as coverUrl,
-            s.audio_url as audioUrl,
+            s.cover_path as coverPath,
+            s.audio_path as audioPath,
             s.release_time as releaseTime
         FROM tb_song s
                  LEFT JOIN tb_singer si ON s.singer_id = si.id
@@ -130,8 +130,8 @@
             s.album,
             s.duration,
             s.style,
-            s.cover_url as coverUrl,
-            s.audio_url as audioUrl,
+            s.cover_path as coverPath,
+            s.audio_path as audioPath,
             s.release_time as releaseTime
         FROM tb_song s
                  LEFT JOIN tb_singer si ON s.singer_id = si.id
@@ -173,8 +173,8 @@
             s.album,
             s.duration,
             s.style,
-            s.cover_url as coverUrl,
-            s.audio_url as audioUrl,
+            s.cover_path as coverPath,
+            s.audio_path as audioPath,
             s.release_time as releaseTime
         FROM tb_song s
                  LEFT JOIN tb_singer si ON s.singer_id = si.id

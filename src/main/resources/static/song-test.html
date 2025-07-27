@@ -26,6 +26,7 @@
         <label>专辑: <input type="text" name="album" placeholder="可选"></label>
         <label>发行时间: <input type="date" name="releaseTime" placeholder="可选"></label>
         <label>音频文件: <input type="file" name="audioFile" accept="audio/*" required></label>
+        <label>封面图片: <input type="file" name="coverFile" accept="image/*"></label>
         <button type="submit">上传</button>
         <div class="result" id="uploadResult"></div>
     </form>
@@ -36,6 +37,10 @@
         <label>歌曲ID: <input type="number" name="id" required></label>
         <label>新歌名: <input type="text" name="name"></label>
         <label>新歌手ID: <input type="number" name="singerId"></label>
+        <label>新歌手名称: <input type="text" name="singerName"></label>
+        <label>新专辑: <input type="text" name="album"></label>
+        <label>新发行时间: <input type="date" name="releaseTime"></label>
+        <label>新封面图片: <input type="file" name="coverFile" accept="image/*"></label>
         <button type="submit">更新</button>
         <div class="result" id="updateResult"></div>
     </form>
@@ -67,6 +72,7 @@
         const album = form.album.value || "未知专辑";
         const releaseTime = form.releaseTime.value || null;
         const audioFile = form.audioFile.files[0];
+        const coverFile = form.coverFile.files[0];
         if (!audioFile) return;
         const data = {
             song: { name: songName, album: album, releaseTime: releaseTime },
@@ -75,6 +81,7 @@
         const formData = new FormData();
         formData.append('data', JSON.stringify(data));
         formData.append('audioFile', audioFile);
+        if (coverFile) formData.append('coverFile', coverFile);
         const res = await fetch('/song/addSong', {
             method: 'POST',
             body: formData
@@ -94,12 +101,19 @@
         const body = {
             id: form.id.value,
             name: form.name.value,
-            singerId: form.singerId.value
+            singerId: form.singerId.value,
+            singerName: form.singerName.value,
+            album: form.album.value,
+            releaseTime: form.releaseTime.value
         };
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(body));
+        if (form.coverFile.files[0]) {
+            formData.append('coverFile', form.coverFile.files[0]);
+        }
         const res = await fetch('/song/updateSong', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: formData
         });
         const result = await res.json();
         document.getElementById('updateResult').innerText = result.message || JSON.stringify(result);
@@ -120,11 +134,24 @@
             const div = document.createElement('div');
             div.className = 'song-item';
             div.innerHTML = `<b>${song.name}</b> (ID: ${song.id}) 歌手ID: ${song.singerId}<br>`;
+            // 动态获取封面
+            if (song.id) {
+                fetch(`/song/getCoverURL?id=${song.id}`)
+                  .then(r => r.json())
+                  .then(data => {
+                      if (data.code === 1 && data.data) {
+                          const img = document.createElement('img');
+                          img.src = data.data;
+                          img.style.height = '40px';
+                          img.style.verticalAlign = 'middle';
+                          div.appendChild(img);
+                      }
+                  });
+            }
             // 动态获取播放路径
             if (song.id) {
                 const audio = document.createElement('audio');
                 audio.controls = true;
-                // 异步获取播放url
                 fetch(`/song/getSongURL?id=${song.id}`)
                   .then(r => r.json())
                   .then(data => {
@@ -152,6 +179,20 @@
             const div = document.createElement('div');
             div.className = 'song-item';
             div.innerHTML = `<b>${song.name}</b> (ID: ${song.id}) 歌手ID: ${song.singerId}<br>`;
+            // 动态获取封面
+            if (song.id) {
+                fetch(`/song/getCoverURL?id=${song.id}`)
+                  .then(r => r.json())
+                  .then(data => {
+                      if (data.code === 1 && data.data) {
+                          const img = document.createElement('img');
+                          img.src = data.data;
+                          img.style.height = '40px';
+                          img.style.verticalAlign = 'middle';
+                          div.appendChild(img);
+                      }
+                  });
+            }
             // 动态获取播放路径
             if (song.id) {
                 const audio = document.createElement('audio');

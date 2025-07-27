@@ -13,7 +13,7 @@ import java.util.List;
 public interface ISongService {
 
     //添加歌曲
-    ResponseMessage addSong(AddSongDTO addSongDTO, MultipartFile audioFile);
+    ResponseMessage addSong(AddSongDTO addSongDTO, MultipartFile audioFile, MultipartFile coverFile);
 
     //根据歌曲id查询歌曲
    ResponseMessage<SongVO> getSong(long songId);
@@ -25,7 +25,7 @@ public interface ISongService {
     ResponseMessage<String> getSongURL(long id);
 
     //更新歌曲
-    ResponseMessage updateSong(UpdateSongDTO updateSongDTO);
+    ResponseMessage updateSong(UpdateSongDTO updateSongDTO, MultipartFile coverFile);
 
     ResponseMessage deleteSong(long id);
 
@@ -40,4 +40,6 @@ public interface ISongService {
 
     // 新增方法：根据风格分页查询
     ResponseMessage<PageResponse<SongVO>> getSongsByStyleWithPage(String style, int pageNum, int pageSize);
+
+    ResponseMessage getCoverURL(long id);
 }

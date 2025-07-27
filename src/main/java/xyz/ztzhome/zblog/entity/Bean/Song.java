@@ -36,14 +36,14 @@ public class Song {
     private String style;
 
     /**
-     * 歌曲封面 url
+     * 歌曲封面 路径+类型后缀
      */
-    private String coverUrl;
+    private String coverPath;
 
     /**
-     * 歌曲 url
+     * 歌曲 路径+类型后缀
      */
-    private String audioUrl;
+    private String audioPath;
 
     /**
      * 歌曲发行时间
