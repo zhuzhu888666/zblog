@@ -13,6 +13,7 @@ import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateSongDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.mapper.SingerMapper;
 import xyz.ztzhome.zblog.mapper.SongMapper;
@@ -60,7 +61,6 @@ public class SongServiceImpl implements ISongService {
      * */
     @Override
     public ResponseMessage addSong(AddSongDTO addSongDTO,MultipartFile audioFile) {
-
         // 1. 校验参数 //检查歌曲信息和文件信息
         if (addSongDTO == null || addSongDTO.getSong() == null || audioFile == null) {
             return new ResponseMessage<>(ResponseConstant.error,"歌曲信息和文件不能为空");
@@ -72,7 +72,6 @@ public class SongServiceImpl implements ISongService {
         }
         // 2. 检查歌手是否存在（通过名称）
         Singer singer = singerMapper.selectBySingerName(addSongDTO.getSinger().getSingerName());
-
         // 3. 若不存在，则尝试插入
         if (singer == null) {
             singer = addSongDTO.getSinger();
@@ -87,30 +86,35 @@ public class SongServiceImpl implements ISongService {
             }
         }
         //检查歌曲是否已经存在
-        Song song=songMapper.selectBySingerIdAndName(singer.getId(),addSongDTO.getSong().getName());
+        Song song = songMapper.selectBySingerIdAndName(singer.getId(), addSongDTO.getSong().getName());
         if (song != null) {
             return new ResponseMessage<>(ResponseConstant.error,"该歌曲已经存在");
         }
-        // 5. 关联歌手并保存歌曲
-        song=addSongDTO.getSong();
-
-        song.setAudioUrl(song.getName()+FileTypeUtil.getFileExtension2(audioFile.getOriginalFilename()));
+        // 4. 先插入数据库（不带audioUrl），获取自增ID
+        song = addSongDTO.getSong();
         song.setSingerId(singer.getId());
-        //mybatis+mysql使用自增id,插入的 song 对象的 id 属性会被自动赋值：
-        songMapper.insertSong(song);
-        //6.上传歌曲文件
+        song.setAudioUrl(null); // 先不设置音频路径
+        songMapper.insertSong(song); // 此时song的id已被赋值
+        // 5. 用ID生成音频文件名，上传到minio
+        String audioFileName = song.getId() + song.getName() + FileTypeUtil.getFileExtension2(audioFile.getOriginalFilename());
+        String folder = PathCosntant.SONG_SAVE_PATH + audioFileName;
+        int isUpload = 0;
         try {
-            //上传文件，使用歌曲id+歌名来重命名保存
-            String folder=PathCosntant.SONG_SAVE_PATH+song.getId()+song.getAudioUrl();
-            int isUpload=minioService.uploadFile(audioFile, folder);
-            if(isUpload==1){
-                return new ResponseMessage<>(ResponseConstant.success,"上传成功");
-            }
-            else {
-                return new ResponseMessage<>(ResponseConstant.error,"上传失败,上传过程发生异常");
-            }
-        }catch (Exception e){
-            return new ResponseMessage<>(ResponseConstant.error,"上传过程发生异常: "+e.getMessage());
+            isUpload = minioService.uploadFile(audioFile, folder);
+        } catch (Exception e) {
+            // 上传异常，删除数据库记录
+            songMapper.deleteSong(song.getId());
+            return new ResponseMessage<>(ResponseConstant.error, "上传过程发生异常: " + e.getMessage());
+        }
+        if (isUpload == 1) {
+            // 上传成功，更新audioUrl字段
+            song.setAudioUrl(audioFileName);
+            songMapper.updateSong(song);
+            return new ResponseMessage<>(ResponseConstant.success, "上传成功");
+        } else {
+            // 上传失败，删除数据库记录
+            songMapper.deleteSong(song.getId());
+            return new ResponseMessage<>(ResponseConstant.error, "上传失败,上传过程发生异常");
         }
     }
     /**
@@ -186,5 +190,117 @@ public class SongServiceImpl implements ISongService {
         //删除数据库中的歌曲信息
         songMapper.deleteSong(id);
         return new ResponseMessage<>(ResponseConstant.success,"删除成功");
+    }
+
+    /**
+     * 根据歌名模糊查询，分页
+     * @param songName 歌曲名称
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    @Override
+    public ResponseMessage<PageResponse<SongVO>> getSongsByNameWithPage(String songName, int pageNum, int pageSize) {
+        // 参数校验
+        if (pageNum < 1) pageNum = 1;
+        if (pageSize < 1) pageSize = 10;
+        
+        int offset = (pageNum - 1) * pageSize;
+        
+        // 查询总数
+        int total = songMapper.countSongsByNameLike(songName);
+        
+        // 查询数据
+        List<SongVO> songs = songMapper.selectSongVOsByNameLikeWithPage(songName, offset, pageSize);
+        
+        PageResponse<SongVO> pageResponse = new PageResponse<>(songs, total, pageNum, pageSize);
+        
+        if (songs.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.error, "未找到相关歌曲信息", pageResponse);
+        }
+        
+        return new ResponseMessage<>(ResponseConstant.success, "查询成功", pageResponse);
+    }
+
+    /**
+     * 查询全部歌曲，分页
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    @Override
+    public ResponseMessage<PageResponse<SongVO>> getAllSongsWithPage(int pageNum, int pageSize) {
+        // 参数校验
+        if (pageNum < 1) pageNum = 1;
+        if (pageSize < 1) pageSize = 10;
+        
+        int offset = (pageNum - 1) * pageSize;
+        
+        // 查询总数
+        int total = songMapper.countAllSongs();
+        
+        // 查询数据
+        List<SongVO> songs = songMapper.selectAllSongVOsWithPage(offset, pageSize);
+        
+        PageResponse<SongVO> pageResponse = new PageResponse<>(songs, total, pageNum, pageSize);
+        
+        if (songs.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.error, "暂无歌曲数据", pageResponse);
+        }
+        
+        return new ResponseMessage<>(ResponseConstant.success, "查询成功", pageResponse);
+    }
+
+    /**
+     * 随机查询歌曲
+     * @param limit 查询数量
+     * @return 歌曲列表
+     */
+    @Override
+    public ResponseMessage<List<Song>> getRandomSongs(int limit) {
+        // 参数校验
+        if (limit < 1) limit = 20;
+        if (limit > 100) limit = 100; // 限制最大查询数量
+        
+        List<Song> songs = songMapper.selectRandomSongs(limit);
+        
+        if (songs.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.error, "暂无歌曲数据");
+        }
+        
+        return new ResponseMessage<>(ResponseConstant.success, "查询成功", songs);
+    }
+
+    /**
+     * 根据风格分页查询
+     * @param style 歌曲风格
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 分页结果
+     */
+    @Override
+    public ResponseMessage<PageResponse<SongVO>> getSongsByStyleWithPage(String style, int pageNum, int pageSize) {
+        // 参数校验
+        if (style == null || style.trim().isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.error, "风格参数不能为空");
+        }
+        if (pageNum < 1) pageNum = 1;
+        if (pageSize < 1) pageSize = 10;
+        
+        int offset = (pageNum - 1) * pageSize;
+        
+        // 查询总数
+        int total = songMapper.countSongsByStyle(style);
+        
+        // 查询数据
+        List<SongVO> songs = songMapper.selectSongVOsByStyleWithPage(style, offset, pageSize);
+        
+        PageResponse<SongVO> pageResponse = new PageResponse<>(songs, total, pageNum, pageSize);
+        
+        if (songs.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.error, "未找到该风格的歌曲", pageResponse);
+        }
+        
+        return new ResponseMessage<>(ResponseConstant.success, "查询成功", pageResponse);
     }
 }

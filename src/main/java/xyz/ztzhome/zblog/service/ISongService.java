@@ -1,9 +1,11 @@
 package xyz.ztzhome.zblog.service;
 
 import org.springframework.web.multipart.MultipartFile;
+import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateSongDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 
 import java.util.List;
@@ -25,6 +27,17 @@ public interface ISongService {
     //更新歌曲
     ResponseMessage updateSong(UpdateSongDTO updateSongDTO);
 
-
     ResponseMessage deleteSong(long id);
+
+    // 新增方法：根据歌名模糊查询，分页
+    ResponseMessage<PageResponse<SongVO>> getSongsByNameWithPage(String songName, int pageNum, int pageSize);
+
+    // 新增方法：查询全部歌曲，分页
+    ResponseMessage<PageResponse<SongVO>> getAllSongsWithPage(int pageNum, int pageSize);
+
+    // 新增方法：随机查询20条歌曲
+    ResponseMessage<List<Song>> getRandomSongs(int limit);
+
+    // 新增方法：根据风格分页查询
+    ResponseMessage<PageResponse<SongVO>> getSongsByStyleWithPage(String style, int pageNum, int pageSize);
 }

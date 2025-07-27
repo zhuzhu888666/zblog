@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>歌曲功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background: #f9f9f9; }
+        h2 { color: #333; }
+        form, .section { background: #fff; padding: 20px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 8px #eee; }
+        label { display: block; margin-top: 10px; }
+        input, select, button, textarea { margin-top: 5px; margin-bottom: 10px; padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
+        .result { margin-top: 10px; }
+        audio { display: block; margin-top: 5px; }
+        .song-list { margin-top: 10px; }
+        .song-item { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>歌曲功能测试页面</h1>
+
+    <!-- 上传歌曲 -->
+    <form id="uploadForm">
+        <h2>上传歌曲</h2>
+        <label>歌名: <input type="text" name="songName" required></label>
+        <label>歌手: <input type="text" name="singerName" required></label>
+        <label>专辑: <input type="text" name="album" placeholder="可选"></label>
+        <label>发行时间: <input type="date" name="releaseTime" placeholder="可选"></label>
+        <label>音频文件: <input type="file" name="audioFile" accept="audio/*" required></label>
+        <button type="submit">上传</button>
+        <div class="result" id="uploadResult"></div>
+    </form>
+
+    <!-- 更新歌曲 -->
+    <form id="updateForm">
+        <h2>更新歌曲信息</h2>
+        <label>歌曲ID: <input type="number" name="id" required></label>
+        <label>新歌名: <input type="text" name="name"></label>
+        <label>新歌手ID: <input type="number" name="singerId"></label>
+        <button type="submit">更新</button>
+        <div class="result" id="updateResult"></div>
+    </form>
+
+    <!-- 模糊查询 -->
+    <form id="searchForm">
+        <h2>按名称模糊查询歌曲</h2>
+        <label>歌名关键字: <input type="text" name="songName" required></label>
+        <button type="submit">查询</button>
+        <div class="result" id="searchResult"></div>
+        <div class="song-list" id="searchSongList"></div>
+    </form>
+
+    <!-- 随机获取20首歌曲 -->
+    <div class="section">
+        <h2>随机获取20首歌曲</h2>
+        <button id="randomBtn">获取</button>
+        <div class="result" id="randomResult"></div>
+        <div class="song-list" id="randomSongList"></div>
+    </div>
+
+    <script>
+    // 上传歌曲
+    document.getElementById('uploadForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const songName = form.songName.value;
+        const singerName = form.singerName.value;
+        const album = form.album.value || "未知专辑";
+        const releaseTime = form.releaseTime.value || null;
+        const audioFile = form.audioFile.files[0];
+        if (!audioFile) return;
+        const data = {
+            song: { name: songName, album: album, releaseTime: releaseTime },
+            singer: { singerName: singerName }
+        };
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(data));
+        formData.append('audioFile', audioFile);
+        const res = await fetch('/song/addSong', {
+            method: 'POST',
+            body: formData
+        });
+        if (!res.ok) {
+            document.getElementById('uploadResult').innerText = '上传失败，文件过大或服务器拒绝。';
+            return;
+        }
+        const result = await res.json();
+        document.getElementById('uploadResult').innerText = result.message || JSON.stringify(result);
+    };
+
+    // 更新歌曲
+    document.getElementById('updateForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const body = {
+            id: form.id.value,
+            name: form.name.value,
+            singerId: form.singerId.value
+        };
+        const res = await fetch('/song/updateSong', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const result = await res.json();
+        document.getElementById('updateResult').innerText = result.message || JSON.stringify(result);
+    };
+
+    // 模糊查询
+    document.getElementById('searchForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const songName = form.songName.value;
+        const res = await fetch(`/song/selectSongsByName?songName=${encodeURIComponent(songName)}`);
+        const result = await res.json();
+        document.getElementById('searchResult').innerText = result.message || '';
+        const list = result.data || [];
+        const songListDiv = document.getElementById('searchSongList');
+        songListDiv.innerHTML = '';
+        for (const song of list) {
+            const div = document.createElement('div');
+            div.className = 'song-item';
+            div.innerHTML = `<b>${song.name}</b> (ID: ${song.id}) 歌手ID: ${song.singerId}<br>`;
+            // 动态获取播放路径
+            if (song.id) {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                // 异步获取播放url
+                fetch(`/song/getSongURL?id=${song.id}`)
+                  .then(r => r.json())
+                  .then(data => {
+                      if (data.code === 1 && data.data) {
+                          audio.src = data.data;
+                      } else {
+                          audio.title = '获取播放地址失败';
+                      }
+                  });
+                div.appendChild(audio);
+            }
+            songListDiv.appendChild(div);
+        }
+    };
+
+    // 随机获取20首歌曲
+    document.getElementById('randomBtn').onclick = async function() {
+        const res = await fetch('/song/getRandomSongs?limit=20');
+        const result = await res.json();
+        document.getElementById('randomResult').innerText = result.message || '';
+        const list = result.data || [];
+        const songListDiv = document.getElementById('randomSongList');
+        songListDiv.innerHTML = '';
+        for (const song of list) {
+            const div = document.createElement('div');
+            div.className = 'song-item';
+            div.innerHTML = `<b>${song.name}</b> (ID: ${song.id}) 歌手ID: ${song.singerId}<br>`;
+            // 动态获取播放路径
+            if (song.id) {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                fetch(`/song/getSongURL?id=${song.id}`)
+                  .then(r => r.json())
+                  .then(data => {
+                      if (data.code === 1 && data.data) {
+                          audio.src = data.data;
+                      } else {
+                          audio.title = '获取播放地址失败';
+                      }
+                  });
+                div.appendChild(audio);
+            }
+            songListDiv.appendChild(div);
+        }
+    };
+    </script>
+</body>
+</html> 

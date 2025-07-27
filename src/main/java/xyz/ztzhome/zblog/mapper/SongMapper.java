@@ -27,4 +27,30 @@ public interface SongMapper {
     int deleteSong(long id);
 
     int updateSong(Song song);
+
+    // 新增方法：根据歌名模糊查询，分页
+    List<SongVO> selectSongVOsByNameLikeWithPage(@Param("songName") String songName, 
+                                                  @Param("offset") int offset, 
+                                                  @Param("limit") int limit);
+
+    // 新增方法：查询全部歌曲，分页
+    List<SongVO> selectAllSongVOsWithPage(@Param("offset") int offset, 
+                                          @Param("limit") int limit);
+
+    // 新增方法：获取歌曲总数
+    int countAllSongs();
+
+    // 新增方法：根据歌名模糊查询总数
+    int countSongsByNameLike(@Param("songName") String songName);
+
+    // 新增方法：根据风格查询总数
+    int countSongsByStyle(@Param("style") String style);
+
+    // 新增方法：随机查询20条歌曲
+    List<Song> selectRandomSongs(@Param("limit") int limit);
+
+    // 新增方法：根据风格分页查询
+    List<SongVO> selectSongVOsByStyleWithPage(@Param("style") String style, 
+                                              @Param("offset") int offset, 
+                                              @Param("limit") int limit);
 }

@@ -32,7 +32,7 @@ public class Song {
      */
     private String duration;
 
-    //风格
+    //歌曲风格
     private String style;
 
     /**

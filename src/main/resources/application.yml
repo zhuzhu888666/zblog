@@ -17,6 +17,11 @@ spring:
       port: 6379
       password: ztz15277504089
 
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
 
 #mybati配置
 mybatis:

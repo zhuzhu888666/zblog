@@ -85,18 +85,101 @@
     <!-- 根据歌曲名称模糊查询(带歌手信息) -->
     <select id="selectSongVOsByNameLike" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
         SELECT
-            s.id as song_id,
-            s.singer_id,
-            si.singer_name,
-            s.name as song_name,
+            s.id as id,
+            s.singer_id as singerId,
+            si.singer_name as singerName,
+            s.name as name,
             s.album,
             s.duration,
             s.style,
-            s.cover_url,
-            s.audio_url,
-            s.release_time
+            s.cover_url as coverUrl,
+            s.audio_url as audioUrl,
+            s.release_time as releaseTime
         FROM tb_song s
                  LEFT JOIN tb_singer si ON s.singer_id = si.id
         WHERE s.name LIKE CONCAT('%', #{name}, '%')
+    </select>
+
+    <!-- 新增：根据歌名模糊查询，分页 -->
+    <select id="selectSongVOsByNameLikeWithPage" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
+        SELECT
+            s.id as id,
+            s.singer_id as singerId,
+            si.singer_name as singerName,
+            s.name as name,
+            s.album,
+            s.duration,
+            s.style,
+            s.cover_url as coverUrl,
+            s.audio_url as audioUrl,
+            s.release_time as releaseTime
+        FROM tb_song s
+                 LEFT JOIN tb_singer si ON s.singer_id = si.id
+        WHERE s.name LIKE CONCAT('%', #{songName}, '%')
+        ORDER BY s.id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 新增：查询全部歌曲，分页 -->
+    <select id="selectAllSongVOsWithPage" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
+        SELECT
+            s.id as id,
+            s.singer_id as singerId,
+            si.singer_name as singerName,
+            s.name as name,
+            s.album,
+            s.duration,
+            s.style,
+            s.cover_url as coverUrl,
+            s.audio_url as audioUrl,
+            s.release_time as releaseTime
+        FROM tb_song s
+                 LEFT JOIN tb_singer si ON s.singer_id = si.id
+        ORDER BY s.id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 新增：获取歌曲总数 -->
+    <select id="countAllSongs" resultType="int">
+        SELECT COUNT(*) FROM tb_song
+    </select>
+
+    <!-- 新增：根据歌名模糊查询总数 -->
+    <select id="countSongsByNameLike" resultType="int">
+        SELECT COUNT(*) FROM tb_song
+        WHERE name LIKE CONCAT('%', #{songName}, '%')
+    </select>
+
+    <!-- 新增：根据风格查询总数 -->
+    <select id="countSongsByStyle" resultType="int">
+        SELECT COUNT(*) FROM tb_song
+        WHERE style = #{style}
+    </select>
+
+    <!-- 新增：随机查询歌曲 -->
+    <select id="selectRandomSongs" resultMap="songResultMap">
+        SELECT * FROM tb_song
+        ORDER BY RAND()
+        LIMIT #{limit}
+    </select>
+
+    <!-- 新增：根据风格分页查询 -->
+    <select id="selectSongVOsByStyleWithPage" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
+        SELECT
+            s.id as id,
+            s.singer_id as singerId,
+            si.singer_name as singerName,
+            s.name as name,
+            s.album,
+            s.duration,
+            s.style,
+            s.cover_url as coverUrl,
+            s.audio_url as audioUrl,
+            s.release_time as releaseTime
+        FROM tb_song s
+                 LEFT JOIN tb_singer si ON s.singer_id = si.id
+        WHERE s.style = #{style}
+        ORDER BY s.id DESC
+        LIMIT #{offset}, #{limit}
     </select>
 </mapper>

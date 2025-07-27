@@ -8,6 +8,7 @@ import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateSongDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.impl.SongServiceImpl;
 
@@ -63,7 +64,62 @@ public class SongController {
     }
 
     //获取歌曲临时路径
-    ResponseMessage getSongURL(@RequestParam("id") long id){
+    @GetMapping("/getSongURL")
+    public ResponseMessage getSongURL(@RequestParam("id") long id){
         return songService.getSongURL(id);
+    }
+
+    /**
+     * 根据歌名模糊查询，分页
+     * @param songName 歌曲名称
+     * @param pageNum 页码，默认1
+     * @param pageSize 每页大小，默认10
+     * @return 分页结果
+     */
+    @GetMapping("/searchByNameWithPage")
+    public ResponseMessage<PageResponse<SongVO>> searchByNameWithPage(
+            @RequestParam("songName") String songName,
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        return songService.getSongsByNameWithPage(songName, pageNum, pageSize);
+    }
+
+    /**
+     * 查询全部歌曲，分页
+     * @param pageNum 页码，默认1
+     * @param pageSize 每页大小，默认10
+     * @return 分页结果
+     */
+    @GetMapping("/getAllSongsWithPage")
+    public ResponseMessage<PageResponse<SongVO>> getAllSongsWithPage(
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        return songService.getAllSongsWithPage(pageNum, pageSize);
+    }
+
+    /**
+     * 随机查询歌曲
+     * @param limit 查询数量，默认20
+     * @return 歌曲列表
+     */
+    @GetMapping("/getRandomSongs")
+    public ResponseMessage<List<Song>> getRandomSongs(
+            @RequestParam(value = "limit", defaultValue = "20") int limit) {
+        return songService.getRandomSongs(limit);
+    }
+
+    /**
+     * 根据风格分页查询
+     * @param style 歌曲风格
+     * @param pageNum 页码，默认1
+     * @param pageSize 每页大小，默认10
+     * @return 分页结果
+     */
+    @GetMapping("/searchByStyleWithPage")
+    public ResponseMessage<PageResponse<SongVO>> searchByStyleWithPage(
+            @RequestParam("style") String style,
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        return songService.getSongsByStyleWithPage(style, pageNum, pageSize);
     }
 }
