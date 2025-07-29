@@ -8,14 +8,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import xyz.ztzhome.zblog.constant.PathCosntant;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
-import xyz.ztzhome.zblog.entity.Bean.Singer;
+import xyz.ztzhome.zblog.entity.Bean.Artist;
 import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateSongDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
-import xyz.ztzhome.zblog.mapper.SingerMapper;
+import xyz.ztzhome.zblog.mapper.ArtistMapper;
 import xyz.ztzhome.zblog.mapper.SongMapper;
 import xyz.ztzhome.zblog.service.ISongService;
 import xyz.ztzhome.zblog.util.FileTypeUtil;
@@ -23,6 +23,7 @@ import xyz.ztzhome.zblog.util.FileTypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,7 +32,7 @@ public class SongServiceImpl implements ISongService {
     @Autowired
     private SongMapper songMapper;
     @Autowired
-    private SingerMapper singerMapper;
+    private ArtistMapper artistMapper;
     @Autowired
     MinioServiceImpl minioService;
 
@@ -48,13 +49,13 @@ public class SongServiceImpl implements ISongService {
         SongVO songVO=new SongVO();
         //转化为返回对象
         BeanUtils.copyProperties(song,songVO);
-        //根据id查询歌手信息
-        Singer singer=singerMapper.selectBySingerId(song.getSingerId());
-        if(singer!=null&&singer.getSingerName()!=null){
-            //添加歌手信息
-            songVO.setSingerName(singer.getSingerName());
+        //根据id查询艺术家信息
+        Artist artist=artistMapper.selectByArtistId(song.getArtistId());
+        if(artist!=null&&artist.getArtistName()!=null){
+            //添加艺术家信息
+            songVO.setArtistName(artist.getArtistName());
         }else {
-            songVO.setSingerName("未找到对应歌手信息");
+            songVO.setArtistName("未找到对应艺术家信息");
         }
         //添加返回数据
         return new ResponseMessage<>(ResponseConstant.success,"获取成功",songVO);
@@ -74,29 +75,29 @@ public class SongServiceImpl implements ISongService {
         if (!FileTypeUtil.getFileType(fileName).equals("music")) {
             return new ResponseMessage<>(ResponseConstant.error, "暂不支持该文件类型");
         }
-        // 2. 检查歌手是否存在（通过名称）
-        Singer singer = singerMapper.selectBySingerName(addSongDTO.getSinger().getSingerName());
+        // 2. 检查艺术家是否存在（通过名称）
+        Artist artist = artistMapper.selectByArtistName(addSongDTO.getArtist().getArtistName());
         // 3. 若不存在，则尝试插入
-        if (singer == null) {
-            singer = addSongDTO.getSinger();
+        if (artist == null) {
+            artist = addSongDTO.getArtist();
             try {
-                singerMapper.insertSinger(singer);
+                artistMapper.insertArtist(artist);
             } catch (DuplicateKeyException e) {
                 // 并发情况下可能被其他请求先插入，重新查询
-                singer = singerMapper.selectBySingerName(addSongDTO.getSinger().getSingerName());
-                if (singer == null) {
-                    return new ResponseMessage<>(ResponseConstant.error, "添加歌手失败");
+                artist = artistMapper.selectByArtistName(addSongDTO.getArtist().getArtistName());
+                if (artist == null) {
+                    return new ResponseMessage<>(ResponseConstant.error, "添加艺术家失败");
                 }
             }
         }
         //检查歌曲是否已经存在
-        Song song = songMapper.selectBySingerIdAndName(singer.getId(), addSongDTO.getSong().getName());
+        Song song = songMapper.selectByArtistIdAndName(artist.getId(), addSongDTO.getSong().getName());
         if (song != null) {
             return new ResponseMessage<>(ResponseConstant.error, "该歌曲已经存在");
         }
         // 4. 先插入数据库（不带audioPath/coverPath），获取自增ID
         song = addSongDTO.getSong();
-        song.setSingerId(singer.getId());
+        song.setArtistId(artist.getId());
         song.setAudioPath(null); // 先不设置音频路径
         song.setCoverPath(null); // 先不设置封面路径
         songMapper.insertSong(song); // 此时song的id已被赋值
@@ -187,23 +188,23 @@ public class SongServiceImpl implements ISongService {
         }
         //复制更改元素
         BeanUtils.copyProperties(updateSongDTO,song);
-        //如果传入的歌手不为空，更新歌手
-        //优先使用歌手id更新歌手
-        if (updateSongDTO.getSingerId()!=0){
-            Singer singer=singerMapper.selectBySingerId(updateSongDTO.getSingerId());
-            if (singer == null) {
-                return new ResponseMessage<>(ResponseConstant.error,"新歌手不存在");
+        //如果传入的艺术家不为空，更新艺术家
+        //优先使用艺术家id更新艺术家
+        if (updateSongDTO.getArtistId()!=0){
+            Artist artist=artistMapper.selectByArtistId(updateSongDTO.getArtistId());
+            if (artist == null) {
+                return new ResponseMessage<>(ResponseConstant.error,"新艺术家不存在");
             }
-            //更新歌手id
-            song.setSingerId(singer.getId());
-        }else if(updateSongDTO.getSingerName()!=null&& !updateSongDTO.getSingerName().isEmpty()){
+            //更新艺术家id
+            song.setArtistId(artist.getId());
+        }else if(updateSongDTO.getArtistName()!=null&& !updateSongDTO.getArtistName().isEmpty()){
 
-            Singer singer=singerMapper.selectBySingerName(updateSongDTO.getSingerName());
-            if (singer == null) {
-                return new ResponseMessage<>(ResponseConstant.error,"新歌手不存在");
+            Artist artist=artistMapper.selectByArtistName(updateSongDTO.getArtistName());
+            if (artist == null) {
+                return new ResponseMessage<>(ResponseConstant.error,"新艺术家不存在");
             }
-            //更新歌手id
-            song.setSingerId(singer.getId());
+            //更新艺术家id
+            song.setArtistId(artist.getId());
         }
         // 处理封面文件
         if (coverFile != null && !coverFile.isEmpty()) {
@@ -316,18 +317,18 @@ public class SongServiceImpl implements ISongService {
      * @return 歌曲列表
      */
     @Override
-    public ResponseMessage<List<Song>> getRandomSongs(int limit) {
+    public ResponseMessage<List<SongVO>> getRandomSongs(int limit) {
         // 参数校验
         if (limit < 1) limit = 20;
         if (limit > 100) limit = 100; // 限制最大查询数量
-        
-        List<Song> songs = songMapper.selectRandomSongs(limit);
-        
-        if (songs.isEmpty()) {
+
+        List<SongVO> songVOs = songMapper.selectRandomSongsWithArtist(limit);
+
+        if (songVOs.isEmpty()) {
             return new ResponseMessage<>(ResponseConstant.error, "暂无歌曲数据");
         }
-        
-        return new ResponseMessage<>(ResponseConstant.success, "查询成功", songs);
+
+        return new ResponseMessage<>(ResponseConstant.success, "查询成功", songVOs);
     }
 
     /**

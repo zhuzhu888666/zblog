@@ -13,14 +13,14 @@ public class UpdateSongDTO {
     private long id;
 
     /**
-     * 歌手名称
+     * 艺术家名称
      * */
-    private String singerName;
+    private String artistName;
 
     /**
-     * 歌手id
+     * 艺术家id
      */
-    private long singerId;
+    private long artistId;
 
 
     /**
@@ -56,4 +56,9 @@ public class UpdateSongDTO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date releaseTime;
+
+    /**
+     * 播放次数
+     */
+    private int playCount;
 }

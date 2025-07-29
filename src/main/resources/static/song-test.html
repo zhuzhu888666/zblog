@@ -22,7 +22,7 @@
     <form id="uploadForm">
         <h2>上传歌曲</h2>
         <label>歌名: <input type="text" name="songName" required></label>
-        <label>歌手: <input type="text" name="singerName" required></label>
+        <label>艺术家: <input type="text" name="artistName" required></label>
         <label>专辑: <input type="text" name="album" placeholder="可选"></label>
         <label>发行时间: <input type="date" name="releaseTime" placeholder="可选"></label>
         <label>音频文件: <input type="file" name="audioFile" accept="audio/*" required></label>
@@ -36,8 +36,8 @@
         <h2>更新歌曲信息</h2>
         <label>歌曲ID: <input type="number" name="id" required></label>
         <label>新歌名: <input type="text" name="name"></label>
-        <label>新歌手ID: <input type="number" name="singerId"></label>
-        <label>新歌手名称: <input type="text" name="singerName"></label>
+        <label>新艺术家ID: <input type="number" name="artistId"></label>
+        <label>新艺术家名称: <input type="text" name="artistName"></label>
         <label>新专辑: <input type="text" name="album"></label>
         <label>新发行时间: <input type="date" name="releaseTime"></label>
         <label>新封面图片: <input type="file" name="coverFile" accept="image/*"></label>
@@ -68,7 +68,7 @@
         e.preventDefault();
         const form = e.target;
         const songName = form.songName.value;
-        const singerName = form.singerName.value;
+        const artistName = form.artistName.value;
         const album = form.album.value || "未知专辑";
         const releaseTime = form.releaseTime.value || null;
         const audioFile = form.audioFile.files[0];
@@ -76,7 +76,7 @@
         if (!audioFile) return;
         const data = {
             song: { name: songName, album: album, releaseTime: releaseTime },
-            singer: { singerName: singerName }
+            artist: { artistName: artistName }
         };
         const formData = new FormData();
         formData.append('data', JSON.stringify(data));
@@ -101,8 +101,8 @@
         const body = {
             id: form.id.value,
             name: form.name.value,
-            singerId: form.singerId.value,
-            singerName: form.singerName.value,
+                    artistId: form.artistId.value,
+        artistName: form.artistName.value,
             album: form.album.value,
             releaseTime: form.releaseTime.value
         };
@@ -133,7 +133,7 @@
         for (const song of list) {
             const div = document.createElement('div');
             div.className = 'song-item';
-            div.innerHTML = `<b>${song.name}</b> (ID: ${song.id}) 歌手ID: ${song.singerId}<br>`;
+            div.innerHTML = `<b>${song.name}</b> (ID: ${song.id}) 艺术家ID: ${song.artistId}<br>`;
             // 动态获取封面
             if (song.id) {
                 fetch(`/song/getCoverURL?id=${song.id}`)
@@ -178,7 +178,7 @@
         for (const song of list) {
             const div = document.createElement('div');
             div.className = 'song-item';
-            div.innerHTML = `<b>${song.name}</b> (ID: ${song.id}) 歌手ID: ${song.singerId}<br>`;
+            div.innerHTML = `<b>${song.name}</b> (ID: ${song.id}) 艺术家ID: ${song.artistId}<br>`;
             // 动态获取封面
             if (song.id) {
                 fetch(`/song/getCoverURL?id=${song.id}`)

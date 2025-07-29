@@ -41,7 +41,6 @@ public class SongController {
     }
 
     @GetMapping("/selectSongsByName")
-    @PostMapping
     //根据名称模糊查找
     ResponseMessage<List<SongVO>> getSongsByName(@RequestParam("songName") String songName){
         return songService.getSongsByName(songName);
@@ -118,7 +117,7 @@ public class SongController {
      * @return 歌曲列表
      */
     @GetMapping("/getRandomSongs")
-    public ResponseMessage<List<Song>> getRandomSongs(
+    public ResponseMessage<List<SongVO>> getRandomSongs(
             @RequestParam(value = "limit", defaultValue = "20") int limit) {
         return songService.getRandomSongs(limit);
     }

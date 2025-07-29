@@ -14,9 +14,9 @@ public class Song {
     private long id;
 
     /**
-     * 歌手
+     * 艺术家
      */
-    private long singerId;
+    private long artistId;
     /**
      * 歌名
      */
@@ -50,5 +50,10 @@ public class Song {
      */
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date releaseTime;
+
+    /**
+     * 播放次数
+     */
+    private int playCount;
 
 }

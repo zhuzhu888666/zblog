@@ -13,7 +13,7 @@ public class PathCosntant {
 
     //歌手
     //头像
-    public static final String SINGER_COVER_PATH="singer/cover/";
+    public static final String ARTIST_COVER_PATH="artist/cover/";
 
     //轮播图片存放路径
     public static final String CAROUSEL_IMAGE="image/carousel/";

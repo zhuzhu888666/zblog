@@ -16,8 +16,8 @@ public interface SongMapper {
     //根据id查找歌曲
     Song selectSongById(long songId);
 
-    //根据歌手id和歌曲名称查询歌曲
-    Song selectBySingerIdAndName(@Param("singerId") long singerId,
+    //根据艺术家id和歌曲名称查询歌曲
+    Song selectByArtistIdAndName(@Param("artistId") long artistId,
                                  @Param("songName") String songName);
 
     //根据歌曲名称模糊查询
@@ -48,6 +48,9 @@ public interface SongMapper {
 
     // 新增方法：随机查询20条歌曲
     List<Song> selectRandomSongs(@Param("limit") int limit);
+
+    //直接返回VO对象
+    List<SongVO> selectRandomSongsWithArtist(@Param("limit")int limit);
 
     // 新增方法：根据风格分页查询
     List<SongVO> selectSongVOsByStyleWithPage(@Param("style") String style, 

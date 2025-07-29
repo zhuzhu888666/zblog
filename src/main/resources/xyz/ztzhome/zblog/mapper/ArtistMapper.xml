@@ -3,12 +3,12 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="xyz.ztzhome.zblog.mapper.SingerMapper">
+<mapper namespace="xyz.ztzhome.zblog.mapper.ArtistMapper">
 
-    <insert id="insertSinger" parameterType="xyz.ztzhome.zblog.entity.Bean.Singer" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO tb_singer
+    <insert id="insertArtist" parameterType="xyz.ztzhome.zblog.entity.Bean.Artist" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_artist
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="singerName != null">singer_name,</if>
+            <if test="artistName != null">artist_name,</if>
             <if test="gender != null">gender,</if>
             <if test="avatar != null">avatar,</if>
             <if test="birth != null">birth,</if>
@@ -16,7 +16,7 @@
             <if test="introduction != null">introduction,</if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
-            <if test="singerName != null">#{singerName},</if>
+            <if test="artistName != null">#{artistName},</if>
             <if test="gender != null">#{gender},</if>
             <if test="avatar != null">#{avatar},</if>
             <if test="birth != null">#{birth},</if>
@@ -24,13 +24,14 @@
             <if test="introduction != null">#{introduction},</if>
         </trim>
     </insert>
-    <select id="getSinger" resultType="xyz.ztzhome.zblog.entity.Bean.Singer">
-        select * from tb_singer where id=#{id}
+
+    <select id="getArtistById" resultType="xyz.ztzhome.zblog.entity.Bean.Artist">
+        select * from tb_artist where id=#{id}
     </select>
-    <select id="selectBySingerName" resultType="xyz.ztzhome.zblog.entity.Bean.Singer">
-        select * from tb_singer where singer_name=#{singerName}
+    <select id="selectByArtistName" resultType="xyz.ztzhome.zblog.entity.Bean.Artist">
+        select * from tb_artist where artist_name=#{artistName}
     </select>
-    <select id="selectBySingerId" resultType="xyz.ztzhome.zblog.entity.Bean.Singer">
-        SELECT * from tb_singer where id=#{singerId}
+    <select id="selectByArtistId" resultType="xyz.ztzhome.zblog.entity.Bean.Artist">
+        SELECT * from tb_artist where id=#{artistId}
     </select>
-</mapper>
+</mapper> 

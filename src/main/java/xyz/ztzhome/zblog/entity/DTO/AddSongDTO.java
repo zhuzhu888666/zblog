@@ -2,7 +2,7 @@ package xyz.ztzhome.zblog.entity.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import xyz.ztzhome.zblog.entity.Bean.Singer;
+import xyz.ztzhome.zblog.entity.Bean.Artist;
 import xyz.ztzhome.zblog.entity.Bean.Song;
 
 @Data
@@ -11,5 +11,5 @@ import xyz.ztzhome.zblog.entity.Bean.Song;
 public class AddSongDTO {
 
     private Song song;
-    private Singer singer;
+    private Artist artist;
 }

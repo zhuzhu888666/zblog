@@ -12,17 +12,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.ztzhome.zblog.constant.PathCosntant;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
+import xyz.ztzhome.zblog.entity.Bean.Artist;
 import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.Bean.User;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
+import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.mapper.SongMapper;
 import xyz.ztzhome.zblog.service.IUserService;
+import xyz.ztzhome.zblog.service.impl.ArtistServiceImpl;
 import xyz.ztzhome.zblog.service.impl.MinioServiceImpl;
 import xyz.ztzhome.zblog.util.BCryptPassword;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,7 +42,7 @@ class ZblogApplicationTests {
         song.setName("test09");
         song.setAlbum("test");
         song.setDuration("123");
-        song.setSingerId(11);
+        song.setArtistId(11);
         song.setReleaseTime(new Date());
         songMapper.insertSong(song);
         System.out.println(song.toString());
@@ -156,5 +160,15 @@ class ZblogApplicationTests {
 
         ResponseMessage response = userService.updateUserSecurity(securityDTO);
         assertEquals(ResponseConstant.success, response.getCode());
+    }
+
+    @Autowired
+    ArtistServiceImpl artistService;
+    @Test
+    void testGetArtist(){
+        List<SongVO> songVOS=songMapper.selectRandomSongsWithArtist(10);
+       for(SongVO songVO:songVOS){
+           System.out.println(songVO.toString());
+       }
     }
 }

@@ -75,6 +75,4 @@
         SELECT * from tb_user where account=#{account}
     </delete>
 
-
-
 </mapper>

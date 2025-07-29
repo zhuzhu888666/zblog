@@ -34,15 +34,16 @@ GET /song/searchByNameWithPage?songName=爱情&pageNum=1&pageSize=10
         "data": [
             {
                 "id": 1,
-                "singerId": 1,
-                "singerName": "张学友",
+                "artistId": 1,
+                "artistName": "张学友",
                 "name": "爱情故事",
                 "album": "吻别",
                 "duration": "04:30",
                 "style": "流行",
                 "coverUrl": "cover1.jpg",
                 "audioUrl": "audio1.mp3",
-                "releaseTime": "1993-01-01"
+                "releaseTime": "1993-01-01",
+                "playCount": 1000
             }
         ],
         "total": 1,
@@ -75,15 +76,16 @@ GET /song/getAllSongsWithPage?pageNum=1&pageSize=10
         "data": [
             {
                 "id": 1,
-                "singerId": 1,
-                "singerName": "张学友",
+                "artistId": 1,
+                "artistName": "张学友",
                 "name": "吻别",
                 "album": "吻别",
                 "duration": "04:30",
                 "style": "流行",
                 "coverUrl": "cover1.jpg",
                 "audioUrl": "audio1.mp3",
-                "releaseTime": "1993-01-01"
+                "releaseTime": "1993-01-01",
+                "playCount": 1000
             }
         ],
         "total": 50,
@@ -112,17 +114,18 @@ GET /song/getRandomSongs?limit=20
     "code": 1,
     "message": "查询成功",
     "data": [
-        {
-            "id": 1,
-            "singerId": 1,
-            "name": "吻别",
-            "album": "吻别",
-            "duration": "04:30",
-            "style": "流行",
-            "coverUrl": "cover1.jpg",
-            "audioUrl": "audio1.mp3",
-            "releaseTime": "1993-01-01"
-        }
+                    {
+                "id": 1,
+                "artistId": 1,
+                "name": "吻别",
+                "album": "吻别",
+                "duration": "04:30",
+                "style": "流行",
+                "coverUrl": "cover1.jpg",
+                "audioUrl": "audio1.mp3",
+                "releaseTime": "1993-01-01",
+                "playCount": 1000
+            }
     ]
 }
 ```
@@ -150,15 +153,16 @@ GET /song/searchByStyleWithPage?style=流行&pageNum=1&pageSize=10
         "data": [
             {
                 "id": 1,
-                "singerId": 1,
-                "singerName": "张学友",
+                "artistId": 1,
+                "artistName": "张学友",
                 "name": "吻别",
                 "album": "吻别",
                 "duration": "04:30",
                 "style": "流行",
                 "coverUrl": "cover1.jpg",
                 "audioUrl": "audio1.mp3",
-                "releaseTime": "1993-01-01"
+                "releaseTime": "1993-01-01",
+                "playCount": 1000
             }
         ],
         "total": 25,
@@ -199,7 +203,7 @@ GET /song/searchByStyleWithPage?style=流行&pageNum=1&pageSize=10
 
 确保数据库中的 `tb_song` 表包含以下字段：
 - `id`: 主键
-- `singer_id`: 歌手ID
+- `artist_id`: 艺术家ID
 - `name`: 歌曲名称
 - `album`: 专辑
 - `duration`: 时长
@@ -207,7 +211,8 @@ GET /song/searchByStyleWithPage?style=流行&pageNum=1&pageSize=10
 - `cover_url`: 封面URL
 - `audio_url`: 音频URL
 - `release_time`: 发行时间
+- `play_count`: 播放次数
 
-同时需要 `tb_singer` 表包含：
+同时需要 `tb_artist` 表包含：
 - `id`: 主键
-- `singer_name`: 歌手名称 
+- `artist_name`: 艺术家名称 

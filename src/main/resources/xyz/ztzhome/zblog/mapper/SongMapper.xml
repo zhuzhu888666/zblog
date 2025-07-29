@@ -7,7 +7,7 @@
 
     <resultMap id="songResultMap" type="xyz.ztzhome.zblog.entity.Bean.Song">
         <id property="id" column="id"/>
-        <result property="singerId" column="singer_id"/>
+        <result property="artistId" column="artist_id"/>
         <result property="name" column="name"/>
         <result property="album" column="album"/>
         <result property="duration" column="duration"/>
@@ -15,11 +15,12 @@
         <result property="coverPath" column="cover_path"/>
         <result property="audioPath" column="audio_path"/>
         <result property="releaseTime" column="release_time"/>
+        <result property="playCount" column="play_count"/>
     </resultMap>
     <insert id="insertSong" parameterType="xyz.ztzhome.zblog.entity.Bean.Song" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO tb_song
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="singerId != null">singer_id,</if>
+            <if test="artistId != null">artist_id,</if>
             <if test="name != null">name,</if>
             <if test="album != null">album,</if>
             <if test="duration != null">duration,</if>
@@ -27,9 +28,10 @@
             <if test="coverPath != null">cover_path,</if>
             <if test="audioPath != null">audio_path,</if>
             <if test="releaseTime != null">release_time,</if>
+            <if test="playCount != null">play_count,</if>
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
-            <if test="singerId != null">#{singerId},</if>
+            <if test="artistId != null">#{artistId},</if>
             <if test="name != null">#{name},</if>
             <if test="album != null">#{album},</if>
             <if test="duration != null">#{duration},</if>
@@ -37,13 +39,14 @@
             <if test="coverPath != null">#{coverPath},</if>
             <if test="audioPath != null">#{audioPath},</if>
             <if test="releaseTime != null">#{releaseTime},</if>
+            <if test="playCount != null">#{playCount},</if>
         </trim>
     </insert>
     <!-- 更新歌曲信息 (动态字段更新) -->
     <update id="updateSong" parameterType="xyz.ztzhome.zblog.entity.Bean.Song">
         UPDATE tb_song
         <set>
-            <if test="singerId != null">singer_id = #{singerId},</if>
+            <if test="artistId != null">artist_id = #{artistId},</if>
             <if test="name != null and name != ''">name = #{name},</if>
             <if test="album != null and album != ''">album = #{album},</if>
             <if test="duration != null and duration != ''">duration = #{duration},</if>
@@ -51,6 +54,7 @@
             <if test="coverPath != null and coverPath != ''">cover_path = #{coverPath},</if>
             <if test="audioPath != null and audioPath != ''">audio_path = #{audioPath},</if>
             <if test="releaseTime != null">release_time = #{releaseTime},</if>
+            <if test="playCount != null">play_count = #{playCount},</if>
         </set>
         WHERE id = #{id}
     </update>
@@ -68,11 +72,11 @@
         select * from tb_song where id=#{songId}
     </select>
 
-    <!-- 根据歌手ID和歌曲名称查询 -->
-    <select id="selectBySingerIdAndName" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
+    <!-- 根据艺术家ID和歌曲名称查询 -->
+    <select id="selectByArtistIdAndName" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
         SELECT *
         FROM tb_song
-        WHERE singer_id = #{singerId}
+        WHERE artist_id = #{artistId}
           AND name = #{songName}
     </select>
 
@@ -82,21 +86,22 @@
         WHERE name LIKE CONCAT('%', #{name}, '%')
     </select>
 
-    <!-- 根据歌曲名称模糊查询(带歌手信息) -->
+    <!-- 根据歌曲名称模糊查询(带艺术家信息) -->
     <select id="selectSongVOsByNameLike" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
         SELECT
             s.id as id,
-            s.singer_id as singerId,
-            si.singer_name as singerName,
+            s.artist_id as artistId,
+            a.artist_name as artistName,
             s.name as name,
             s.album,
             s.duration,
             s.style,
             s.cover_path as coverPath,
             s.audio_path as audioPath,
-            s.release_time as releaseTime
+            s.release_time as releaseTime,
+            s.play_count as playCount
         FROM tb_song s
-                 LEFT JOIN tb_singer si ON s.singer_id = si.id
+                 LEFT JOIN tb_artist a ON s.artist_id = a.id
         WHERE s.name LIKE CONCAT('%', #{name}, '%')
     </select>
 
@@ -104,17 +109,18 @@
     <select id="selectSongVOsByNameLikeWithPage" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
         SELECT
             s.id as id,
-            s.singer_id as singerId,
-            si.singer_name as singerName,
+            s.artist_id as artistId,
+            a.artist_name as artistName,
             s.name as name,
             s.album,
             s.duration,
             s.style,
             s.cover_path as coverPath,
             s.audio_path as audioPath,
-            s.release_time as releaseTime
+            s.release_time as releaseTime,
+            s.play_count as playCount
         FROM tb_song s
-                 LEFT JOIN tb_singer si ON s.singer_id = si.id
+                 LEFT JOIN tb_artist a ON s.artist_id = a.id
         WHERE s.name LIKE CONCAT('%', #{songName}, '%')
         ORDER BY s.id DESC
         LIMIT #{offset}, #{limit}
@@ -124,17 +130,18 @@
     <select id="selectAllSongVOsWithPage" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
         SELECT
             s.id as id,
-            s.singer_id as singerId,
-            si.singer_name as singerName,
+            s.artist_id as artistId,
+            a.artist_name as artistName,
             s.name as name,
             s.album,
             s.duration,
             s.style,
             s.cover_path as coverPath,
             s.audio_path as audioPath,
-            s.release_time as releaseTime
+            s.release_time as releaseTime,
+            s.play_count as playCount
         FROM tb_song s
-                 LEFT JOIN tb_singer si ON s.singer_id = si.id
+                 LEFT JOIN tb_artist a ON s.artist_id = a.id
         ORDER BY s.id DESC
         LIMIT #{offset}, #{limit}
     </select>
@@ -167,19 +174,42 @@
     <select id="selectSongVOsByStyleWithPage" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
         SELECT
             s.id as id,
-            s.singer_id as singerId,
-            si.singer_name as singerName,
+            s.artist_id as artistId,
+            a.artist_name as artistName,
             s.name as name,
             s.album,
             s.duration,
             s.style,
             s.cover_path as coverPath,
             s.audio_path as audioPath,
-            s.release_time as releaseTime
+            s.release_time as releaseTime,
+            s.play_count as playCount
         FROM tb_song s
-                 LEFT JOIN tb_singer si ON s.singer_id = si.id
+                 LEFT JOIN tb_artist a ON s.artist_id = a.id
         WHERE s.style = #{style}
         ORDER BY s.id DESC
         LIMIT #{offset}, #{limit}
+    </select>
+
+    <!--多表查询直接返回VO对象-->
+    <select id="selectRandomSongsWithArtist" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
+        SELECT
+            s.id AS song_id,
+            s.artist_id,
+            a.artist_name AS artist_name,
+            s.name AS name,
+            s.album,
+            s.duration,
+            s.style,
+            s.release_time,
+            s.play_count
+        FROM
+            tb_song s
+                INNER JOIN
+            tb_artist a ON s.artist_id = a.id
+        WHERE
+            s.id >= (SELECT FLOOR(RAND() * (SELECT MAX(id) FROM tb_song)))
+        ORDER BY s.id
+        LIMIT #{limit}
     </select>
 </mapper>

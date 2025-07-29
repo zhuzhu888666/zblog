@@ -5,10 +5,10 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class Singer {
+public class Artist {
     //id
     private long id;
-    private String SingerName;
+    private String artistName;
     private String gender;
     //头像URL
     private String avatar;
@@ -18,4 +18,4 @@ public class Singer {
     private String area;
     //简介
     private String introduction;
-}
+} 

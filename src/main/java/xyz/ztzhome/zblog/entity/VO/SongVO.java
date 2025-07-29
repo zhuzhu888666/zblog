@@ -10,8 +10,9 @@ public class SongVO {
 
     private long id;
 
-    private long singerId;
-    private String singerName;
+    private long artistId;
+
+    private String artistName;
 
     private String name;
 
@@ -21,11 +22,12 @@ public class SongVO {
 
     private String style;
 
-    private String coverPath;
-
-    private String audioPath;
-
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date releaseTime;
+
+    /**
+     * 播放次数
+     */
+    private int playCount;
 
 }

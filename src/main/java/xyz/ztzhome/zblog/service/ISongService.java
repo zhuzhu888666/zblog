@@ -36,7 +36,7 @@ public interface ISongService {
     ResponseMessage<PageResponse<SongVO>> getAllSongsWithPage(int pageNum, int pageSize);
 
     // 新增方法：随机查询20条歌曲
-    ResponseMessage<List<Song>> getRandomSongs(int limit);
+    ResponseMessage<List<SongVO>> getRandomSongs(int limit);
 
     // 新增方法：根据风格分页查询
     ResponseMessage<PageResponse<SongVO>> getSongsByStyleWithPage(String style, int pageNum, int pageSize);
