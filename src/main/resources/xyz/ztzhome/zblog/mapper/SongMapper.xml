@@ -194,7 +194,7 @@
     <!--多表查询直接返回VO对象-->
     <select id="selectRandomSongsWithArtist" resultType="xyz.ztzhome.zblog.entity.VO.SongVO">
         SELECT
-            s.id AS song_id,
+            s.id,
             s.artist_id,
             a.artist_name AS artist_name,
             s.name AS name,

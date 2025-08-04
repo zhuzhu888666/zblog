@@ -6,6 +6,7 @@ import io.minio.StatObjectArgs;
 import io.minio.StatObjectResponse;
 import io.minio.http.Method;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,10 +16,12 @@ import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.Artist;
 import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.Bean.User;
+import xyz.ztzhome.zblog.entity.DTO.AddArtistDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
+import xyz.ztzhome.zblog.mapper.ArtistMapper;
 import xyz.ztzhome.zblog.mapper.SongMapper;
 import xyz.ztzhome.zblog.service.IUserService;
 import xyz.ztzhome.zblog.service.impl.ArtistServiceImpl;
@@ -170,5 +173,20 @@ class ZblogApplicationTests {
        for(SongVO songVO:songVOS){
            System.out.println(songVO.toString());
        }
+    }
+    @Autowired
+    ArtistMapper artistMapper;
+    @Test
+    void testAdd(){
+        Artist artist = new Artist();
+        artist.setArtistName("test01");
+        artist.setGender("male");
+        artist.setIntroduction("test01");
+        artist.setArea("CN");
+        artist.setAvatar("test01");
+        AddArtistDTO addArtistDTO = new AddArtistDTO();
+        BeanUtils.copyProperties(artist,addArtistDTO);
+       ResponseMessage responseMessage= artistService.addArtist(addArtistDTO);
+        System.out.println(responseMessage.toString());
     }
 }
