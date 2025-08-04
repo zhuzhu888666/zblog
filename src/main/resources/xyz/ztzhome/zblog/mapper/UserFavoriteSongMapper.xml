@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.UserFavoriteSongMapper">
+
+    <!-- 定义 UserFavoriteSong resultMap -->
+    <resultMap id="UserFavoriteSongResultMap" type="xyz.ztzhome.zblog.entity.Bean.UserFavoriteSong">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="songId" column="song_id"/>
+        <result property="favoriteTime" column="favorite_time"/>
+    </resultMap>
+
+    <!-- 定义 SongVO resultMap -->
+    <resultMap id="SongVOResultMap" type="xyz.ztzhome.zblog.entity.VO.SongVO">
+        <result property="id" column="id"/>
+        <result property="artistId" column="artist_id"/>
+        <result property="artistName" column="artist_name"/>
+        <result property="name" column="name"/>
+        <result property="album" column="album"/>
+        <result property="duration" column="duration"/>
+        <result property="style" column="style"/>
+        <result property="releaseTime" column="release_time"/>
+        <result property="playCount" column="play_count"/>
+    </resultMap>
+
+    <!-- 添加收藏歌曲 -->
+    <insert id="insertUserFavoriteSong" parameterType="xyz.ztzhome.zblog.entity.Bean.UserFavoriteSong" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_user_favorite_song (user_id, song_id, favorite_time)
+        VALUES (#{userId}, #{songId}, #{favoriteTime})
+    </insert>
+
+    <!-- 取消收藏歌曲 -->
+    <delete id="deleteUserFavoriteSong">
+        DELETE FROM tb_user_favorite_song 
+        WHERE user_id = #{userId} AND song_id = #{songId}
+    </delete>
+
+    <!-- 检查用户是否已收藏该歌曲 -->
+    <select id="isUserFavoriteSong" resultType="boolean">
+        SELECT COUNT(1) > 0 
+        FROM tb_user_favorite_song 
+        WHERE user_id = #{userId} AND song_id = #{songId}
+    </select>
+
+    <!-- 根据用户ID查询收藏的歌曲列表 -->
+    <select id="selectFavoriteSongsByUserId" resultMap="SongVOResultMap">
+        SELECT 
+            s.id,
+            s.artist_id,
+            a.artist_name,
+            s.name,
+            s.album,
+            s.duration,
+            s.style,
+            s.release_time,
+            s.play_count
+        FROM tb_user_favorite_song ufs
+        JOIN tb_song s ON ufs.song_id = s.id
+        JOIN tb_artist a ON s.artist_id = a.id
+        WHERE ufs.user_id = #{userId}
+        ORDER BY ufs.favorite_time DESC
+    </select>
+
+    <!-- 根据用户ID分页查询收藏的歌曲列表 -->
+    <select id="selectFavoriteSongsByUserIdWithPage" resultMap="SongVOResultMap">
+        SELECT 
+            s.id,
+            s.artist_id,
+            a.artist_name,
+            s.name,
+            s.album,
+            s.duration,
+            s.style,
+            s.release_time,
+            s.play_count
+        FROM tb_user_favorite_song ufs
+        JOIN tb_song s ON ufs.song_id = s.id
+        JOIN tb_artist a ON s.artist_id = a.id
+        WHERE ufs.user_id = #{userId}
+        ORDER BY ufs.favorite_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 查询用户收藏歌曲总数 -->
+    <select id="countFavoriteSongsByUserId" resultType="int">
+        SELECT COUNT(1) 
+        FROM tb_user_favorite_song 
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 根据歌曲ID查询收藏该歌曲的用户数量 -->
+    <select id="countUsersBySongId" resultType="int">
+        SELECT COUNT(1) 
+        FROM tb_user_favorite_song 
+        WHERE song_id = #{songId}
+    </select>
+
+</mapper>

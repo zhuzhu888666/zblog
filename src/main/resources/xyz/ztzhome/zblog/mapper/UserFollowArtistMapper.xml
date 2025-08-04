@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.UserFollowArtistMapper">
+
+    <!-- 定义 UserFollowArtist resultMap -->
+    <resultMap id="UserFollowArtistResultMap" type="xyz.ztzhome.zblog.entity.Bean.UserFollowArtist">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="artistId" column="artist_id"/>
+        <result property="followTime" column="follow_time"/>
+    </resultMap>
+
+    <!-- 定义 Artist resultMap -->
+    <resultMap id="ArtistResultMap" type="xyz.ztzhome.zblog.entity.Bean.Artist">
+        <result property="id" column="id"/>
+        <result property="artistName" column="artist_name"/>
+        <result property="gender" column="gender"/>
+        <result property="avatar" column="avatar"/>
+        <result property="birth" column="birth"/>
+        <result property="area" column="area"/>
+        <result property="introduction" column="introduction"/>
+    </resultMap>
+
+    <!-- 关注艺术家 -->
+    <insert id="insertUserFollowArtist" parameterType="xyz.ztzhome.zblog.entity.Bean.UserFollowArtist" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_user_follow_artist (user_id, artist_id, follow_time)
+        VALUES (#{userId}, #{artistId}, #{followTime})
+    </insert>
+
+    <!-- 取消关注艺术家 -->
+    <delete id="deleteUserFollowArtist">
+        DELETE FROM tb_user_follow_artist 
+        WHERE user_id = #{userId} AND artist_id = #{artistId}
+    </delete>
+
+    <!-- 检查用户是否已关注该艺术家 -->
+    <select id="isUserFollowArtist" resultType="boolean">
+        SELECT COUNT(1) > 0 
+        FROM tb_user_follow_artist 
+        WHERE user_id = #{userId} AND artist_id = #{artistId}
+    </select>
+
+    <!-- 根据用户ID查询关注的艺术家列表 -->
+    <select id="selectFollowArtistsByUserId" resultMap="ArtistResultMap">
+        SELECT 
+            a.id,
+            a.artist_name,
+            a.gender,
+            a.avatar,
+            a.birth,
+            a.area,
+            a.introduction
+        FROM tb_user_follow_artist ufa
+        JOIN tb_artist a ON ufa.artist_id = a.id
+        WHERE ufa.user_id = #{userId}
+        ORDER BY ufa.follow_time DESC
+    </select>
+
+    <!-- 根据用户ID分页查询关注的艺术家列表 -->
+    <select id="selectFollowArtistsByUserIdWithPage" resultMap="ArtistResultMap">
+        SELECT 
+            a.id,
+            a.artist_name,
+            a.gender,
+            a.avatar,
+            a.birth,
+            a.area,
+            a.introduction
+        FROM tb_user_follow_artist ufa
+        JOIN tb_artist a ON ufa.artist_id = a.id
+        WHERE ufa.user_id = #{userId}
+        ORDER BY ufa.follow_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 查询用户关注艺术家总数 -->
+    <select id="countFollowArtistsByUserId" resultType="int">
+        SELECT COUNT(1) 
+        FROM tb_user_follow_artist 
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 根据艺术家ID查询关注该艺术家的用户数量（粉丝数） -->
+    <select id="countUsersByArtistId" resultType="int">
+        SELECT COUNT(1) 
+        FROM tb_user_follow_artist 
+        WHERE artist_id = #{artistId}
+    </select>
+
+</mapper>

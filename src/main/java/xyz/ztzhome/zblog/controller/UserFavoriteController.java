@@ -1,0 +1,129 @@
+package xyz.ztzhome.zblog.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import xyz.ztzhome.zblog.entity.Bean.Artist;
+import xyz.ztzhome.zblog.entity.DTO.FavoriteDTO;
+import xyz.ztzhome.zblog.entity.DTO.FollowDTO;
+import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.entity.response.PageResponse;
+import xyz.ztzhome.zblog.entity.response.ResponseMessage;
+import xyz.ztzhome.zblog.service.IUserFavoriteService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/user/favorite")
+public class UserFavoriteController {
+
+    @Autowired
+    private IUserFavoriteService userFavoriteService;
+
+    // ========== 收藏歌曲相关接口 ==========
+
+    /**
+     * 收藏歌曲
+     */
+    @PostMapping("/song")
+    public ResponseMessage favoriteSong(@RequestBody FavoriteDTO favoriteDTO) {
+        return userFavoriteService.favoriteSong(favoriteDTO.getUserId(), favoriteDTO.getSongId());
+    }
+
+    /**
+     * 取消收藏歌曲
+     */
+    @PostMapping("/song/unfavorite")
+    public ResponseMessage unfavoriteSong(@RequestBody FavoriteDTO favoriteDTO) {
+        return userFavoriteService.unfavoriteSong(favoriteDTO.getUserId(), favoriteDTO.getSongId());
+    }
+
+    /**
+     * 检查用户是否已收藏该歌曲
+     */
+    @GetMapping("/song/check")
+    public ResponseMessage<Boolean> isUserFavoriteSong(@RequestParam("userId") long userId, 
+                                                      @RequestParam("songId") long songId) {
+        return userFavoriteService.isUserFavoriteSong(userId, songId);
+    }
+
+    /**
+     * 获取用户收藏的歌曲列表
+     */
+    @GetMapping("/songs")
+    public ResponseMessage<List<SongVO>> getUserFavoriteSongs(@RequestParam("userId") long userId) {
+        return userFavoriteService.getUserFavoriteSongs(userId);
+    }
+
+    /**
+     * 分页获取用户收藏的歌曲列表
+     */
+    @GetMapping("/songs/page")
+    public ResponseMessage<PageResponse<SongVO>> getUserFavoriteSongsWithPage(
+            @RequestParam("userId") long userId,
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        return userFavoriteService.getUserFavoriteSongsWithPage(userId, pageNum, pageSize);
+    }
+
+    /**
+     * 获取歌曲被收藏的次数
+     */
+    @GetMapping("/song/count")
+    public ResponseMessage<Integer> getSongFavoriteCount(@RequestParam("songId") long songId) {
+        return userFavoriteService.getSongFavoriteCount(songId);
+    }
+
+    // ========== 关注艺术家相关接口 ==========
+
+    /**
+     * 关注艺术家
+     */
+    @PostMapping("/artist")
+    public ResponseMessage followArtist(@RequestBody FollowDTO followDTO) {
+        return userFavoriteService.followArtist(followDTO.getUserId(), followDTO.getArtistId());
+    }
+
+    /**
+     * 取消关注艺术家
+     */
+    @PostMapping("/artist/unfollow")
+    public ResponseMessage unfollowArtist(@RequestBody FollowDTO followDTO) {
+        return userFavoriteService.unfollowArtist(followDTO.getUserId(), followDTO.getArtistId());
+    }
+
+    /**
+     * 检查用户是否已关注该艺术家
+     */
+    @GetMapping("/artist/check")
+    public ResponseMessage<Boolean> isUserFollowArtist(@RequestParam("userId") long userId, 
+                                                      @RequestParam("artistId") long artistId) {
+        return userFavoriteService.isUserFollowArtist(userId, artistId);
+    }
+
+    /**
+     * 获取用户关注的艺术家列表
+     */
+    @GetMapping("/artists")
+    public ResponseMessage<List<Artist>> getUserFollowArtists(@RequestParam("userId") long userId) {
+        return userFavoriteService.getUserFollowArtists(userId);
+    }
+
+    /**
+     * 分页获取用户关注的艺术家列表
+     */
+    @GetMapping("/artists/page")
+    public ResponseMessage<PageResponse<Artist>> getUserFollowArtistsWithPage(
+            @RequestParam("userId") long userId,
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        return userFavoriteService.getUserFollowArtistsWithPage(userId, pageNum, pageSize);
+    }
+
+    /**
+     * 获取艺术家的粉丝数量
+     */
+    @GetMapping("/artist/followers")
+    public ResponseMessage<Integer> getArtistFollowerCount(@RequestParam("artistId") long artistId) {
+        return userFavoriteService.getArtistFollowerCount(artistId);
+    }
+}
