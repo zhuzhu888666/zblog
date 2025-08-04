@@ -79,36 +79,8 @@ class ZblogApplicationTests {
         minioService.deleteFile(PathCosntant.SONG_COVER_PATH+song.getCoverPath());
     }
 
-    @Test
-    void test2(){
-        String url= PathCosntant.SONG_SAVE_PATH+"下载.webp";
-        System.out.println(minioService.deleteFile(url));
-    }
-
-    @Test
-    void test3(){
-        String url= PathCosntant.SONG_SAVE_PATH+"下载.webp";
-        try {
-          minioService.fileIsExist(url);
-          System.out.println(minioService.fileIsExist(url));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
     @Autowired
     private IUserService userService;
-
-    @Test
-    void testRegister() {
-        User user = new User();
-        user.setAccount("testuser");
-        user.setPassword("password123");
-        user.setEmail("testuser@example.com");
-        ResponseMessage response = userService.register(user);
-        //assertEquals(ResponseConstant.success, response.getCode());
-        System.out.println(response.getMessage());
-    }
 
     @Test
     void testLogin() {
