@@ -18,6 +18,4 @@ public class PathCosntant {
     //轮播图片存放路径
     public static final String CAROUSEL_IMAGE="image/carousel/";
 
-    //评论文本存储路径
-
 }
