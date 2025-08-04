@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.CommentLikeMapper">
+
+    <!-- 定义 CommentLike resultMap -->
+    <resultMap id="CommentLikeResultMap" type="xyz.ztzhome.zblog.entity.Bean.CommentLike">
+        <result property="id" column="id"/>
+        <result property="commentId" column="comment_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="likeTime" column="like_time"/>
+    </resultMap>
+
+    <!-- 添加评论点赞 -->
+    <insert id="insertCommentLike" parameterType="xyz.ztzhome.zblog.entity.Bean.CommentLike" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_comment_like (comment_id, user_id, like_time)
+        VALUES (#{commentId}, #{userId}, #{likeTime})
+    </insert>
+
+    <!-- 取消评论点赞 -->
+    <delete id="deleteCommentLike">
+        DELETE FROM tb_comment_like 
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
+
+    <!-- 检查用户是否已点赞该评论 -->
+    <select id="isUserLikedComment" resultType="boolean">
+        SELECT COUNT(1) > 0 
+        FROM tb_comment_like 
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+
+    <!-- 统计评论的点赞数 -->
+    <select id="countLikesByCommentId" resultType="int">
+        SELECT COUNT(1) 
+        FROM tb_comment_like 
+        WHERE comment_id = #{commentId}
+    </select>
+
+    <!-- 批量检查用户对多个评论的点赞状态 -->
+    <select id="selectLikedCommentIds" resultType="long">
+        SELECT comment_id 
+        FROM tb_comment_like 
+        WHERE user_id = #{userId} 
+        AND comment_id IN
+        <foreach collection="commentIds" item="commentId" open="(" close=")" separator=",">
+            #{commentId}
+        </foreach>
+    </select>
+
+</mapper>

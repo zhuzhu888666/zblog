@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.CommentMapper">
+
+    <!-- 定义 Comment resultMap -->
+    <resultMap id="CommentResultMap" type="xyz.ztzhome.zblog.entity.Bean.Comment">
+        <result property="id" column="id"/>
+        <result property="songId" column="song_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="rootId" column="root_id"/>
+        <result property="replyToUserId" column="reply_to_user_id"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="replyCount" column="reply_count"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 定义 CommentVO resultMap -->
+    <resultMap id="CommentVOResultMap" type="xyz.ztzhome.zblog.entity.VO.CommentVO">
+        <result property="id" column="id"/>
+        <result property="songId" column="song_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="content" column="content"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="rootId" column="root_id"/>
+        <result property="replyToUserId" column="reply_to_user_id"/>
+        <result property="replyToUserNickname" column="reply_to_user_nickname"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="replyCount" column="reply_count"/>
+        <result property="status" column="status"/>
+        <result property="isLiked" column="is_liked"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!-- 添加评论 -->
+    <insert id="insertComment" parameterType="xyz.ztzhome.zblog.entity.Bean.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_comment (
+            song_id, user_id, content, parent_id, root_id, reply_to_user_id, 
+            like_count, reply_count, status, create_time, update_time
+        ) VALUES (
+            #{songId}, #{userId}, #{content}, #{parentId}, #{rootId}, #{replyToUserId}, 
+            #{likeCount}, #{replyCount}, #{status}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <!-- 删除评论（软删除） -->
+    <update id="deleteComment">
+        UPDATE tb_comment 
+        SET status = 0, update_time = NOW() 
+        WHERE id = #{id} AND user_id = #{userId} AND status != 0
+    </update>
+
+    <!-- 根据ID查询评论 -->
+    <select id="selectCommentById" resultMap="CommentResultMap">
+        SELECT * FROM tb_comment WHERE id = #{id}
+    </select>
+
+    <!-- 根据歌曲ID查询顶级评论列表 -->
+    <select id="selectTopCommentsBySongId" resultMap="CommentVOResultMap">
+        SELECT 
+            c.id,
+            c.song_id,
+            c.user_id,
+            u.nickname AS user_nickname,
+            u.user_avatar,
+            c.content,
+            c.parent_id,
+            c.root_id,
+            c.reply_to_user_id,
+            c.like_count,
+            c.reply_count,
+            c.status,
+            c.create_time,
+            CASE WHEN cl.comment_id IS NOT NULL THEN 1 ELSE 0 END AS is_liked
+        FROM tb_comment c
+        JOIN tb_user u ON c.user_id = u.id
+        LEFT JOIN tb_comment_like cl ON c.id = cl.comment_id AND cl.user_id = #{currentUserId}
+        WHERE c.song_id = #{songId} AND c.parent_id = 0 AND c.status = 1
+        ORDER BY c.create_time DESC
+    </select>
+
+    <!-- 根据歌曲ID分页查询顶级评论列表 -->
+    <select id="selectTopCommentsBySongIdWithPage" resultMap="CommentVOResultMap">
+        SELECT 
+            c.id,
+            c.song_id,
+            c.user_id,
+            u.nickname AS user_nickname,
+            u.user_avatar,
+            c.content,
+            c.parent_id,
+            c.root_id,
+            c.reply_to_user_id,
+            c.like_count,
+            c.reply_count,
+            c.status,
+            c.create_time,
+            CASE WHEN cl.comment_id IS NOT NULL THEN 1 ELSE 0 END AS is_liked
+        FROM tb_comment c
+        JOIN tb_user u ON c.user_id = u.id
+        LEFT JOIN tb_comment_like cl ON c.id = cl.comment_id AND cl.user_id = #{currentUserId}
+        WHERE c.song_id = #{songId} AND c.parent_id = 0 AND c.status = 1
+        ORDER BY c.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 根据父评论ID查询回复列表 -->
+    <select id="selectRepliesByParentId" resultMap="CommentVOResultMap">
+        SELECT 
+            c.id,
+            c.song_id,
+            c.user_id,
+            u.nickname AS user_nickname,
+            u.user_avatar,
+            c.content,
+            c.parent_id,
+            c.root_id,
+            c.reply_to_user_id,
+            ru.nickname AS reply_to_user_nickname,
+            c.like_count,
+            c.reply_count,
+            c.status,
+            c.create_time,
+            CASE WHEN cl.comment_id IS NOT NULL THEN 1 ELSE 0 END AS is_liked
+        FROM tb_comment c
+        JOIN tb_user u ON c.user_id = u.id
+        LEFT JOIN tb_user ru ON c.reply_to_user_id = ru.id
+        LEFT JOIN tb_comment_like cl ON c.id = cl.comment_id AND cl.user_id = #{currentUserId}
+        WHERE c.parent_id = #{parentId} AND c.status = 1
+        ORDER BY c.create_time ASC
+    </select>
+
+    <!-- 根据根评论ID查询所有回复 -->
+    <select id="selectRepliesByRootId" resultMap="CommentVOResultMap">
+        SELECT 
+            c.id,
+            c.song_id,
+            c.user_id,
+            u.nickname AS user_nickname,
+            u.user_avatar,
+            c.content,
+            c.parent_id,
+            c.root_id,
+            c.reply_to_user_id,
+            ru.nickname AS reply_to_user_nickname,
+            c.like_count,
+            c.reply_count,
+            c.status,
+            c.create_time,
+            CASE WHEN cl.comment_id IS NOT NULL THEN 1 ELSE 0 END AS is_liked
+        FROM tb_comment c
+        JOIN tb_user u ON c.user_id = u.id
+        LEFT JOIN tb_user ru ON c.reply_to_user_id = ru.id
+        LEFT JOIN tb_comment_like cl ON c.id = cl.comment_id AND cl.user_id = #{currentUserId}
+        WHERE c.root_id = #{rootId} AND c.id != #{rootId} AND c.status = 1
+        ORDER BY c.create_time ASC
+    </select>
+
+    <!-- 分页查询某个评论的回复 -->
+    <select id="selectRepliesByParentIdWithPage" resultMap="CommentVOResultMap">
+        SELECT 
+            c.id,
+            c.song_id,
+            c.user_id,
+            u.nickname AS user_nickname,
+            u.user_avatar,
+            c.content,
+            c.parent_id,
+            c.root_id,
+            c.reply_to_user_id,
+            ru.nickname AS reply_to_user_nickname,
+            c.like_count,
+            c.reply_count,
+            c.status,
+            c.create_time,
+            CASE WHEN cl.comment_id IS NOT NULL THEN 1 ELSE 0 END AS is_liked
+        FROM tb_comment c
+        JOIN tb_user u ON c.user_id = u.id
+        LEFT JOIN tb_user ru ON c.reply_to_user_id = ru.id
+        LEFT JOIN tb_comment_like cl ON c.id = cl.comment_id AND cl.user_id = #{currentUserId}
+        WHERE c.parent_id = #{parentId} AND c.status = 1
+        ORDER BY c.create_time ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 查询歌曲的评论总数 -->
+    <select id="countCommentsBySongId" resultType="int">
+        SELECT COUNT(1) FROM tb_comment 
+        WHERE song_id = #{songId} AND status = 1
+    </select>
+
+    <!-- 查询某个评论的回复总数 -->
+    <select id="countRepliesByParentId" resultType="int">
+        SELECT COUNT(1) FROM tb_comment 
+        WHERE parent_id = #{parentId} AND status = 1
+    </select>
+
+    <!-- 更新评论的点赞数 -->
+    <update id="updateCommentLikeCount">
+        UPDATE tb_comment 
+        SET like_count = like_count + #{increment}, update_time = NOW() 
+        WHERE id = #{commentId}
+    </update>
+
+    <!-- 更新评论的回复数 -->
+    <update id="updateCommentReplyCount">
+        UPDATE tb_comment 
+        SET reply_count = reply_count + #{increment}, update_time = NOW() 
+        WHERE id = #{commentId}
+    </update>
+
+    <!-- 根据用户ID查询用户的评论列表 -->
+    <select id="selectCommentsByUserId" resultMap="CommentVOResultMap">
+        SELECT 
+            c.id,
+            c.song_id,
+            c.user_id,
+            u.nickname AS user_nickname,
+            u.user_avatar,
+            c.content,
+            c.parent_id,
+            c.root_id,
+            c.reply_to_user_id,
+            ru.nickname AS reply_to_user_nickname,
+            c.like_count,
+            c.reply_count,
+            c.status,
+            c.create_time,
+            CASE WHEN cl.comment_id IS NOT NULL THEN 1 ELSE 0 END AS is_liked
+        FROM tb_comment c
+        JOIN tb_user u ON c.user_id = u.id
+        LEFT JOIN tb_user ru ON c.reply_to_user_id = ru.id
+        LEFT JOIN tb_comment_like cl ON c.id = cl.comment_id AND cl.user_id = #{currentUserId}
+        WHERE c.user_id = #{userId} AND c.status = 1
+        ORDER BY c.create_time DESC
+    </select>
+
+    <!-- 分页查询用户的评论列表 -->
+    <select id="selectCommentsByUserIdWithPage" resultMap="CommentVOResultMap">
+        SELECT 
+            c.id,
+            c.song_id,
+            c.user_id,
+            u.nickname AS user_nickname,
+            u.user_avatar,
+            c.content,
+            c.parent_id,
+            c.root_id,
+            c.reply_to_user_id,
+            ru.nickname AS reply_to_user_nickname,
+            c.like_count,
+            c.reply_count,
+            c.status,
+            c.create_time,
+            CASE WHEN cl.comment_id IS NOT NULL THEN 1 ELSE 0 END AS is_liked
+        FROM tb_comment c
+        JOIN tb_user u ON c.user_id = u.id
+        LEFT JOIN tb_user ru ON c.reply_to_user_id = ru.id
+        LEFT JOIN tb_comment_like cl ON c.id = cl.comment_id AND cl.user_id = #{currentUserId}
+        WHERE c.user_id = #{userId} AND c.status = 1
+        ORDER BY c.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 查询用户评论总数 -->
+    <select id="countCommentsByUserId" resultType="int">
+        SELECT COUNT(1) FROM tb_comment 
+        WHERE user_id = #{userId} AND status = 1
+    </select>
+
+</mapper>
