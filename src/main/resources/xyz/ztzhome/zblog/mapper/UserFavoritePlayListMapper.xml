@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.UserFavoritePlayListMapper">
+
+    <!-- 定义 UserFavoritePlayList resultMap -->
+    <resultMap id="UserFavoritePlayListResultMap" type="xyz.ztzhome.zblog.entity.Bean.UserFavoritePlayList">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="playListId" column="playlist_id"/>
+        <result property="favoriteTime" column="favorite_time"/>
+    </resultMap>
+
+    <!-- 定义 PlayListVO resultMap -->
+    <resultMap id="PlayListVOResultMap" type="xyz.ztzhome.zblog.entity.VO.PlayListVO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="coverPath" column="cover_path"/>
+        <result property="isPublic" column="is_public"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="songCount" column="song_count"/>
+        <result property="favoriteCount" column="favorite_count"/>
+    </resultMap>
+
+    <!-- 收藏歌单 -->
+    <insert id="insertUserFavoritePlayList" parameterType="xyz.ztzhome.zblog.entity.Bean.UserFavoritePlayList" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_user_favorite_playlist (user_id, playlist_id, favorite_time)
+        VALUES (#{userId}, #{playListId}, #{favoriteTime})
+    </insert>
+
+    <!-- 取消收藏歌单 -->
+    <delete id="deleteUserFavoritePlayList">
+        DELETE FROM tb_user_favorite_playlist 
+        WHERE user_id = #{userId} AND playlist_id = #{playListId}
+    </delete>
+
+    <!-- 检查用户是否已收藏该歌单 -->
+    <select id="isUserFavoritePlayList" resultType="boolean">
+        SELECT COUNT(1) > 0 
+        FROM tb_user_favorite_playlist 
+        WHERE user_id = #{userId} AND playlist_id = #{playListId}
+    </select>
+
+    <!-- 根据用户ID查询收藏的歌单列表 -->
+    <select id="selectFavoritePlayListsByUserId" resultMap="PlayListVOResultMap">
+        SELECT 
+            p.id, p.user_id, p.name, p.description, p.cover_path, p.is_public, 
+            p.create_time, p.update_time,
+            u.nickname AS user_name,
+            COALESCE(sc.song_count, 0) AS song_count,
+            COALESCE(fc.favorite_count, 0) AS favorite_count
+        FROM tb_user_favorite_playlist ufp
+        JOIN tb_song_playlist p ON ufp.playlist_id = p.id
+        LEFT JOIN tb_user u ON p.user_id = u.id
+        LEFT JOIN (
+            SELECT playlist_id, COUNT(*) AS song_count 
+            FROM tb_song_playlist_song 
+            GROUP BY playlist_id
+        ) sc ON p.id = sc.playlist_id
+        LEFT JOIN (
+            SELECT playlist_id, COUNT(*) AS favorite_count 
+            FROM tb_user_favorite_playlist 
+            GROUP BY playlist_id
+        ) fc ON p.id = fc.playlist_id
+        WHERE ufp.user_id = #{userId}
+        ORDER BY ufp.favorite_time DESC
+    </select>
+
+    <!-- 根据用户ID分页查询收藏的歌单列表 -->
+    <select id="selectFavoritePlayListsByUserIdWithPage" resultMap="PlayListVOResultMap">
+        SELECT 
+            p.id, p.user_id, p.name, p.description, p.cover_path, p.is_public, 
+            p.create_time, p.update_time,
+            u.nickname AS user_name,
+            COALESCE(sc.song_count, 0) AS song_count,
+            COALESCE(fc.favorite_count, 0) AS favorite_count
+        FROM tb_user_favorite_playlist ufp
+        JOIN tb_song_playlist p ON ufp.playlist_id = p.id
+        LEFT JOIN tb_user u ON p.user_id = u.id
+        LEFT JOIN (
+            SELECT playlist_id, COUNT(*) AS song_count 
+            FROM tb_song_playlist_song 
+            GROUP BY playlist_id
+        ) sc ON p.id = sc.playlist_id
+        LEFT JOIN (
+            SELECT playlist_id, COUNT(*) AS favorite_count 
+            FROM tb_user_favorite_playlist 
+            GROUP BY playlist_id
+        ) fc ON p.id = fc.playlist_id
+        WHERE ufp.user_id = #{userId}
+        ORDER BY ufp.favorite_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 查询用户收藏歌单总数 -->
+    <select id="countFavoritePlayListsByUserId" resultType="int">
+        SELECT COUNT(*) FROM tb_user_favorite_playlist WHERE user_id = #{userId}
+    </select>
+
+    <!-- 根据歌单ID查询收藏该歌单的用户数量 -->
+    <select id="countUsersByPlayListId" resultType="int">
+        SELECT COUNT(*) FROM tb_user_favorite_playlist WHERE playlist_id = #{playListId}
+    </select>
+
+</mapper>

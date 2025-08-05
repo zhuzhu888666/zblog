@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="xyz.ztzhome.zblog.mapper.SongPlayListSongMapper">
+
+    <!-- 定义 SongPlayListSong resultMap -->
+    <resultMap id="SongPlayListSongResultMap" type="xyz.ztzhome.zblog.entity.Bean.SongPlayListSong">
+        <id property="id" column="id"/>
+        <result property="playListId" column="playlist_id"/>
+        <result property="songId" column="song_id"/>
+        <result property="addTime" column="add_time"/>
+        <result property="sortOrder" column="sort_order"/>
+    </resultMap>
+
+    <!-- 定义 SongVO resultMap -->
+    <resultMap id="SongVOResultMap" type="xyz.ztzhome.zblog.entity.VO.SongVO">
+        <id property="id" column="id"/>
+        <result property="artistId" column="artist_id"/>
+        <result property="artistName" column="artist_name"/>
+        <result property="name" column="name"/>
+        <result property="album" column="album"/>
+        <result property="duration" column="duration"/>
+        <result property="style" column="style"/>
+        <result property="releaseTime" column="release_time"/>
+        <result property="playCount" column="play_count"/>
+    </resultMap>
+
+    <!-- 添加歌曲到歌单 -->
+    <insert id="insertPlayListSong" parameterType="xyz.ztzhome.zblog.entity.Bean.SongPlayListSong" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_song_playlist_song (playlist_id, song_id, add_time, sort_order)
+        VALUES (#{playListId}, #{songId}, #{addTime}, #{sortOrder})
+    </insert>
+
+    <!-- 从歌单中移除歌曲 -->
+    <delete id="deletePlayListSong">
+        DELETE FROM tb_song_playlist_song 
+        WHERE playlist_id = #{playListId} AND song_id = #{songId}
+    </delete>
+
+    <!-- 检查歌曲是否在歌单中 -->
+    <select id="isSongInPlayList" resultType="boolean">
+        SELECT COUNT(1) > 0 
+        FROM tb_song_playlist_song 
+        WHERE playlist_id = #{playListId} AND song_id = #{songId}
+    </select>
+
+    <!-- 根据歌单ID查询歌曲列表 -->
+    <select id="selectSongsByPlayListId" resultMap="SongVOResultMap">
+        SELECT 
+            s.id, s.artist_id, s.name, s.album, s.duration, s.style, s.release_time, s.play_count,
+            a.name AS artist_name
+        FROM tb_song_playlist_song ps
+        JOIN tb_song s ON ps.song_id = s.id
+        LEFT JOIN tb_artist a ON s.artist_id = a.id
+        WHERE ps.playlist_id = #{playListId}
+        ORDER BY ps.sort_order ASC, ps.add_time ASC
+    </select>
+
+    <!-- 根据歌单ID分页查询歌曲列表 -->
+    <select id="selectSongsByPlayListIdWithPage" resultMap="SongVOResultMap">
+        SELECT 
+            s.id, s.artist_id, s.name, s.album, s.duration, s.style, s.release_time, s.play_count,
+            a.name AS artist_name
+        FROM tb_song_playlist_song ps
+        JOIN tb_song s ON ps.song_id = s.id
+        LEFT JOIN tb_artist a ON s.artist_id = a.id
+        WHERE ps.playlist_id = #{playListId}
+        ORDER BY ps.sort_order ASC, ps.add_time ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 查询歌单中歌曲数量 -->
+    <select id="countSongsByPlayListId" resultType="int">
+        SELECT COUNT(*) FROM tb_song_playlist_song WHERE playlist_id = #{playListId}
+    </select>
+
+    <!-- 根据歌单ID删除所有歌曲关联 -->
+    <delete id="deleteAllSongsByPlayListId">
+        DELETE FROM tb_song_playlist_song WHERE playlist_id = #{playListId}
+    </delete>
+
+    <!-- 更新歌曲在歌单中的排序 -->
+    <update id="updateSongOrder">
+        UPDATE tb_song_playlist_song 
+        SET sort_order = #{sortOrder}
+        WHERE playlist_id = #{playListId} AND song_id = #{songId}
+    </update>
+
+    <!-- 获取歌单中歌曲的最大排序号 -->
+    <select id="getMaxSortOrder" resultType="int">
+        SELECT COALESCE(MAX(sort_order), 0) FROM tb_song_playlist_song WHERE playlist_id = #{playListId}
+    </select>
+
+</mapper>

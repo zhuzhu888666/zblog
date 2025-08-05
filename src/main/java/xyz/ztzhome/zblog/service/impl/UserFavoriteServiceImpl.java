@@ -9,11 +9,14 @@ import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.Artist;
 import xyz.ztzhome.zblog.entity.Bean.UserFavoriteSong;
 import xyz.ztzhome.zblog.entity.Bean.UserFollowArtist;
+import xyz.ztzhome.zblog.entity.Bean.UserFavoritePlayList;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.entity.VO.PlayListVO;
 import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.mapper.UserFavoriteSongMapper;
 import xyz.ztzhome.zblog.mapper.UserFollowArtistMapper;
+import xyz.ztzhome.zblog.mapper.UserFavoritePlayListMapper;
 import xyz.ztzhome.zblog.service.IUserFavoriteService;
 
 import java.util.List;
@@ -28,6 +31,9 @@ public class UserFavoriteServiceImpl implements IUserFavoriteService {
 
     @Autowired
     private UserFollowArtistMapper userFollowArtistMapper;
+
+    @Autowired
+    private UserFavoritePlayListMapper userFavoritePlayListMapper;
 
     // ========== 收藏歌曲相关方法 ==========
 
@@ -243,6 +249,115 @@ public class UserFavoriteServiceImpl implements IUserFavoriteService {
             return new ResponseMessage<>(ResponseConstant.success, "查询成功", count);
         } catch (Exception e) {
             logger.error("查询艺术家粉丝数失败：艺术家ID={}", artistId, e);
+            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+        }
+    }
+
+    // ========== 收藏歌单相关方法 ==========
+
+    @Override
+    @Transactional
+    public ResponseMessage favoritePlayList(long userId, long playListId) {
+        try {
+            // 检查是否已经收藏
+            if (userFavoritePlayListMapper.isUserFavoritePlayList(userId, playListId)) {
+                return new ResponseMessage<>(ResponseConstant.error, "已经收藏过该歌单");
+            }
+
+            // 创建收藏记录
+            UserFavoritePlayList userFavoritePlayList = new UserFavoritePlayList();
+            userFavoritePlayList.setUserId(userId);
+            userFavoritePlayList.setPlayListId(playListId);
+
+            int result = userFavoritePlayListMapper.insertUserFavoritePlayList(userFavoritePlayList);
+            if (result > 0) {
+                return new ResponseMessage<>(ResponseConstant.success, "收藏成功");
+            } else {
+                return new ResponseMessage<>(ResponseConstant.error, "收藏失败");
+            }
+        } catch (Exception e) {
+            logger.error("收藏歌单失败：用户ID={}，歌单ID={}", userId, playListId, e);
+            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+        }
+    }
+
+    @Override
+    @Transactional
+    public ResponseMessage unfavoritePlayList(long userId, long playListId) {
+        try {
+            // 检查是否已收藏
+            if (!userFavoritePlayListMapper.isUserFavoritePlayList(userId, playListId)) {
+                return new ResponseMessage<>(ResponseConstant.error, "尚未收藏该歌单");
+            }
+
+            int result = userFavoritePlayListMapper.deleteUserFavoritePlayList(userId, playListId);
+            if (result > 0) {
+                return new ResponseMessage<>(ResponseConstant.success, "取消收藏成功");
+            } else {
+                return new ResponseMessage<>(ResponseConstant.error, "取消收藏失败");
+            }
+        } catch (Exception e) {
+            logger.error("取消收藏歌单失败：用户ID={}，歌单ID={}", userId, playListId, e);
+            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+        }
+    }
+
+    @Override
+    public ResponseMessage<Boolean> isUserFavoritePlayList(long userId, long playListId) {
+        try {
+            boolean isFavorite = userFavoritePlayListMapper.isUserFavoritePlayList(userId, playListId);
+            return new ResponseMessage<>(ResponseConstant.success, "查询成功", isFavorite);
+        } catch (Exception e) {
+            logger.error("查询歌单收藏状态失败：用户ID={}，歌单ID={}", userId, playListId, e);
+            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+        }
+    }
+
+    @Override
+    public ResponseMessage<List<PlayListVO>> getUserFavoritePlayLists(long userId) {
+        try {
+            List<PlayListVO> playLists = userFavoritePlayListMapper.selectFavoritePlayListsByUserId(userId);
+            return new ResponseMessage<>(ResponseConstant.success, "查询成功", playLists);
+        } catch (Exception e) {
+            logger.error("查询用户收藏歌单列表失败：用户ID={}", userId, e);
+            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+        }
+    }
+
+    @Override
+    public ResponseMessage<PageResponse<PlayListVO>> getUserFavoritePlayListsWithPage(long userId, int pageNum, int pageSize) {
+        try {
+            // 计算偏移量
+            int offset = (pageNum - 1) * pageSize;
+
+            // 查询收藏的歌单列表
+            List<PlayListVO> playLists = userFavoritePlayListMapper.selectFavoritePlayListsByUserIdWithPage(userId, offset, pageSize);
+
+            // 查询总数
+            int totalCount = userFavoritePlayListMapper.countFavoritePlayListsByUserId(userId);
+
+            // 构建分页响应
+            PageResponse<PlayListVO> pageResponse = new PageResponse<>();
+            pageResponse.setData(playLists);
+            pageResponse.setPageNum(pageNum);
+            pageResponse.setPageSize(pageSize);
+            pageResponse.setTotal(totalCount);
+            pageResponse.setTotalPages((long) Math.ceil((double) totalCount / pageSize));
+
+            return new ResponseMessage<>(ResponseConstant.success, "查询成功", pageResponse);
+        } catch (Exception e) {
+            logger.error("分页查询用户收藏歌单列表失败：用户ID={}，页码={}，页大小={}", userId, pageNum, pageSize, e);
+            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+        }
+    }
+
+    @Override
+    public ResponseMessage<Integer> getPlayListFavoriteCount(long playListId) {
+        try {
+            int count = userFavoritePlayListMapper.countUsersByPlayListId(playListId);
+            return new ResponseMessage<>(ResponseConstant.success, "查询成功", count);
+        } catch (Exception e) {
+            logger.error("查询歌单收藏数失败：歌单ID={}", playListId, e);
             return new ResponseMessage<>(ResponseConstant.error, "服务异常");
         }
     }

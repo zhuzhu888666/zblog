@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import xyz.ztzhome.zblog.entity.Bean.Artist;
 import xyz.ztzhome.zblog.entity.DTO.FavoriteDTO;
+import xyz.ztzhome.zblog.entity.DTO.FavoritePlayListDTO;
 import xyz.ztzhome.zblog.entity.DTO.FollowDTO;
+import xyz.ztzhome.zblog.entity.VO.PlayListVO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
@@ -125,5 +127,59 @@ public class UserFavoriteController {
     @GetMapping("/artist/followers")
     public ResponseMessage<Integer> getArtistFollowerCount(@RequestParam("artistId") long artistId) {
         return userFavoriteService.getArtistFollowerCount(artistId);
+    }
+
+    // ========== 收藏歌单相关接口 ==========
+
+    /**
+     * 收藏歌单
+     */
+    @PostMapping("/playlist")
+    public ResponseMessage favoritePlayList(@RequestBody FavoritePlayListDTO favoritePlayListDTO) {
+        return userFavoriteService.favoritePlayList(favoritePlayListDTO.getUserId(), favoritePlayListDTO.getPlayListId());
+    }
+
+    /**
+     * 取消收藏歌单
+     */
+    @PostMapping("/playlist/unfavorite")
+    public ResponseMessage unfavoritePlayList(@RequestBody FavoritePlayListDTO favoritePlayListDTO) {
+        return userFavoriteService.unfavoritePlayList(favoritePlayListDTO.getUserId(), favoritePlayListDTO.getPlayListId());
+    }
+
+    /**
+     * 检查用户是否已收藏该歌单
+     */
+    @GetMapping("/playlist/check")
+    public ResponseMessage<Boolean> isUserFavoritePlayList(@RequestParam("userId") long userId,
+                                                          @RequestParam("playListId") long playListId) {
+        return userFavoriteService.isUserFavoritePlayList(userId, playListId);
+    }
+
+    /**
+     * 获取用户收藏的歌单列表
+     */
+    @GetMapping("/playlists")
+    public ResponseMessage<List<PlayListVO>> getUserFavoritePlayLists(@RequestParam("userId") long userId) {
+        return userFavoriteService.getUserFavoritePlayLists(userId);
+    }
+
+    /**
+     * 分页获取用户收藏的歌单列表
+     */
+    @GetMapping("/playlists/page")
+    public ResponseMessage<PageResponse<PlayListVO>> getUserFavoritePlayListsWithPage(
+            @RequestParam("userId") long userId,
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        return userFavoriteService.getUserFavoritePlayListsWithPage(userId, pageNum, pageSize);
+    }
+
+    /**
+     * 获取歌单的收藏数量
+     */
+    @GetMapping("/playlist/count")
+    public ResponseMessage<Integer> getPlayListFavoriteCount(@RequestParam("playListId") long playListId) {
+        return userFavoriteService.getPlayListFavoriteCount(playListId);
     }
 }

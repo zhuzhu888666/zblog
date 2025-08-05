@@ -11,6 +11,9 @@ public class PathCosntant {
     //歌词
     public static final String SONG_LRC_PATH="music/lrc/";
 
+    //歌单封面
+    public static final String PLAYLIST_COVER_PATH="music/cover/";
+
     //歌手
     //头像
     public static final String ARTIST_COVER_PATH="artist/cover/";

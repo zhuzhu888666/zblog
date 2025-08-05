@@ -47,7 +47,6 @@ public class SongController {
     }
 
     //更新歌曲
-
     @PostMapping("/updateSong")
     public ResponseMessage updateSong(@RequestPart("data") String data, @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
         UpdateSongDTO updateSongDTO = new UpdateSongDTO();
