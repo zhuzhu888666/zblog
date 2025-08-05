@@ -10,12 +10,12 @@
         <result property="id" column="id"/>
         <result property="commentId" column="comment_id"/>
         <result property="userId" column="user_id"/>
-        <result property="likeTime" column="like_time"/>
+        <result property="likeTime" column="create_time"/>
     </resultMap>
 
     <!-- 添加评论点赞 -->
     <insert id="insertCommentLike" parameterType="xyz.ztzhome.zblog.entity.Bean.CommentLike" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO tb_comment_like (comment_id, user_id, like_time)
+        INSERT INTO tb_comment_like (comment_id, user_id, create_time)
         VALUES (#{commentId}, #{userId}, #{likeTime})
     </insert>
 
