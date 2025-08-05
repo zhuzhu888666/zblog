@@ -1,5 +1,6 @@
 package xyz.ztzhome.zblog.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.entity.Bean.User;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
@@ -25,4 +26,6 @@ public interface IUserService {
      * 验证用户是否存在且状态正常
      */
     boolean validateUser(long userId);
+
+    ResponseMessage updateUserAvatar(long id, MultipartFile file);
 }

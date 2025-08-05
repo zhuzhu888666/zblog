@@ -2,6 +2,7 @@ package xyz.ztzhome.zblog.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.User;
 import xyz.ztzhome.zblog.entity.DTO.LoginDTO;
@@ -47,8 +48,8 @@ public class UserController {
     }
 
     @PostMapping("/updateAvatar")
-    public ResponseMessage updateUserAvatar(@RequestBody User user){
-        return null;
+    public ResponseMessage updateUserAvatar(@RequestPart("id")long id,@RequestPart("avatar") MultipartFile file){
+        return userService.updateUserAvatar(id,file);
     }
 
     @PostMapping("/updatePassword")

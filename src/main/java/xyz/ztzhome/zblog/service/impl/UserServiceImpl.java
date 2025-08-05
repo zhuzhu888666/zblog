@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import xyz.ztzhome.zblog.constant.PathCosntant;
 import xyz.ztzhome.zblog.entity.Bean.User;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
@@ -16,6 +18,7 @@ import xyz.ztzhome.zblog.service.IUserService;
 import xyz.ztzhome.zblog.util.BCryptPassword;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
+import xyz.ztzhome.zblog.util.FileTypeUtil;
 import xyz.ztzhome.zblog.util.JwtToken;
 
 import java.util.concurrent.TimeUnit;
@@ -28,6 +31,8 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    MinioServiceImpl minioService;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
@@ -169,6 +174,32 @@ public class UserServiceImpl implements IUserService {
         } catch (Exception e) {
             logger.error("验证用户失败，用户ID：{}", userId, e);
             return false;
+        }
+    }
+
+    @Override
+    public ResponseMessage updateUserAvatar(long id, MultipartFile file) {
+        if (file == null) {
+            return new ResponseMessage<>(ResponseConstant.error,"上传文件不能为空");
+        }
+        User user= userMapper.selectById(id);
+        if (user == null) {
+            return new ResponseMessage<>(ResponseConstant.error,"用户不存在！");
+        }
+        String fileName = file.getOriginalFilename();
+        if(!FileTypeUtil.getFileType(fileName).equals("image")){
+            return new ResponseMessage<>(ResponseConstant.error,"暂不支持该文件类型");
+        }
+        try {
+            if(user.getUserAvatar()!=null){
+                minioService.deleteFile(PathCosntant.USER_Avatar+user.getAccount());
+            }
+            String path= PathCosntant.USER_Avatar+user.getId()+ FileTypeUtil.getFileExtension2(fileName);
+            minioService.uploadFile(file,path);
+            return new ResponseMessage<>(ResponseConstant.success,"更新成功！");
+        }catch (Exception e){
+            logger.error("更新用户头像失败{}",user.getId(),e);
+            return new ResponseMessage<>(ResponseConstant.error,e.getMessage());
         }
     }
 }
