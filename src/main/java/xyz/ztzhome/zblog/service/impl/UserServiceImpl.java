@@ -145,4 +145,30 @@ public class UserServiceImpl implements IUserService {
             return new ResponseMessage<>(ResponseConstant.error, "服务异常，请联系管理员");
         }
     }
+
+    @Override
+    public ResponseMessage<User> getUserById(long userId) {
+        try {
+            User user = userMapper.selectById(userId);
+            if (user != null && user.getStatus() == 1) {
+                return new ResponseMessage<>(ResponseConstant.success, "查询成功", user);
+            } else {
+                return new ResponseMessage<>(ResponseConstant.error, "用户不存在或已被禁用");
+            }
+        } catch (Exception e) {
+            logger.error("查询用户信息失败，用户ID：{}", userId, e);
+            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+        }
+    }
+
+    @Override
+    public boolean validateUser(long userId) {
+        try {
+            User user = userMapper.selectById(userId);
+            return user != null && user.getStatus() == 1;
+        } catch (Exception e) {
+            logger.error("验证用户失败，用户ID：{}", userId, e);
+            return false;
+        }
+    }
 }

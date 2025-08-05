@@ -15,4 +15,14 @@ public interface IUserService {
     ResponseMessage updateUserProfile(UpdateUserProfileDTO updateUserProfileDTO);
 
     ResponseMessage updateUserSecurity(UpdateUserSecurityDTO securityDTO);
+    
+    /**
+     * 根据用户ID获取用户信息
+     */
+    ResponseMessage<User> getUserById(long userId);
+    
+    /**
+     * 验证用户是否存在且状态正常
+     */
+    boolean validateUser(long userId);
 }

@@ -5,24 +5,14 @@ import lombok.Data;
 @Data
 public class ReplyCommentDTO {
     /**
-     * 歌曲ID
+     * 要回复的评论ID
      */
-    private long songId;
+    private long commentId;
     
     /**
      * 回复用户ID
      */
     private long userId;
-    
-    /**
-     * 父评论ID
-     */
-    private long parentId;
-    
-    /**
-     * 根评论ID
-     */
-    private long rootId;
     
     /**
      * 回复的目标用户ID
