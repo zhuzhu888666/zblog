@@ -28,4 +28,6 @@ public interface IUserService {
     boolean validateUser(long userId);
 
     ResponseMessage updateUserAvatar(long id, MultipartFile file);
+
+    ResponseMessage<String> getUserAvatar(long id);
 }

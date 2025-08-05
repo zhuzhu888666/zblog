@@ -195,11 +195,35 @@ public class UserServiceImpl implements IUserService {
                 minioService.deleteFile(PathCosntant.USER_Avatar+user.getAccount());
             }
             String path= PathCosntant.USER_Avatar+user.getId()+ FileTypeUtil.getFileExtension2(fileName);
-            minioService.uploadFile(file,path);
-            return new ResponseMessage<>(ResponseConstant.success,"更新成功！");
+            int result=minioService.uploadFile(file,path);
+            if(result>0){
+                //只更新头像字段
+                User newUser = new User();
+                newUser.setId(user.getId());
+                newUser.setUserAvatar(path);
+                userMapper.updateUserProfile(newUser);
+                String newUserAvatar=minioService.getFileUrl(6,user.getUserAvatar());
+                return new ResponseMessage<>(ResponseConstant.success,"更新成功！",newUserAvatar);
+            }
+           else {
+               return new ResponseMessage<>(ResponseConstant.error,"上传头像时发生异常");
+            }
         }catch (Exception e){
             logger.error("更新用户头像失败{}",user.getId(),e);
             return new ResponseMessage<>(ResponseConstant.error,e.getMessage());
         }
+    }
+
+    @Override
+    public ResponseMessage<String> getUserAvatar(long id) {
+        User user = userMapper.selectById(id);
+        if(user==null){
+            return new ResponseMessage<>(ResponseConstant.error,"用户不存在");
+        }
+        if(user.getUserAvatar()==null|| user.getUserAvatar().isEmpty()){
+            return new ResponseMessage<>(ResponseConstant.success,"默认","/images/default.jpg");
+        }
+        String url=minioService.getFileUrl(6, user.getUserAvatar());
+        return new ResponseMessage<>(ResponseConstant.success,"获取成功",url);
     }
 }

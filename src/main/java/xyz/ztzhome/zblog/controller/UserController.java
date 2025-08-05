@@ -1,10 +1,12 @@
 package xyz.ztzhome.zblog.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.User;
+import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
 import xyz.ztzhome.zblog.entity.DTO.LoginDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
@@ -48,8 +50,19 @@ public class UserController {
     }
 
     @PostMapping("/updateAvatar")
-    public ResponseMessage updateUserAvatar(@RequestPart("id")long id,@RequestPart("avatar") MultipartFile file){
-        return userService.updateUserAvatar(id,file);
+    public ResponseMessage updateAvatar(@RequestPart("id") String id, @RequestPart("avatar") MultipartFile avatarFile) {
+        try {
+            long userId = Long.parseLong(id);
+            System.out.println("转换后用户id:"+userId);
+            return userService.updateUserAvatar(userId, avatarFile);
+        } catch (Exception e) {
+            return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
+        }
+    }
+
+    @GetMapping("/getUserAvatar")
+    public ResponseMessage getUserAvatar(@RequestParam("id")long id){
+        return userService.getUserAvatar(id);
     }
 
     @PostMapping("/updatePassword")
