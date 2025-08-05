@@ -62,7 +62,7 @@
     <select id="selectSongsByPlayListIdWithPage" resultMap="SongVOResultMap">
         SELECT 
             s.id, s.artist_id, s.name, s.album, s.duration, s.style, s.release_time, s.play_count,
-            a.artist_name AS artist_name
+            a.artist_name
         FROM tb_song_playlist_song ps
         JOIN tb_song s ON ps.song_id = s.id
         LEFT JOIN tb_artist a ON s.artist_id = a.id
