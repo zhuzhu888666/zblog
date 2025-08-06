@@ -22,10 +22,43 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
     <!-- 查询所有用户 -->
-
     <select id="selectAll" resultMap="UserResultMap">
         SELECT *
         FROM tb_user
+    </select>
+    
+    <!-- 分页查询所有用户 -->
+    <select id="selectAllWithPagination" resultMap="UserResultMap">
+        SELECT *
+        FROM tb_user
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+    
+    <!-- 查询用户总数 -->
+    <select id="countAllUsers" resultType="long">
+        SELECT COUNT(*)
+        FROM tb_user
+    </select>
+    
+    <!-- 搜索用户（根据账号或邮箱模糊查询） -->
+    <select id="searchUsers" resultMap="UserResultMap">
+        SELECT *
+        FROM tb_user
+        WHERE account LIKE CONCAT('%', #{keyword}, '%')
+           OR email LIKE CONCAT('%', #{keyword}, '%')
+           OR nickname LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+    
+    <!-- 搜索用户总数 -->
+    <select id="countSearchUsers" resultType="long">
+        SELECT COUNT(*)
+        FROM tb_user
+        WHERE account LIKE CONCAT('%', #{keyword}, '%')
+           OR email LIKE CONCAT('%', #{keyword}, '%')
+           OR nickname LIKE CONCAT('%', #{keyword}, '%')
     </select>
 
 
@@ -177,12 +210,12 @@
         </where>
     </update>
     <!-- 删除用户 -->
-    <delete id="deleteById" parameterType="string">
+    <delete id="deleteById" parameterType="long">
         DELETE FROM tb_user
         WHERE id = #{id}
     </delete>
     <delete id="deleteByAccount">
-        SELECT * from tb_user where account=#{account}
+        DELETE FROM tb_user WHERE account = #{account}
     </delete>
 
 </mapper>
