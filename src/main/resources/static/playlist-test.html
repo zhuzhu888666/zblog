@@ -81,10 +81,20 @@
         <br>
         <button id="getUserFavSongsBtn">获取我收藏的歌曲</button>
     </div>
+    
+    <div class="section">
+        <h2>最近播放</h2>
+        <div>
+            <label for="songIdForRecent">歌曲ID:</label>
+            <input type="number" id="songIdForRecent" placeholder="输入歌曲ID">
+            <button id="addRecentSongBtn">添加到最近播放</button>
+        </div>
+        <br>
+        <button id="getRecentSongsBtn">获取最近播放列表</button>
+    </div>
 
     <h2>结果</h2>
     <pre id="results"></pre>
-
 </div>
 
 <script>
@@ -256,6 +266,28 @@
         const userId = getCurrentUserId();
         if (!userId) return;
         apiCall(`/user/favorite/songs?userId=${userId}`);
+    });
+    
+    // 添加到最近播放
+    document.getElementById('addRecentSongBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        const songId = document.getElementById('songIdForRecent').value;
+        if (!userId || !songId) {
+            alert('请输入用户ID和歌曲ID。');
+            return;
+        }
+        apiCall('/user/recently-played/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId, songId: songId })
+        });
+    });
+
+    // 获取最近播放列表
+    document.getElementById('getRecentSongsBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+        apiCall(`/user/recently-played?userId=${userId}`);
     });
 
 </script>

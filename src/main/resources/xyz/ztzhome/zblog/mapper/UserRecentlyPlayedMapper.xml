@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.ztzhome.zblog.mapper.UserRecentlyPlayedMapper">
+
+    <resultMap id="SongVOResultMap" type="xyz.ztzhome.zblog.entity.VO.SongVO">
+        <id property="id" column="song_id"/>
+        <result property="artistId" column="artist_id"/>
+        <result property="artistName" column="artist_name"/>
+        <result property="name" column="song_name"/>
+        <result property="album" column="album"/>
+        <result property="duration" column="duration"/>
+        <result property="style" column="style"/>
+        <result property="releaseTime" column="release_time"/>
+        <result property="playCount" column="play_count"/>
+    </resultMap>
+    
+    <resultMap id="UserRecentlyPlayedResultMap" type="xyz.ztzhome.zblog.entity.Bean.UserRecentlyPlayed">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="songId" column="song_id"/>
+        <result property="playTime" column="play_time"/>
+    </resultMap>
+
+    <insert id="upsertRecentlyPlayed" parameterType="xyz.ztzhome.zblog.entity.Bean.UserRecentlyPlayed">
+        INSERT INTO tb_user_recently_played (user_id, song_id, play_time)
+        VALUES (#{userId}, #{songId}, #{playTime})
+        ON DUPLICATE KEY UPDATE play_time = #{playTime}
+    </insert>
+
+    <select id="selectRecentlyPlayedSongs" resultMap="SongVOResultMap">
+        SELECT
+            s.id AS song_id,
+            s.name AS song_name,
+            s.artist_id,
+            a.artist_name,
+            s.album,
+            s.duration,
+            s.style,
+            s.release_time,
+            s.play_count,
+            rp.play_time
+        FROM tb_user_recently_played rp
+        JOIN tb_song s ON rp.song_id = s.id
+        LEFT JOIN tb_artist a ON s.artist_id = a.id
+        WHERE rp.user_id = #{userId}
+        ORDER BY rp.play_time DESC
+        LIMIT #{limit}
+    </select>
+    
+    <select id="countRecentlyPlayed" resultType="int">
+        SELECT COUNT(*) FROM tb_user_recently_played WHERE user_id = #{userId}
+    </select>
+    
+    <select id="selectOldestPlayed" resultMap="UserRecentlyPlayedResultMap">
+        SELECT id, user_id, song_id, play_time
+        FROM tb_user_recently_played
+        WHERE user_id = #{userId}
+        ORDER BY play_time ASC
+        LIMIT #{limit}
+    </select>
+
+    <delete id="deleteRecentlyPlayed">
+        DELETE FROM tb_user_recently_played
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
+

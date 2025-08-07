@@ -1,0 +1,19 @@
+package xyz.ztzhome.zblog.service;
+
+import xyz.ztzhome.zblog.entity.DTO.RecentlyPlayedDTO;
+import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.entity.response.ResponseMessage;
+import java.util.List;
+
+public interface IUserRecentlyPlayedService {
+    /**
+     * 添加播放记录
+     */
+    ResponseMessage addRecentlyPlayed(RecentlyPlayedDTO recentlyPlayedDTO);
+
+    /**
+     * 获取用户最近播放列表
+     */
+    ResponseMessage<List<SongVO>> getRecentlyPlayed(long userId);
+}
+
