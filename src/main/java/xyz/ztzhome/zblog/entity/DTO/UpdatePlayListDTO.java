@@ -20,7 +20,7 @@ public class UpdatePlayListDTO {
     private String description;
     
     /**
-     * 是否公开（0-私有，1-公开）
+     * 是否公开
      */
-    private int isPublic;
+    private Boolean isPublic;
 }

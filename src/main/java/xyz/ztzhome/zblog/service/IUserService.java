@@ -4,6 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.entity.Bean.User;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
+import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 
 public interface IUserService {
@@ -30,4 +31,10 @@ public interface IUserService {
     ResponseMessage updateUserAvatar(long id, MultipartFile file);
 
     ResponseMessage<String> getUserAvatar(long id);
+    
+    ResponseMessage getUserByAccount(String account);
+    
+    ResponseMessage getUserByEmail(String email);
+    
+    ResponseMessage<PageResponse<User>> searchUsers(String keyword, int pageNum, int pageSize);
 }

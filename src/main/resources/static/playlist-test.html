@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>歌单与收藏功能测试</title>
+    <style>
+        body { font-family: sans-serif; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        .section { margin-bottom: 20px; padding: 10px; border: 1px solid #eee; }
+        h2 { border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        h3 { border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        label { display: inline-block; width: 120px; }
+        input[type="text"], input[type="number"] { width: 200px; padding: 5px; }
+        input[type="submit"], button { padding: 8px 15px; border: none; background-color: #007bff; color: white; cursor: pointer; border-radius: 3px; }
+        button.secondary { background-color: #6c757d; }
+        button.danger { background-color: #dc3545; }
+        form { margin-bottom: 15px; }
+        #results { margin-top: 20px; padding: 10px; background-color: #f0f0f0; border: 1px solid #ddd; white-space: pre-wrap; font-family: monospace; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>歌单与收藏功能测试</h1>
+
+    <div class="section">
+        <h2>用户信息</h2>
+        <label for="userId">当前用户ID:</label>
+        <input type="number" id="userId" placeholder="输入用户ID" value="1">
+    </div>
+
+    <div class="section">
+        <h2>歌单管理</h2>
+        
+        <h3>创建歌单</h3>
+        <form id="createPlaylistForm">
+            <label for="playlistName">名称:</label>
+            <input type="text" id="playlistName" required><br><br>
+            <label for="playlistDesc">描述:</label>
+            <input type="text" id="playlistDesc"><br><br>
+            <label for="isPublic">是否公开:</label>
+            <input type="checkbox" id="isPublic" checked><br><br>
+            <input type="submit" value="创建歌单">
+        </form>
+
+        <h3>获取用户歌单</h3>
+        <button id="getUserPlaylistsBtn">获取我创建的歌单</button>
+        <button id="getUserFavPlaylistsBtn">获取我收藏的歌单</button>
+
+        <h3>歌单操作</h3>
+        <div>
+            <label for="playlistId">歌单ID:</label>
+            <input type="number" id="playlistId" placeholder="输入歌单ID">
+            <button id="getPlaylistDetailBtn">获取详情</button>
+        </div>
+        <br>
+        <div>
+            <label for="songIdForPlaylist">歌曲ID:</label>
+            <input type="number" id="songIdForPlaylist" placeholder="输入歌曲ID">
+            <button id="addSongToPlaylistBtn">添加歌曲</button>
+            <button id="removeSongFromPlaylistBtn" class="danger">移除歌曲</button>
+        </div>
+         <br>
+        <div>
+            <label for="playlistIdForFav">歌单ID:</label>
+            <input type="number" id="playlistIdForFav" placeholder="输入歌单ID">
+            <button id="favPlaylistBtn">收藏</button>
+            <button id="unfavPlaylistBtn" class="secondary">取消收藏</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>歌曲收藏</h2>
+        <h3>收藏操作</h3>
+        <div>
+            <label for="songIdForFav">歌曲ID:</label>
+            <input type="number" id="songIdForFav" placeholder="输入歌曲ID">
+            <button id="favSongBtn">收藏歌曲</button>
+            <button id="unfavSongBtn" class="secondary">取消收藏歌曲</button>
+        </div>
+        <br>
+        <button id="getUserFavSongsBtn">获取我收藏的歌曲</button>
+    </div>
+
+    <h2>结果</h2>
+    <pre id="results"></pre>
+
+</div>
+
+<script>
+    const API_BASE = ''; // 假设同源
+    const userIdInput = document.getElementById('userId');
+    const resultsDiv = document.getElementById('results');
+
+    function getCurrentUserId() {
+        const userId = userIdInput.value;
+        if (!userId) {
+            alert('请先输入用户ID。');
+            return null;
+        }
+        return parseInt(userId, 10);
+    }
+
+    async function apiCall(endpoint, options = {}) {
+        try {
+            const response = await fetch(API_BASE + endpoint, options);
+            const data = await response.json();
+            resultsDiv.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+            resultsDiv.textContent = `错误: ${error.message}`;
+            console.error('API调用错误:', error);
+        }
+    }
+
+    // 创建歌单
+    document.getElementById('createPlaylistForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const userId = getCurrentUserId();
+        if (!userId) return;
+
+        const playlistName = document.getElementById('playlistName').value;
+        const description = document.getElementById('playlistDesc').value;
+        const isPublic = document.getElementById('isPublic').checked;
+        
+        const formData = new FormData();
+        const jsonData = {
+            userId: userId,
+            name: playlistName,
+            description: description,
+            isPublic: isPublic
+        };
+        formData.append('data', JSON.stringify(jsonData));
+
+        apiCall('/playlist/create', {
+            method: 'POST',
+            body: formData // 使用 FormData 以支持 multipart 请求
+        });
+    });
+
+    // 获取用户创建的歌单
+    document.getElementById('getUserPlaylistsBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+        apiCall(`/playlist/user?userId=${userId}`);
+    });
+
+    // 获取用户收藏的歌单
+    document.getElementById('getUserFavPlaylistsBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+        apiCall(`/playlist/favorite/user?userId=${userId}`);
+    });
+    
+    // 获取歌单详情
+    document.getElementById('getPlaylistDetailBtn').addEventListener('click', () => {
+        const playlistId = document.getElementById('playlistId').value;
+        if (!playlistId) {
+            alert('请输入歌单ID。');
+            return;
+        }
+        apiCall(`/playlist/detail?id=${playlistId}`);
+    });
+    
+    // 添加歌曲到歌单
+    document.getElementById('addSongToPlaylistBtn').addEventListener('click', () => {
+        const playlistId = document.getElementById('playlistId').value;
+        const songId = document.getElementById('songIdForPlaylist').value;
+        const userId = getCurrentUserId();
+        if(!userId) return;
+        if (!playlistId || !songId) {
+            alert('请输入歌单ID和歌曲ID。');
+            return;
+        }
+        apiCall('/playlist/addSong', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playListId: playlistId, songId: songId, userId: userId })
+        });
+    });
+
+    // 从歌单移除歌曲
+    document.getElementById('removeSongFromPlaylistBtn').addEventListener('click', () => {
+        const playlistId = document.getElementById('playlistId').value;
+        const songId = document.getElementById('songIdForPlaylist').value;
+        if (!playlistId || !songId) {
+            alert('请输入歌单ID和歌曲ID。');
+            return;
+        }
+        apiCall(`/playlist/removeSong?playListId=${playlistId}&songId=${songId}`, {
+            method: 'POST'
+        });
+    });
+
+    // 收藏歌单
+    document.getElementById('favPlaylistBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        const playlistId = document.getElementById('playlistIdForFav').value;
+        if (!userId || !playlistId) {
+            alert('请输入用户ID和歌单ID。');
+            return;
+        }
+        apiCall('/playlist/favorite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId, playListId: playlistId })
+        });
+    });
+
+    // 取消收藏歌单
+    document.getElementById('unfavPlaylistBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        const playlistId = document.getElementById('playlistIdForFav').value;
+        if (!userId || !playlistId) {
+            alert('请输入用户ID和歌单ID。');
+            return;
+        }
+        apiCall('/playlist/unfavorite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId, playListId: playlistId })
+        });
+    });
+
+    // 收藏歌曲
+    document.getElementById('favSongBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        const songId = document.getElementById('songIdForFav').value;
+        if (!userId || !songId) {
+            alert('请输入用户ID和歌曲ID。');
+            return;
+        }
+        apiCall('/user/favorite/song', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId, songId: songId })
+        });
+    });
+
+    // 取消收藏歌曲
+    document.getElementById('unfavSongBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        const songId = document.getElementById('songIdForFav').value;
+        if (!userId || !songId) {
+            alert('请输入用户ID和歌曲ID。');
+            return;
+        }
+        apiCall('/user/favorite/song/unfavorite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId, songId: songId })
+        });
+    });
+
+    // 获取用户收藏的歌曲
+    document.getElementById('getUserFavSongsBtn').addEventListener('click', () => {
+        const userId = getCurrentUserId();
+        if (!userId) return;
+        apiCall(`/user/favorite/songs?userId=${userId}`);
+    });
+
+</script>
+
+</body>
+</html>

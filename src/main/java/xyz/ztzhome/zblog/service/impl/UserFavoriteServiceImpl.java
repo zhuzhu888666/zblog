@@ -6,17 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
-import xyz.ztzhome.zblog.entity.Bean.Artist;
-import xyz.ztzhome.zblog.entity.Bean.UserFavoriteSong;
-import xyz.ztzhome.zblog.entity.Bean.UserFollowArtist;
-import xyz.ztzhome.zblog.entity.Bean.UserFavoritePlayList;
-import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.entity.Bean.*;
 import xyz.ztzhome.zblog.entity.VO.PlayListVO;
+import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
-import xyz.ztzhome.zblog.mapper.UserFavoriteSongMapper;
-import xyz.ztzhome.zblog.mapper.UserFollowArtistMapper;
-import xyz.ztzhome.zblog.mapper.UserFavoritePlayListMapper;
+import xyz.ztzhome.zblog.mapper.*;
 import xyz.ztzhome.zblog.service.IUserFavoriteService;
 
 import java.util.List;
@@ -35,12 +30,23 @@ public class UserFavoriteServiceImpl implements IUserFavoriteService {
     @Autowired
     private UserFavoritePlayListMapper userFavoritePlayListMapper;
 
+    @Autowired
+    private SongMapper songMapper;
+    
+    @Autowired
+    private SongPlayListMapper songPlayListMapper;
+
     // ========== 收藏歌曲相关方法 ==========
 
     @Override
     @Transactional
     public ResponseMessage favoriteSong(long userId, long songId) {
         try {
+            // 检查歌曲是否存在
+            if (songMapper.selectSongById(songId) == null) {
+                return new ResponseMessage<>(ResponseConstant.error, "歌曲不存在");
+            }
+            
             // 检查是否已经收藏
             if (userFavoriteSongMapper.isUserFavoriteSong(userId, songId)) {
                 return new ResponseMessage<>(ResponseConstant.error, "已经收藏过该歌曲");
@@ -259,6 +265,11 @@ public class UserFavoriteServiceImpl implements IUserFavoriteService {
     @Transactional
     public ResponseMessage favoritePlayList(long userId, long playListId) {
         try {
+            // 检查歌单是否存在
+            if (songPlayListMapper.selectPlayListById(playListId) == null) {
+                return new ResponseMessage<>(ResponseConstant.error, "歌单不存在");
+            }
+            
             // 检查是否已经收藏
             if (userFavoritePlayListMapper.isUserFavoritePlayList(userId, playListId)) {
                 return new ResponseMessage<>(ResponseConstant.error, "已经收藏过该歌单");

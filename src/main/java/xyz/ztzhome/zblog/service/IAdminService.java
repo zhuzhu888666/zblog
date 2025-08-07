@@ -19,10 +19,4 @@ public interface IAdminService {
     ResponseMessage updateUser(User user);
     
     ResponseMessage deleteUser(String account);
-    
-    ResponseMessage getUserByAccount(String account);
-    
-    ResponseMessage getUserByEmail(String email);
-    
-    ResponseMessage<PageResponse<User>> searchUsers(String keyword, int pageNum, int pageSize);
 }

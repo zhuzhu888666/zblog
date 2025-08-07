@@ -32,20 +32,10 @@
     </div>
 
     <div class="container">
-        <h2>搜索用户</h2>
-        <div class="form-group">
-            <input type="text" id="searchKeyword" placeholder="输入账号、邮箱或昵称">
-            <button onclick="searchUsers()">搜索</button>
-        </div>
-        <div id="searchResults"></div>
-    </div>
-
-    <div class="container">
         <h2>用户管理</h2>
         <div class="form-group">
             <label>用户账号:</label>
             <input type="text" id="userAccount" placeholder="输入用户账号">
-            <button onclick="getUserByAccount()">查询用户</button>
         </div>
         <div class="form-group">
             <label>更新状态:</label>
@@ -54,6 +44,9 @@
                 <option value="0">禁用</option>
             </select>
             <button onclick="updateUserStatus()">更新状态</button>
+        </div>
+        <div class="form-group">
+            <button onclick="deleteUser()">删除用户</button>
         </div>
         <div id="userInfo"></div>
     </div>
@@ -77,48 +70,6 @@
             }
         }
 
-        async function searchUsers() {
-            const keyword = document.getElementById('searchKeyword').value;
-            if (!keyword.trim()) {
-                alert('请输入搜索关键词');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/admin/searchUsers?keyword=${encodeURIComponent(keyword)}&pageNum=1&pageSize=10`);
-                const result = await response.json();
-                
-                if (result.code === 1) {
-                    displaySearchResults(result.data);
-                } else {
-                    alert('搜索失败: ' + result.message);
-                }
-            } catch (error) {
-                alert('请求失败: ' + error.message);
-            }
-        }
-
-        async function getUserByAccount() {
-            const account = document.getElementById('userAccount').value;
-            if (!account.trim()) {
-                alert('请输入用户账号');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/admin/getUserByAccount?account=${encodeURIComponent(account)}`);
-                const result = await response.json();
-                
-                if (result.code === 1) {
-                    displayUserInfo(result.data);
-                } else {
-                    alert('查询失败: ' + result.message);
-                }
-            } catch (error) {
-                alert('请求失败: ' + error.message);
-            }
-        }
-
         async function updateUserStatus() {
             const account = document.getElementById('userAccount').value;
             const status = document.getElementById('userStatus').value;
@@ -134,9 +85,42 @@
                 
                 if (result.code === 1) {
                     alert('状态更新成功');
-                    getUserByAccount();
                 } else {
                     alert('更新失败: ' + result.message);
+                }
+            } catch (error) {
+                alert('请求失败: ' + error.message);
+            }
+        }
+
+        async function deleteUser() {
+            const account = document.getElementById('userAccount').value;
+            
+            if (!account.trim()) {
+                alert('请输入用户账号');
+                return;
+            }
+            
+            if (!confirm(`确定要删除用户 ${account} 吗？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/admin/delete/deleteUser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `account=${encodeURIComponent(account)}`
+                });
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    alert('用户删除成功');
+                    document.getElementById('userAccount').value = '';
+                    document.getElementById('userInfo').innerHTML = '';
+                } else {
+                    alert('删除失败: ' + result.message);
                 }
             } catch (error) {
                 alert('请求失败: ' + error.message);
@@ -181,49 +165,6 @@
 
             html += '</tbody></table>';
             tableDiv.innerHTML = html;
-        }
-
-        function displaySearchResults(pageData) {
-            const resultsDiv = document.getElementById('searchResults');
-            if (!pageData.data || pageData.data.length === 0) {
-                resultsDiv.innerHTML = '<p>未找到匹配的用户</p>';
-                return;
-            }
-
-            let html = `<h3>搜索结果 (共${pageData.total}条)</h3><table><thead><tr><th>ID</th><th>账号</th><th>邮箱</th><th>昵称</th><th>状态</th></tr></thead><tbody>`;
-
-            pageData.data.forEach(user => {
-                const statusText = user.status === 1 ? '启用' : '禁用';
-                html += `
-                    <tr>
-                        <td>${user.id}</td>
-                        <td>${user.account}</td>
-                        <td>${user.email || '-'}</td>
-                        <td>${user.nickname || '-'}</td>
-                        <td>${statusText}</td>
-                    </tr>
-                `;
-            });
-
-            html += '</tbody></table>';
-            resultsDiv.innerHTML = html;
-        }
-
-        function displayUserInfo(user) {
-            const infoDiv = document.getElementById('userInfo');
-            const statusText = user.status === 1 ? '启用' : '禁用';
-            
-            infoDiv.innerHTML = `
-                <h3>用户信息</h3>
-                <table>
-                    <tr><td><strong>ID:</strong></td><td>${user.id}</td></tr>
-                    <tr><td><strong>账号:</strong></td><td>${user.account}</td></tr>
-                    <tr><td><strong>邮箱:</strong></td><td>${user.email || '-'}</td></tr>
-                    <tr><td><strong>昵称:</strong></td><td>${user.nickname || '-'}</td></tr>
-                    <tr><td><strong>状态:</strong></td><td>${statusText}</td></tr>
-                    <tr><td><strong>创建时间:</strong></td><td>${user.createTime || '-'}</td></tr>
-                </table>
-            `;
         }
 
         window.onload = function() {

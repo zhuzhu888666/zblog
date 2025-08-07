@@ -21,7 +21,7 @@ public class SongController {
     SongServiceImpl songService;
 
 
-    @PostMapping("addSong")
+    @PostMapping("/addSong")
     public ResponseMessage addSong(@RequestPart("data") String data, @RequestPart("audioFile") MultipartFile audioFile, @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
         AddSongDTO addSongDTO = new AddSongDTO();
         try {
@@ -134,5 +134,10 @@ public class SongController {
             @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
         return songService.getSongsByStyleWithPage(style, pageNum, pageSize);
+    }
+    //增加歌曲播放次数
+    @GetMapping("/incrementPlayCount")
+    public ResponseMessage addPlayCount(@RequestParam("id") long id) {
+        return songService.addPlayCount(id);
     }
 }

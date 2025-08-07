@@ -58,6 +58,9 @@
         </set>
         WHERE id = #{id}
     </update>
+    <update id="updatePlayCount">
+        update tb_song set play_count=#{count} where id=#{id}
+    </update>
     <!--删除-->
     <delete id="deleteSong">
         delete from tb_song where id=#{id}
@@ -68,7 +71,7 @@
         SELECT * from tb_song
     </select>
 
-    <select id="selectSongById" resultType="xyz.ztzhome.zblog.entity.Bean.Song">
+    <select id="selectSongById" resultMap="songResultMap">
         select * from tb_song where id=#{songId}
     </select>
 

@@ -29,7 +29,7 @@ public class AdminController {
         return adminService.adminLogin(loginDTO);
     };
 
-    @GetMapping("/update/user/status")
+    @GetMapping("/user/update/status")
     public ResponseMessage updateUserStatus(@RequestParam("status")  int status,
                                             @RequestParam("account")   String account){
         return adminService.updateUserStatus(account,status);
@@ -40,7 +40,6 @@ public class AdminController {
                                                               @RequestParam(value = "pageSize", defaultValue = "10") int pageSize){
         return adminService.getAllUsers(pageNum,pageSize);
     }
-
     //更新用户信息
     @PostMapping("/update/updateUser")
     public ResponseMessage updateUser(@RequestBody User user){
@@ -50,26 +49,5 @@ public class AdminController {
    @PostMapping("/delete/deleteUser")
     public ResponseMessage deleteUser(@RequestParam("account") String account){
         return adminService.deleteUser(account);
-    }
-    
-    // 根据账号查询用户
-    @GetMapping("/getUserByAccount")
-    public ResponseMessage getUserByAccount(@RequestParam("account") String account) {
-        return adminService.getUserByAccount(account);
-    }
-    
-    // 根据邮箱查询用户
-    @GetMapping("/getUserByEmail")
-    public ResponseMessage getUserByEmail(@RequestParam("email") String email) {
-        return adminService.getUserByEmail(email);
-    }
-    
-    // 搜索用户（根据账号或邮箱模糊查询）
-    @GetMapping("/searchUsers")
-    public ResponseMessage<PageResponse<User>> searchUsers(
-            @RequestParam("keyword") String keyword,
-            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
-            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
-        return adminService.searchUsers(keyword, pageNum, pageSize);
     }
 }

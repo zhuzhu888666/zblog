@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: inline-block; width: 100px; font-weight: bold; }
+        input, button { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background-color: #007bff; color: white; border: none; cursor: pointer; margin-right: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>用户功能测试</h1>
+    
+    <div class="container">
+        <h2>搜索用户</h2>
+        <div class="form-group">
+            <input type="text" id="searchKeyword" placeholder="输入账号、邮箱或昵称">
+            <button onclick="searchUsers()">搜索</button>
+        </div>
+        <div id="searchResults"></div>
+    </div>
+
+    <div class="container">
+        <h2>查询用户</h2>
+        <div class="form-group">
+            <label>用户账号:</label>
+            <input type="text" id="userAccount" placeholder="输入用户账号">
+            <button onclick="getUserByAccount()">查询用户</button>
+        </div>
+        <div class="form-group">
+            <label>用户邮箱:</label>
+            <input type="email" id="userEmail" placeholder="输入用户邮箱">
+            <button onclick="getUserByEmail()">查询用户</button>
+        </div>
+        <div id="userInfo"></div>
+    </div>
+
+    <script>
+        async function searchUsers() {
+            const keyword = document.getElementById('searchKeyword').value;
+            if (!keyword.trim()) {
+                alert('请输入搜索关键词');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/user/searchUsers?keyword=${encodeURIComponent(keyword)}&pageNum=1&pageSize=10`);
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    displaySearchResults(result.data);
+                } else {
+                    alert('搜索失败: ' + result.message);
+                }
+            } catch (error) {
+                alert('请求失败: ' + error.message);
+            }
+        }
+
+        async function getUserByAccount() {
+            const account = document.getElementById('userAccount').value;
+            if (!account.trim()) {
+                alert('请输入用户账号');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/user/getUserByAccount?account=${encodeURIComponent(account)}`);
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    displayUserInfo(result.data);
+                } else {
+                    alert('查询失败: ' + result.message);
+                }
+            } catch (error) {
+                alert('请求失败: ' + error.message);
+            }
+        }
+
+        async function getUserByEmail() {
+            const email = document.getElementById('userEmail').value;
+            if (!email.trim()) {
+                alert('请输入用户邮箱');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/user/getUserByEmail?email=${encodeURIComponent(email)}`);
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    displayUserInfo(result.data);
+                } else {
+                    alert('查询失败: ' + result.message);
+                }
+            } catch (error) {
+                alert('请求失败: ' + error.message);
+            }
+        }
+
+        function displaySearchResults(pageData) {
+            const resultsDiv = document.getElementById('searchResults');
+            if (!pageData.data || pageData.data.length === 0) {
+                resultsDiv.innerHTML = '<p>未找到匹配的用户</p>';
+                return;
+            }
+
+            let html = `<h3>搜索结果 (共${pageData.total}条)</h3><table><thead><tr><th>ID</th><th>账号</th><th>邮箱</th><th>昵称</th><th>状态</th></tr></thead><tbody>`;
+
+            pageData.data.forEach(user => {
+                const statusText = user.status === 1 ? '启用' : '禁用';
+                html += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.account}</td>
+                        <td>${user.email || '-'}</td>
+                        <td>${user.nickname || '-'}</td>
+                        <td>${statusText}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        function displayUserInfo(user) {
+            const infoDiv = document.getElementById('userInfo');
+            const statusText = user.status === 1 ? '启用' : '禁用';
+            
+            infoDiv.innerHTML = `
+                <h3>用户信息</h3>
+                <table>
+                    <tr><td><strong>ID:</strong></td><td>${user.id}</td></tr>
+                    <tr><td><strong>账号:</strong></td><td>${user.account}</td></tr>
+                    <tr><td><strong>邮箱:</strong></td><td>${user.email || '-'}</td></tr>
+                    <tr><td><strong>昵称:</strong></td><td>${user.nickname || '-'}</td></tr>
+                    <tr><td><strong>状态:</strong></td><td>${statusText}</td></tr>
+                    <tr><td><strong>创建时间:</strong></td><td>${user.createTime || '-'}</td></tr>
+                </table>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -13,6 +13,7 @@ import xyz.ztzhome.zblog.entity.Bean.User;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
 import xyz.ztzhome.zblog.entity.VO.UserLoginVO;
+import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.mapper.UserMapper;
 import xyz.ztzhome.zblog.service.IUserService;
 import xyz.ztzhome.zblog.util.BCryptPassword;
@@ -21,6 +22,7 @@ import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.util.FileTypeUtil;
 import xyz.ztzhome.zblog.util.JwtToken;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -202,7 +204,7 @@ public class UserServiceImpl implements IUserService {
                 newUser.setId(user.getId());
                 newUser.setUserAvatar(path);
                 userMapper.updateUserProfile(newUser);
-                String newUserAvatar=minioService.getFileUrl(6,user.getUserAvatar());
+                String newUserAvatar=minioService.getFileUrl(ResponseConstant.AvatarTimOut,user.getUserAvatar());
                 return new ResponseMessage<>(ResponseConstant.success,"更新成功！",newUserAvatar);
             }
            else {
@@ -223,7 +225,71 @@ public class UserServiceImpl implements IUserService {
         if(user.getUserAvatar()==null|| user.getUserAvatar().isEmpty()){
             return new ResponseMessage<>(ResponseConstant.success,"默认","/images/default.jpg");
         }
-        String url=minioService.getFileUrl(6, user.getUserAvatar());
+        String url=minioService.getFileUrl(ResponseConstant.AvatarTimOut, user.getUserAvatar());
         return new ResponseMessage<>(ResponseConstant.success,"获取成功",url);
+    }
+    
+    @Override
+    public ResponseMessage getUserByAccount(String account) {
+        if (account == null || account.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.error, "账号不能为空");
+        }
+        
+        try {
+            User user = userMapper.selectByAccount(account);
+            if (user != null) {
+                return new ResponseMessage<>(ResponseConstant.success, "查询成功", user);
+            } else {
+                return new ResponseMessage<>(ResponseConstant.error, "用户不存在");
+            }
+        } catch (Exception e) {
+            return new ResponseMessage<>(ResponseConstant.error, "查询失败: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public ResponseMessage getUserByEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.error, "邮箱不能为空");
+        }
+        
+        try {
+            User user = userMapper.selectByEmail(email);
+            if (user != null) {
+                return new ResponseMessage<>(ResponseConstant.success, "查询成功", user);
+            } else {
+                return new ResponseMessage<>(ResponseConstant.error, "用户不存在");
+            }
+        } catch (Exception e) {
+            return new ResponseMessage<>(ResponseConstant.error, "查询失败: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public ResponseMessage<PageResponse<User>> searchUsers(String keyword, int pageNum, int pageSize) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.error, "搜索关键词不能为空");
+        }
+        
+        if (pageNum < 1) pageNum = 1;
+        if (pageSize < 1) pageSize = 10;
+        
+        try {
+            // 计算偏移量
+            int offset = (pageNum - 1) * pageSize;
+            
+            // 查询搜索结果总数
+            long total = userMapper.countSearchUsers(keyword);
+            
+            // 分页查询搜索结果
+            List<User> users = userMapper.searchUsers(keyword, offset, pageSize);
+            
+            // 创建分页响应对象
+            PageResponse<User> pageResponse = new PageResponse<>(users, total, pageNum, pageSize);
+            
+            return new ResponseMessage<>(ResponseConstant.success, "搜索成功", pageResponse);
+        } catch (Exception e) {
+            return new ResponseMessage<>(ResponseConstant.error, "搜索失败: " + e.getMessage());
+        }
     }
 }

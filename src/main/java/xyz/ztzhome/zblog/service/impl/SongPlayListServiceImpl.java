@@ -19,6 +19,7 @@ import xyz.ztzhome.zblog.entity.VO.PlayListVO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
 import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
+import xyz.ztzhome.zblog.mapper.SongMapper;
 import xyz.ztzhome.zblog.mapper.SongPlayListMapper;
 import xyz.ztzhome.zblog.mapper.SongPlayListSongMapper;
 import xyz.ztzhome.zblog.mapper.UserFavoritePlayListMapper;
@@ -35,6 +36,9 @@ public class SongPlayListServiceImpl implements ISongPlayListService {
 
     @Autowired
     private SongPlayListMapper songPlayListMapper;
+
+    @Autowired
+    private SongMapper songMapper;
 
     @Autowired
     private SongPlayListSongMapper songPlayListSongMapper;
@@ -128,7 +132,6 @@ public class SongPlayListServiceImpl implements ISongPlayListService {
                 return new ResponseMessage<>(ResponseConstant.error, "歌单不存在");
             }
 
-            // 更新基本信息
             playList.setName(updatePlayListDTO.getName());
             playList.setDescription(updatePlayListDTO.getDescription());
             playList.setIsPublic(updatePlayListDTO.getIsPublic());
@@ -202,6 +205,11 @@ public class SongPlayListServiceImpl implements ISongPlayListService {
             SongPlayList playList = songPlayListMapper.selectPlayListById(playListId);
             if (playList == null) {
                 return new ResponseMessage<>(ResponseConstant.error, "歌单不存在");
+            }
+
+            // 检查歌曲是否存在
+            if (songMapper.selectSongById(songId) == null) {
+                return new ResponseMessage<>(ResponseConstant.error, "歌曲不存在");
             }
 
             // 检查歌曲是否已在歌单中

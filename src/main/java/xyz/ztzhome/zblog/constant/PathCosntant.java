@@ -23,4 +23,8 @@ public class PathCosntant {
 
     //评论文本存储路径
 
+
+    //默认文件配置
+    public static final String Default_Song_Cover="/images/default/SongCover.jpg";
+
 }

@@ -56,4 +56,6 @@ public interface SongMapper {
     List<SongVO> selectSongVOsByStyleWithPage(@Param("style") String style, 
                                               @Param("offset") int offset, 
                                               @Param("limit") int limit);
+
+   int updatePlayCount(@Param("count")long count,@Param("id")long id);
 }

@@ -166,7 +166,7 @@ public class SongServiceImpl implements ISongService {
             return  new ResponseMessage<>(ResponseConstant.error,"歌曲不存在");
         }
         String path=PathCosntant.SONG_SAVE_PATH+song.getAudioPath();
-        String url=minioService.getFileUrl(6,path);
+        String url=minioService.getFileUrl(60*24,path);
         if(url==null){
             return new ResponseMessage<>(ResponseConstant.error,"存储库未找到该歌曲");
         }
@@ -242,10 +242,12 @@ public class SongServiceImpl implements ISongService {
         if(song==null){
             return new ResponseMessage<>(ResponseConstant.error,"歌曲信息不存在，删除失败");
         }
-        String filePath=PathCosntant.SONG_SAVE_PATH+song.getId()+song.getAudioPath();
+        String filePath=PathCosntant.SONG_SAVE_PATH+song.getAudioPath();
         minioService.deleteFile(filePath);
         if (!minioService.fileIsExist(filePath)){
-            return new ResponseMessage<>(ResponseConstant.error,"服务异常，删除失败");
+            //删除数据库中的歌曲信息--既然文件不存在那么把数据库中的数据也清除了
+            songMapper.deleteSong(id);
+            return new ResponseMessage<>(ResponseConstant.success,"未找到对应歌曲文件，已清空歌曲信息");
         }
         //删除数据库中的歌曲信息
         songMapper.deleteSong(id);
@@ -376,10 +378,21 @@ public class SongServiceImpl implements ISongService {
             return new ResponseMessage<>(ResponseConstant.success, "加载成功", "/files/image/default_cover.jpg");
         }
         String minioPath = PathCosntant.SONG_COVER_PATH + coverPath;
-        String url = minioService.getFileUrl(6, minioPath);
+        String url = minioService.getFileUrl(60*24, minioPath);
         if (url == null) {
             return new ResponseMessage<>(ResponseConstant.error, "存储库未找到该封面");
         }
         return new ResponseMessage<>(ResponseConstant.success, "加载成功", url);
+    }
+
+    @Override
+    public ResponseMessage addPlayCount(long id) {
+        Song song=songMapper.selectSongById(id);
+        if (song==null) {
+            return new ResponseMessage<>(ResponseConstant.error,"歌曲不存在");
+        }
+        long count=song.getPlayCount()+1;
+        songMapper.updatePlayCount(count,song.getId());
+        return new ResponseMessage<>(ResponseConstant.success,"1");
     }
 }

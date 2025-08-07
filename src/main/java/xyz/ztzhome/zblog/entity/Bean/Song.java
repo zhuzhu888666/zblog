@@ -54,6 +54,6 @@ public class Song {
     /**
      * 播放次数
      */
-    private int playCount;
+    private long playCount;
 
 }

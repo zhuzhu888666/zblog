@@ -33,9 +33,9 @@ public class SongPlayList {
     private String coverPath;
     
     /**
-     * 是否公开（0-私有，1-公开）
+     * 是否公开
      */
-    private int isPublic = 1;
+    private Boolean isPublic = true;
     
     /**
      * 创建时间

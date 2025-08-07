@@ -42,4 +42,6 @@ public interface ISongService {
     ResponseMessage<PageResponse<SongVO>> getSongsByStyleWithPage(String style, int pageNum, int pageSize);
 
     ResponseMessage getCoverURL(long id);
+
+    ResponseMessage addPlayCount(long id);
 }

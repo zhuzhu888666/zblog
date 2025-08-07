@@ -10,6 +10,7 @@ import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
 import xyz.ztzhome.zblog.entity.DTO.LoginDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserProfileDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateUserSecurityDTO;
+import xyz.ztzhome.zblog.entity.response.PageResponse;
 
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.IUserService;
@@ -69,4 +70,26 @@ public class UserController {
     public ResponseMessage updateUserPassword(@RequestBody User user){
         return new ResponseMessage(1,"success");
     }
+    
+    // 根据账号查询用户
+    @GetMapping("/getUserByAccount")
+    public ResponseMessage getUserByAccount(@RequestParam("account") String account) {
+        return userService.getUserByAccount(account);
+    }
+    
+    // 根据邮箱查询用户
+    @GetMapping("/getUserByEmail")
+    public ResponseMessage getUserByEmail(@RequestParam("email") String email) {
+        return userService.getUserByEmail(email);
+    }
+    
+    // 搜索用户（根据账号或邮箱模糊查询）
+    @GetMapping("/searchUsers")
+    public ResponseMessage<PageResponse<User>> searchUsers(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        return userService.searchUsers(keyword, pageNum, pageSize);
+    }
+
 }
