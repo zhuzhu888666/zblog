@@ -30,4 +30,10 @@ public class SongVO {
      */
     private int playCount;
 
+    /**
+     * 前端直接使用的封面路径
+     * - 若为默认封面，返回静态资源路径：/files/image/default_cover.jpg
+     * - 若为自定义封面，返回 MinIO 预签名 URL
+     */
+    private String coverPath;
 }

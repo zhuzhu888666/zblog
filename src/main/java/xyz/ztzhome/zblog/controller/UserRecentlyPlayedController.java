@@ -27,9 +27,15 @@ public class UserRecentlyPlayedController {
     /**
      * 获取最近播放列表
      */
-    @GetMapping("")
+    @GetMapping("/getRecentlyPlayed")
     public ResponseMessage<List<SongVO>> getRecentlyPlayed(@RequestParam("userId") long userId) {
         return recentlyPlayedService.getRecentlyPlayed(userId);
+    }
+    // 同步最近播放列表（前端已去重并仅传未在数据库的歌曲ID数组）
+    @PostMapping("/sync")
+    public ResponseMessage syncRecentlyPlayed(@RequestParam("userId") long userId,
+                                              @RequestBody List<Long> songIds) {
+        return recentlyPlayedService.syncRecentlySongs(userId, songIds);
     }
 }
 

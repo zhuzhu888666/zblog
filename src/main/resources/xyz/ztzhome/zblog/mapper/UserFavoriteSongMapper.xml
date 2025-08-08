@@ -24,6 +24,7 @@
         <result property="style" column="style"/>
         <result property="releaseTime" column="release_time"/>
         <result property="playCount" column="play_count"/>
+        <result property="coverPath" column="cover_path"/>
     </resultMap>
 
     <!-- 添加收藏歌曲 -->
@@ -56,7 +57,8 @@
             s.duration,
             s.style,
             s.release_time,
-            s.play_count
+            s.play_count,
+            s.cover_path
         FROM tb_user_favorite_song ufs
         JOIN tb_song s ON ufs.song_id = s.id
         JOIN tb_artist a ON s.artist_id = a.id
@@ -75,7 +77,8 @@
             s.duration,
             s.style,
             s.release_time,
-            s.play_count
+            s.play_count,
+            s.cover_path
         FROM tb_user_favorite_song ufs
         JOIN tb_song s ON ufs.song_id = s.id
         JOIN tb_artist a ON s.artist_id = a.id

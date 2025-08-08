@@ -100,6 +100,7 @@ public class SongPlayListServiceImpl implements ISongPlayListService {
 
             // 获取歌单中的歌曲列表
             List<SongVO> songs = songPlayListSongMapper.selectSongsByPlayListId(playListId);
+            fillCoverUrls(songs);
             playListDetail.setSongs(songs);
 
             return new ResponseMessage<>(ResponseConstant.success, "获取歌单详情成功", playListDetail);
@@ -263,6 +264,7 @@ public class SongPlayListServiceImpl implements ISongPlayListService {
     public ResponseMessage<List<SongVO>> getPlayListSongs(long playListId) {
         try {
             List<SongVO> songs = songPlayListSongMapper.selectSongsByPlayListId(playListId);
+            fillCoverUrls(songs);
             return new ResponseMessage<>(ResponseConstant.success, "获取歌单歌曲列表成功", songs);
         } catch (Exception e) {
             logger.error("获取歌单歌曲列表失败: {}", e.getMessage(), e);
@@ -275,6 +277,7 @@ public class SongPlayListServiceImpl implements ISongPlayListService {
         try {
             int offset = (pageNum - 1) * pageSize;
             List<SongVO> songs = songPlayListSongMapper.selectSongsByPlayListIdWithPage(playListId, offset, pageSize);
+            fillCoverUrls(songs);
             int totalCount = songPlayListSongMapper.countSongsByPlayListId(playListId);
 
             PageResponse<SongVO> pageResponse = new PageResponse<>();
@@ -288,6 +291,20 @@ public class SongPlayListServiceImpl implements ISongPlayListService {
         } catch (Exception e) {
             logger.error("分页获取歌单歌曲列表失败: {}", e.getMessage(), e);
             return new ResponseMessage<>(ResponseConstant.error, "获取歌单歌曲列表失败: " + e.getMessage());
+        }
+    }
+
+    private void fillCoverUrls(List<SongVO> songVOs) {
+        if (songVOs == null || songVOs.isEmpty()) return;
+        for (SongVO vo : songVOs) {
+            String coverPath = vo.getCoverPath();
+            if (coverPath == null || coverPath.isEmpty() || "default.jpg".equals(coverPath)) {
+                vo.setCoverPath("/files/image/default_cover.jpg");
+            } else {
+                String minioPath = PathCosntant.SONG_COVER_PATH + coverPath;
+                String url = minioService.getFileUrl(60*24, minioPath);
+                vo.setCoverPath(url);
+            }
         }
     }
 

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import xyz.ztzhome.zblog.constant.PathCosntant;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.*;
 import xyz.ztzhome.zblog.entity.VO.PlayListVO;
@@ -35,6 +36,9 @@ public class UserFavoriteServiceImpl implements IUserFavoriteService {
     
     @Autowired
     private SongPlayListMapper songPlayListMapper;
+
+    @Autowired
+    private MinioServiceImpl minioService;
 
     // ========== 收藏歌曲相关方法 ==========
 
@@ -105,6 +109,7 @@ public class UserFavoriteServiceImpl implements IUserFavoriteService {
     public ResponseMessage<List<SongVO>> getUserFavoriteSongs(long userId) {
         try {
             List<SongVO> favoriteSongs = userFavoriteSongMapper.selectFavoriteSongsByUserId(userId);
+            fillCoverUrls(favoriteSongs);
             return new ResponseMessage<>(ResponseConstant.success, "查询成功", favoriteSongs);
         } catch (Exception e) {
             logger.error("查询用户收藏歌曲失败：用户ID={}", userId, e);
@@ -132,10 +137,25 @@ public class UserFavoriteServiceImpl implements IUserFavoriteService {
             pageResponse.setPageSize(pageSize);
             pageResponse.setTotalPages((long) Math.ceil((double) totalCount / pageSize));
             
+            fillCoverUrls(favoriteSongs);
             return new ResponseMessage<>(ResponseConstant.success, "查询成功", pageResponse);
         } catch (Exception e) {
             logger.error("分页查询用户收藏歌曲失败：用户ID={}, 页码={}, 页大小={}", userId, pageNum, pageSize, e);
             return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+        }
+    }
+
+    private void fillCoverUrls(List<SongVO> songVOs) {
+        if (songVOs == null || songVOs.isEmpty()) return;
+        for (SongVO vo : songVOs) {
+            String coverPath = vo.getCoverPath();
+            if (coverPath == null || coverPath.isEmpty() || "default.jpg".equals(coverPath)) {
+                vo.setCoverPath("/files/image/default_cover.jpg");
+            } else {
+                String minioPath = PathCosntant.SONG_COVER_PATH + coverPath;
+                String url = minioService.getFileUrl(60*24, minioPath);
+                vo.setCoverPath(url);
+            }
         }
     }
 

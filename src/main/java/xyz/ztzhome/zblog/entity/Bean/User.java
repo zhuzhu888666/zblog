@@ -19,5 +19,4 @@ public class User {
     String address;
     String signature;//个性签名
     Date createTime=new Date();//创建的时间
-
 }

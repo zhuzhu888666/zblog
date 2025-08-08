@@ -12,8 +12,7 @@ import xyz.ztzhome.zblog.mapper.SongMapper;
 import xyz.ztzhome.zblog.mapper.UserRecentlyPlayedMapper;
 import xyz.ztzhome.zblog.service.IUserRecentlyPlayedService;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,6 +58,47 @@ public class UserRecentlyPlayedServiceImpl implements IUserRecentlyPlayedService
     public ResponseMessage<List<SongVO>> getRecentlyPlayed(long userId) {
         List<SongVO> songs = recentlyPlayedMapper.selectRecentlyPlayedSongs(userId, MAX_RECENTLY_PLAYED);
         return new ResponseMessage<>(ResponseConstant.success, "查询成功", songs);
+    }
+
+    @Override
+    @Transactional
+    public ResponseMessage syncRecentlySongs(long userId, List<Long> songIds) {
+        if (songIds == null || songIds.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.success, "无需同步");
+        }
+
+        // 去重并保序
+        LinkedHashSet<Long> distinctIds = new LinkedHashSet<>(songIds);
+
+        Date now = new Date();
+        int index = 0;
+        for (Long songId : distinctIds) {
+            if (songId == null) continue;
+            // 歌曲存在校验
+            if (songMapper.selectSongById(songId) == null) {
+                continue; // 不存在则跳过
+            }
+            UserRecentlyPlayed played = new UserRecentlyPlayed();
+            played.setUserId(userId);
+            played.setSongId(songId);
+            // 保持数组后面的时间更新为更近，使用 now 逐步递增毫秒确保顺序
+            played.setPlayTime(new Date(now.getTime() + index));
+            recentlyPlayedMapper.upsertRecentlyPlayed(played);
+            index++;
+        }
+
+        // 限制上限
+        int count = recentlyPlayedMapper.countRecentlyPlayed(userId);
+        if (count > MAX_RECENTLY_PLAYED) {
+            int toDeleteCount = count - MAX_RECENTLY_PLAYED;
+            List<UserRecentlyPlayed> oldestPlayed = recentlyPlayedMapper.selectOldestPlayed(userId, toDeleteCount);
+            List<Long> idsToDelete = oldestPlayed.stream().map(UserRecentlyPlayed::getId).collect(Collectors.toList());
+            if (!idsToDelete.isEmpty()) {
+                recentlyPlayedMapper.deleteRecentlyPlayed(idsToDelete);
+            }
+        }
+
+        return new ResponseMessage<>(ResponseConstant.success, "同步成功");
     }
 }
 

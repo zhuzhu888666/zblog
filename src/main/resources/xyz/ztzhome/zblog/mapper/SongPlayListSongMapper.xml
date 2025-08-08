@@ -25,6 +25,7 @@
         <result property="style" column="style"/>
         <result property="releaseTime" column="release_time"/>
         <result property="playCount" column="play_count"/>
+        <result property="coverPath" column="cover_path"/>
     </resultMap>
 
     <!-- 添加歌曲到歌单 -->
@@ -49,7 +50,7 @@
     <!-- 根据歌单ID查询歌曲列表 -->
     <select id="selectSongsByPlayListId" resultMap="SongVOResultMap">
         SELECT 
-            s.id, s.artist_id, s.name, s.album, s.duration, s.style, s.release_time, s.play_count,
+            s.id, s.artist_id, s.name, s.album, s.duration, s.style, s.release_time, s.play_count, s.cover_path,
             a.artist_name AS artist_name
         FROM tb_song_playlist_song ps
         JOIN tb_song s ON ps.song_id = s.id
@@ -61,7 +62,7 @@
     <!-- 根据歌单ID分页查询歌曲列表 -->
     <select id="selectSongsByPlayListIdWithPage" resultMap="SongVOResultMap">
         SELECT 
-            s.id, s.artist_id, s.name, s.album, s.duration, s.style, s.release_time, s.play_count,
+            s.id, s.artist_id, s.name, s.album, s.duration, s.style, s.release_time, s.play_count, s.cover_path,
             a.artist_name AS artist_name
         FROM tb_song_playlist_song ps
         JOIN tb_song s ON ps.song_id = s.id

@@ -21,4 +21,5 @@ public class ArtistController {
     public ResponseMessage addArtist(@RequestBody AddArtistDTO addArtistDTO){
         return artistService.addArtist(addArtistDTO);
     }
+
 }

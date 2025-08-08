@@ -14,6 +14,7 @@
         <result property="style" column="style"/>
         <result property="releaseTime" column="release_time"/>
         <result property="playCount" column="play_count"/>
+        <result property="coverPath" column="cover_path"/>
     </resultMap>
     
     <resultMap id="UserRecentlyPlayedResultMap" type="xyz.ztzhome.zblog.entity.Bean.UserRecentlyPlayed">
@@ -40,6 +41,7 @@
             s.style,
             s.release_time,
             s.play_count,
+            s.cover_path AS cover_path,
             rp.play_time
         FROM tb_user_recently_played rp
         JOIN tb_song s ON rp.song_id = s.id

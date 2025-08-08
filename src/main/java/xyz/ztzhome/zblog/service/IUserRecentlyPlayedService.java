@@ -15,5 +15,10 @@ public interface IUserRecentlyPlayedService {
      * 获取用户最近播放列表
      */
     ResponseMessage<List<SongVO>> getRecentlyPlayed(long userId);
+
+    /**
+     * 同步用户最近播放歌曲（批量）
+     */
+    ResponseMessage syncRecentlySongs(long userId, List<Long> songIds);
 }
 

@@ -57,6 +57,14 @@ public class SongServiceImpl implements ISongService {
         }else {
             songVO.setArtistName("未找到对应艺术家信息");
         }
+        // 封面URL
+        if (song.getCoverPath() == null || song.getCoverPath().isEmpty() || "default.jpg".equals(song.getCoverPath())) {
+            songVO.setCoverPath("/files/image/default_cover.jpg");
+        } else {
+            String minioPath = PathCosntant.SONG_COVER_PATH + song.getCoverPath();
+            String url = minioService.getFileUrl(60*24, minioPath);
+            songVO.setCoverPath(url);
+        }
         //添加返回数据
         return new ResponseMessage<>(ResponseConstant.success,"获取成功",songVO);
     }
@@ -150,6 +158,8 @@ public class SongServiceImpl implements ISongService {
         if(songVOS==null|| songVOS.isEmpty()){
             return new ResponseMessage<>(ResponseConstant.error,"未找到相关歌曲信息");
         }
+        // 填充封面URL
+        fillCoverUrls(songVOS);
         return new ResponseMessage<>(ResponseConstant.success,"success",songVOS);
     }
 
@@ -274,6 +284,7 @@ public class SongServiceImpl implements ISongService {
         
         // 查询数据
         List<SongVO> songs = songMapper.selectSongVOsByNameLikeWithPage(songName, offset, pageSize);
+        fillCoverUrls(songs);
         
         PageResponse<SongVO> pageResponse = new PageResponse<>(songs, total, pageNum, pageSize);
         
@@ -303,6 +314,7 @@ public class SongServiceImpl implements ISongService {
         
         // 查询数据
         List<SongVO> songs = songMapper.selectAllSongVOsWithPage(offset, pageSize);
+        fillCoverUrls(songs);
         
         PageResponse<SongVO> pageResponse = new PageResponse<>(songs, total, pageNum, pageSize);
         
@@ -325,6 +337,7 @@ public class SongServiceImpl implements ISongService {
         if (limit > 100) limit = 100; // 限制最大查询数量
 
         List<SongVO> songVOs = songMapper.selectRandomSongsWithArtist(limit);
+        fillCoverUrls(songVOs);
 
         if (songVOs.isEmpty()) {
             return new ResponseMessage<>(ResponseConstant.error, "暂无歌曲数据");
@@ -356,6 +369,7 @@ public class SongServiceImpl implements ISongService {
         
         // 查询数据
         List<SongVO> songs = songMapper.selectSongVOsByStyleWithPage(style, offset, pageSize);
+        fillCoverUrls(songs);
         
         PageResponse<SongVO> pageResponse = new PageResponse<>(songs, total, pageNum, pageSize);
         
@@ -394,5 +408,19 @@ public class SongServiceImpl implements ISongService {
         long count=song.getPlayCount()+1;
         songMapper.updatePlayCount(count,song.getId());
         return new ResponseMessage<>(ResponseConstant.success,"1");
+    }
+
+    private void fillCoverUrls(List<SongVO> songVOs) {
+        if (songVOs == null || songVOs.isEmpty()) return;
+        for (SongVO vo : songVOs) {
+            String coverPath = vo.getCoverPath();
+            if (coverPath == null || coverPath.isEmpty() || "default.jpg".equals(coverPath)) {
+                vo.setCoverPath("/files/image/default_cover.jpg");
+            } else {
+                String minioPath = PathCosntant.SONG_COVER_PATH + coverPath;
+                String url = minioService.getFileUrl(60*24, minioPath);
+                vo.setCoverPath(url);
+            }
+        }
     }
 }

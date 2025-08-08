@@ -60,7 +60,6 @@ public class UserController {
             return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
         }
     }
-
     @GetMapping("/getUserAvatar")
     public ResponseMessage getUserAvatar(@RequestParam("id")long id){
         return userService.getUserAvatar(id);
@@ -91,5 +90,4 @@ public class UserController {
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
         return userService.searchUsers(keyword, pageNum, pageSize);
     }
-
 }

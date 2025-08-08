@@ -19,8 +19,6 @@ import java.util.List;
 public class SongController {
     @Autowired
     SongServiceImpl songService;
-
-
     @PostMapping("/addSong")
     public ResponseMessage addSong(@RequestPart("data") String data, @RequestPart("audioFile") MultipartFile audioFile, @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
         AddSongDTO addSongDTO = new AddSongDTO();
@@ -32,7 +30,6 @@ public class SongController {
             return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
         }
     }
-
     //根据id查找歌曲
     @GetMapping("/selectSongById")
     @PostMapping
