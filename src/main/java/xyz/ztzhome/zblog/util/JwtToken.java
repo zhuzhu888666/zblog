@@ -1,123 +1,104 @@
 package xyz.ztzhome.zblog.util;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+import xyz.ztzhome.zblog.service.impl.MinioServiceImpl;
 
+import java.security.Key;
 import java.util.Date;
 
 public class JwtToken {
+    private static final Logger logger = LoggerFactory.getLogger(JwtToken.class);
 
-    // 密钥（实际应从配置中读取）
-    private static final String SECRET_KEY = "YourSuperLongSecretKey1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz12345678901";
-    private static final String Admin_KEY = "admin" + SECRET_KEY + "123";
-    private static final long EXPIRATION = 24 * 60 * 60 * 1000;
+    // 使用更安全的密钥生成方式
+    private static final Key USER_SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    private static final Key ADMIN_SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+
+    private static final long EXPIRATION = 24 * 60 * 60 * 1000; // 24小时
 
     // 生成普通用户 Token
     public static String generateToken(String userId) {
-        return Jwts.builder()
-                .setSubject(userId)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
-                .compact();
+        return buildToken(userId, USER_SECRET_KEY);
     }
 
     // 生成管理员 Token
     public static String generateAdminToken(String adminName) {
+        return buildToken(adminName, ADMIN_SECRET_KEY);
+    }
+
+    private static String buildToken(String subject, Key key) {
         return Jwts.builder()
-                .setSubject(adminName)
+                .setSubject(subject)
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(SignatureAlgorithm.HS512, Admin_KEY)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
     // 验证普通用户 Token
     public static int validateToken(String token) {
-        try {
-            Jws<Claims> jws = Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
-                    .build()
-                    .parseClaimsJws(token);
-            return 1; // 验证成功
-        } catch (ExpiredJwtException e) {
-            return 2; // Token 已过期
-        } catch (JwtException e) {
-            return 0; // 其他验证失败
-        } catch (Exception e) {
-            return 0; // 未知异常
-        }
+        return validateToken(token, USER_SECRET_KEY);
     }
 
     // 验证管理员 Token
     public static int validateAdminToken(String token) {
+        return validateToken(token, ADMIN_SECRET_KEY);
+    }
+
+    private static int validateToken(String token, Key key) {
         try {
-            Jws<Claims> jws = Jwts.parserBuilder()
-                    .setSigningKey(Admin_KEY)
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
             return 1; // 验证成功
         } catch (ExpiredJwtException e) {
             return 2; // Token 已过期
-        } catch (JwtException e) {
-            return 0; // 其他验证失败
-        } catch (Exception e) {
-            return 0; // 未知异常
+        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException e) {
+            return 0; // Token 无效
+        } catch (IllegalArgumentException e) {
+            return 0; // Token 为空或格式错误
         }
     }
 
-    // 新增方法：从普通用户 Token 获取账户信息
+    // 从普通用户 Token 获取账户信息
     public static String getAccountFromToken(String token) {
-        try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-            return claims.getSubject(); // 返回账户名
-        } catch (ExpiredJwtException e) {
-            // 即使过期也返回账户信息
-            return e.getClaims().getSubject();
-        } catch (JwtException e) {
-            throw new RuntimeException("无效的 Token: " + e.getMessage());
-        }
+        return extractSubject(token, USER_SECRET_KEY);
     }
 
-    // 新增方法：从管理员 Token 获取账户信息
+    // 从管理员 Token 获取账户信息
     public static String getAdminAccountFromToken(String token) {
+        return extractSubject(token, ADMIN_SECRET_KEY);
+    }
+
+    private static String extractSubject(String token, Key key) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Admin_KEY)
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token)
-                    .getBody();
-            return claims.getSubject(); // 返回管理员账户名
+                    .getBody()
+                    .getSubject();
         } catch (ExpiredJwtException e) {
             // 即使过期也返回账户信息
             return e.getClaims().getSubject();
         } catch (JwtException e) {
-            throw new RuntimeException("无效的管理员 Token: " + e.getMessage());
+            logger.error("提取token异常：->无效的token：{}",e.getMessage());
+            return  null;
         }
     }
 
-    // 测试主方法
-    public static void main(String[] args) {
-        String userId = "testUser123";
-        String adminName = "adminUser";
-
-        // 测试普通用户 Token
-        String userToken = generateToken(userId);
-        System.out.println("普通用户 Token 验证结果: " + validateToken(userToken));
-        System.out.println("从普通 Token 获取账户: " + getAccountFromToken(userToken));
-
-        // 测试管理员 Token
-        String adminToken = generateAdminToken(adminName);
-        System.out.println("管理员 Token 验证结果: " + validateAdminToken(adminToken));
-        System.out.println("从管理员 Token 获取账户: " + getAdminAccountFromToken(adminToken));
-
-        // 测试过期 Token
-        String expiredToken = Jwts.builder()
-                .setSubject(userId)
-                .setExpiration(new Date(System.currentTimeMillis() - 1000))
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
-                .compact();
-        System.out.println("过期 Token 获取账户: " + getAccountFromToken(expiredToken));
+    // 从请求头提取Token（可直接在Controller中使用）
+    public static String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }
