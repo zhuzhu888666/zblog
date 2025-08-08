@@ -33,5 +33,21 @@ public interface UserRecentlyPlayedMapper {
      * 删除指定的播放记录
      */
     void deleteRecentlyPlayed(@Param("ids") List<Long> ids);
+
+    /**
+     * 删除多余的播放记录，仅保留该用户最近的 keep 条（按 play_time DESC）
+     */
+    void trimKeepNewest(@Param("userId") long userId, @Param("keep") int keep);
+
+    /**
+     * 清空用户的最近播放记录
+     */
+    void deleteAllByUserId(@Param("userId") long userId);
+
+    /**
+     * 从用户最近播放中移除指定歌曲
+     * @return 受影响行数
+     */
+    int deleteByUserAndSong(@Param("userId") long userId, @Param("songId") long songId);
 }
 

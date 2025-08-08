@@ -71,5 +71,28 @@
         </foreach>
     </delete>
 
+    <!-- 仅保留该用户最近的 keep 条记录，删除其余（按 play_time DESC 排序） -->
+    <delete id="trimKeepNewest">
+        DELETE FROM tb_user_recently_played
+        WHERE user_id = #{userId}
+          AND id NOT IN (
+              SELECT id FROM (
+                  SELECT id
+                  FROM tb_user_recently_played
+                  WHERE user_id = #{userId}
+                  ORDER BY play_time DESC
+                  LIMIT #{keep}
+              ) AS t
+          )
+    </delete>
+
+    <delete id="deleteAllByUserId">
+        DELETE FROM tb_user_recently_played WHERE user_id = #{userId}
+    </delete>
+
+    <delete id="deleteByUserAndSong">
+        DELETE FROM tb_user_recently_played WHERE user_id = #{userId} AND song_id = #{songId}
+    </delete>
+
 </mapper>
 

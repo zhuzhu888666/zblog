@@ -42,17 +42,12 @@ public class UserRecentlyPlayedServiceImpl implements IUserRecentlyPlayedService
         played.setSongId(recentlyPlayedDTO.getSongId());
         played.setPlayTime(new Date());
         
-        recentlyPlayedMapper.upsertRecentlyPlayed(played);
+        executeWithDeadlockRetry(() -> recentlyPlayedMapper.upsertRecentlyPlayed(played));
         
         // 检查并清理超出200条的旧记录
         int count = recentlyPlayedMapper.countRecentlyPlayed(recentlyPlayedDTO.getUserId());
         if (count > MAX_RECENTLY_PLAYED) {
-            int toDeleteCount = count - MAX_RECENTLY_PLAYED;
-            List<UserRecentlyPlayed> oldestPlayed = recentlyPlayedMapper.selectOldestPlayed(recentlyPlayedDTO.getUserId(), toDeleteCount);
-            List<Long> idsToDelete = oldestPlayed.stream().map(UserRecentlyPlayed::getId).collect(Collectors.toList());
-            if (!idsToDelete.isEmpty()) {
-                recentlyPlayedMapper.deleteRecentlyPlayed(idsToDelete);
-            }
+            recentlyPlayedMapper.trimKeepNewest(recentlyPlayedDTO.getUserId(), MAX_RECENTLY_PLAYED);
         }
         
         return new ResponseMessage<>(ResponseConstant.success, "添加成功");
@@ -83,7 +78,6 @@ public class UserRecentlyPlayedServiceImpl implements IUserRecentlyPlayedService
     }
 
     @Override
-    @Transactional
     public ResponseMessage syncRecentlySongs(long userId, List<Long> songIds) {
         if (songIds == null || songIds.isEmpty()) {
             return new ResponseMessage<>(ResponseConstant.success, "无需同步");
@@ -91,10 +85,19 @@ public class UserRecentlyPlayedServiceImpl implements IUserRecentlyPlayedService
 
         // 去重并保序
         LinkedHashSet<Long> distinctIds = new LinkedHashSet<>(songIds);
+        // 记录原始顺序下标，用于正确设置 play_time
+        Map<Long, Integer> originalIndexBySongId = new HashMap<>();
+        int tmpIdx = 0;
+        for (Long id : distinctIds) {
+            originalIndexBySongId.put(id, tmpIdx++);
+        }
 
         Date now = new Date();
         int index = 0;
-        for (Long songId : distinctIds) {
+        // 固定顺序执行，避免不同事务不同顺序导致意外锁顺序冲突
+        List<Long> sortedIds = new ArrayList<>(distinctIds);
+        Collections.sort(sortedIds);
+        for (Long songId : sortedIds) {
             if (songId == null) continue;
             // 歌曲存在校验
             if (songMapper.selectSongById(songId) == null) {
@@ -104,23 +107,59 @@ public class UserRecentlyPlayedServiceImpl implements IUserRecentlyPlayedService
             played.setUserId(userId);
             played.setSongId(songId);
             // 保持数组后面的时间更新为更近，使用 now 逐步递增毫秒确保顺序
-            played.setPlayTime(new Date(now.getTime() + index));
-            recentlyPlayedMapper.upsertRecentlyPlayed(played);
+            Integer orig = originalIndexBySongId.get(songId);
+            int ordinal = (orig != null ? orig : index);
+            played.setPlayTime(new Date(now.getTime() + ordinal));
+            executeWithDeadlockRetry(() -> recentlyPlayedMapper.upsertRecentlyPlayed(played));
             index++;
         }
 
         // 限制上限
         int count = recentlyPlayedMapper.countRecentlyPlayed(userId);
         if (count > MAX_RECENTLY_PLAYED) {
-            int toDeleteCount = count - MAX_RECENTLY_PLAYED;
-            List<UserRecentlyPlayed> oldestPlayed = recentlyPlayedMapper.selectOldestPlayed(userId, toDeleteCount);
-            List<Long> idsToDelete = oldestPlayed.stream().map(UserRecentlyPlayed::getId).collect(Collectors.toList());
-            if (!idsToDelete.isEmpty()) {
-                recentlyPlayedMapper.deleteRecentlyPlayed(idsToDelete);
-            }
+            recentlyPlayedMapper.trimKeepNewest(userId, MAX_RECENTLY_PLAYED);
         }
 
         return new ResponseMessage<>(ResponseConstant.success, "同步成功");
+    }
+
+    @Override
+    public ResponseMessage clearAll(long userId) {
+        recentlyPlayedMapper.deleteAllByUserId(userId);
+        return new ResponseMessage<>(ResponseConstant.success, "清空成功");
+    }
+
+    @Override
+    public ResponseMessage removeSong(long userId, long songId) {
+        int affected = recentlyPlayedMapper.deleteByUserAndSong(userId, songId);
+        if (affected > 0) {
+            return new ResponseMessage<>(ResponseConstant.success, "移除成功");
+        } else {
+            return new ResponseMessage<>(ResponseConstant.error, "记录不存在或已移除");
+        }
+    }
+    private static final int DEADLOCK_MAX_RETRY = 3;
+    private static final long DEADLOCK_BACKOFF_MS = 30L;
+
+    private void executeWithDeadlockRetry(Runnable action) {
+        int attempt = 0;
+        while (true) {
+            try {
+                action.run();
+                return;
+            } catch (org.springframework.dao.DeadlockLoserDataAccessException e) {
+                attempt++;
+                if (attempt >= DEADLOCK_MAX_RETRY) {
+                    throw e;
+                }
+                try {
+                    Thread.sleep(DEADLOCK_BACKOFF_MS * attempt);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+            }
+        }
     }
 }
 

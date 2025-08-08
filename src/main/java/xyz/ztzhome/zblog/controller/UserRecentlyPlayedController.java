@@ -37,5 +37,22 @@ public class UserRecentlyPlayedController {
                                               @RequestBody List<Long> songIds) {
         return recentlyPlayedService.syncRecentlySongs(userId, songIds);
     }
+    /**
+     * 清空用户最近播放记录
+     */
+    @PostMapping("/clear")
+    public ResponseMessage clearAll(@RequestParam("userId") long userId) {
+        return recentlyPlayedService.clearAll(userId);
+    }
+
+    /**
+     * 从最近播放移除指定歌曲
+     */
+    @PostMapping("/remove")
+    public ResponseMessage removeSong(@RequestParam("userId") long userId,
+                                      @RequestParam("songId") long songId) {
+        return recentlyPlayedService.removeSong(userId, songId);
+    }
 }
+
 

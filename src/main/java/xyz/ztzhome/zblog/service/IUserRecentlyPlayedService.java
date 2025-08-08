@@ -20,5 +20,15 @@ public interface IUserRecentlyPlayedService {
      * 同步用户最近播放歌曲（批量）
      */
     ResponseMessage syncRecentlySongs(long userId, List<Long> songIds);
+
+    /**
+     * 清空用户最近播放记录
+     */
+    ResponseMessage clearAll(long userId);
+
+    /**
+     * 从最近播放移除指定歌曲
+     */
+    ResponseMessage removeSong(long userId, long songId);
 }
 
