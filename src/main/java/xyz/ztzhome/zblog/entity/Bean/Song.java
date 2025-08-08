@@ -45,6 +45,9 @@ public class Song {
      */
     private String audioPath;
 
+    //
+    private String lyricPath;
+
     /**
      * 歌曲发行时间
      */

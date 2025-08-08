@@ -9,7 +9,7 @@ public class PathCosntant {
     //歌曲封面
     public static final String SONG_COVER_PATH="music/cover/";
     //歌词
-    public static final String SONG_LRC_PATH="music/lrc/";
+    public static final String SONG_LYRIC_PATH="music/lrc/";
 
     //歌单封面
     public static final String PLAYLIST_COVER_PATH="music/cover/";

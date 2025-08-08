@@ -61,6 +61,10 @@ public class MinioServiceImpl implements IMinioService {
     @Override
     public String getFileUrl(int timeOut, String filePath) {
         try {
+            // 生成URL前先校验文件是否存在，避免返回无效URL
+            if (!fileIsExist(filePath)) {
+                return null;
+            }
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                     .bucket(bucket)
                     .method(Method.GET)
@@ -74,6 +78,10 @@ public class MinioServiceImpl implements IMinioService {
     @Override
     public String getFileUrl(int timeOut, String filePath, TimeUnit timeUnit) {
         try {
+            // 生成URL前先校验文件是否存在，避免返回无效URL
+            if (!fileIsExist(filePath)) {
+                return null;
+            }
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                     .bucket(bucket)
                     .method(Method.GET)

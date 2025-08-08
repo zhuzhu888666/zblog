@@ -14,6 +14,7 @@
         <result property="style" column="style"/>
         <result property="coverPath" column="cover_path"/>
         <result property="audioPath" column="audio_path"/>
+        <result property="lyricPath" column="lyric_path"/>
         <result property="releaseTime" column="release_time"/>
         <result property="playCount" column="play_count"/>
     </resultMap>
@@ -27,6 +28,7 @@
             <if test="style != null">style,</if>
             <if test="coverPath != null">cover_path,</if>
             <if test="audioPath != null">audio_path,</if>
+            <if test="lyricPath != null">lyric_path,</if>
             <if test="releaseTime != null">release_time,</if>
             <if test="playCount != null">play_count,</if>
         </trim>
@@ -38,6 +40,7 @@
             <if test="style != null">#{style},</if>
             <if test="coverPath != null">#{coverPath},</if>
             <if test="audioPath != null">#{audioPath},</if>
+            <if test="lyricPath != null">#{lyricPath},</if>
             <if test="releaseTime != null">#{releaseTime},</if>
             <if test="playCount != null">#{playCount},</if>
         </trim>
@@ -53,6 +56,7 @@
             <if test="style != null and style != ''">style = #{style},</if>
             <if test="coverPath != null and coverPath != ''">cover_path = #{coverPath},</if>
             <if test="audioPath != null and audioPath != ''">audio_path = #{audioPath},</if>
+            <if test="lyricPath != null and lyricPath != ''">lyric_path = #{lyricPath},</if>
             <if test="releaseTime != null">release_time = #{releaseTime},</if>
             <if test="playCount != null">play_count = #{playCount},</if>
         </set>

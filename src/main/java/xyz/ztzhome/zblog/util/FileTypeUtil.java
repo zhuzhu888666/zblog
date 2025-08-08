@@ -23,7 +23,7 @@ public class FileTypeUtil {
 
     private static final List<String> TEXT_EXT = Arrays.asList(
             "txt", "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
-            "md", "rtf", "csv", "html", "htm", "xml", "json", "ini", "log"
+            "md", "rtf", "csv", "html", "htm", "xml", "json", "ini", "log", "lrc"
     );
 
     private static final List<String> ZIP_EXT = Arrays.asList(

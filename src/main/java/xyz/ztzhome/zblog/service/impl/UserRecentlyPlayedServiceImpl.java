@@ -3,6 +3,7 @@ package xyz.ztzhome.zblog.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import xyz.ztzhome.zblog.constant.PathCosntant;
 import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.Bean.UserRecentlyPlayed;
 import xyz.ztzhome.zblog.entity.DTO.RecentlyPlayedDTO;
@@ -25,6 +26,9 @@ public class UserRecentlyPlayedServiceImpl implements IUserRecentlyPlayedService
     
     @Autowired
     private SongMapper songMapper;
+
+    @Autowired
+    private MinioServiceImpl minioService;
 
     @Override
     @Transactional
@@ -57,6 +61,24 @@ public class UserRecentlyPlayedServiceImpl implements IUserRecentlyPlayedService
     @Override
     public ResponseMessage<List<SongVO>> getRecentlyPlayed(long userId) {
         List<SongVO> songs = recentlyPlayedMapper.selectRecentlyPlayedSongs(userId, MAX_RECENTLY_PLAYED);
+        // 填充封面URL（含MinIO存在性校验）
+        if (songs != null && !songs.isEmpty()) {
+            for (SongVO vo : songs) {
+                String coverPath = vo.getCoverPath();
+                if (coverPath == null || coverPath.isEmpty() || "default.jpg".equals(coverPath)) {
+                    vo.setCoverPath("/files/image/default_cover.jpg");
+                } else {
+                    String minioPath = PathCosntant.SONG_COVER_PATH + coverPath;
+                    String url = minioService.getFileUrl(60 * 24, minioPath);
+                    if (url == null || (url.startsWith("getURL_error:"))) {
+                        // 文件不存在或生成URL异常，则回退默认封面
+                        vo.setCoverPath("/files/image/default_cover.jpg");
+                    } else {
+                        vo.setCoverPath(url);
+                    }
+                }
+            }
+        }
         return new ResponseMessage<>(ResponseConstant.success, "查询成功", songs);
     }
 
