@@ -15,7 +15,7 @@ import xyz.ztzhome.zblog.service.impl.SongServiceImpl;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/songs")
+@RequestMapping("/api/song")
 public class SongController {
     @Autowired
     SongServiceImpl songService;

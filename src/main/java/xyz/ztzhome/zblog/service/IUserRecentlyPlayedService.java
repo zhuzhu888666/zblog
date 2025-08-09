@@ -30,5 +30,10 @@ public interface IUserRecentlyPlayedService {
      * 从最近播放移除指定歌曲
      */
     ResponseMessage removeSong(long userId, long songId);
+
+    /**
+     * 批量从最近播放移除指定歌曲
+     */
+    ResponseMessage removeSongs(long userId, List<Long> songIds);
 }
 

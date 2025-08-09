@@ -10,7 +10,7 @@ import xyz.ztzhome.zblog.service.IBannerService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/banners")
+@RequestMapping("/api/banner")
 public class BannerController {
 
     @Autowired

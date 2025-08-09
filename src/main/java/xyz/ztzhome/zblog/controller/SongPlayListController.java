@@ -18,12 +18,11 @@ import xyz.ztzhome.zblog.service.ISongPlayListService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/playlists")
+@RequestMapping("/api/playlist")
 public class SongPlayListController {
 
     @Autowired
     private ISongPlayListService songPlayListService;
-
     // ========== 歌单基本操作 ==========
 
     /**

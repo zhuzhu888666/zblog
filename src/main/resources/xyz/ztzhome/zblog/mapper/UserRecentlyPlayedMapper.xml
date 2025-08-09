@@ -94,5 +94,14 @@
         DELETE FROM tb_user_recently_played WHERE user_id = #{userId} AND song_id = #{songId}
     </delete>
 
+    <delete id="deleteByUserAndSongs">
+        DELETE FROM tb_user_recently_played
+        WHERE user_id = #{userId}
+          AND song_id IN
+        <foreach item="songId" collection="songIds" open="(" separator="," close=")">
+            #{songId}
+        </foreach>
+    </delete>
+
 </mapper>
 

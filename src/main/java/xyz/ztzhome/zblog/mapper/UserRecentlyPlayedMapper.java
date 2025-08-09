@@ -49,5 +49,11 @@ public interface UserRecentlyPlayedMapper {
      * @return 受影响行数
      */
     int deleteByUserAndSong(@Param("userId") long userId, @Param("songId") long songId);
+
+    /**
+     * 批量从用户最近播放中移除指定歌曲
+     * @return 受影响行数
+     */
+    int deleteByUserAndSongs(@Param("userId") long userId, @Param("songIds") List<Long> songIds);
 }
 

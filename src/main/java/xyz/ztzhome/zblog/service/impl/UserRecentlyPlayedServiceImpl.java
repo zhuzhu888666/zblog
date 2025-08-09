@@ -138,6 +138,27 @@ public class UserRecentlyPlayedServiceImpl implements IUserRecentlyPlayedService
             return new ResponseMessage<>(ResponseConstant.error, "记录不存在或已移除");
         }
     }
+
+    @Override
+    public ResponseMessage removeSongs(long userId, List<Long> songIds) {
+        if (songIds == null || songIds.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.success, "无需删除");
+        }
+        // 去重
+        List<Long> distinctIds = songIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (distinctIds.isEmpty()) {
+            return new ResponseMessage<>(ResponseConstant.success, "无需删除");
+        }
+        int affected = recentlyPlayedMapper.deleteByUserAndSongs(userId, distinctIds);
+        if (affected > 0) {
+            return new ResponseMessage<>(ResponseConstant.success, "批量移除成功");
+        } else {
+            return new ResponseMessage<>(ResponseConstant.error, "未找到可移除的记录");
+        }
+    }
     private static final int DEADLOCK_MAX_RETRY = 3;
     private static final long DEADLOCK_BACKOFF_MS = 30L;
 

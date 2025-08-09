@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.impl.LyricServiceImpl;
 
-@RequestMapping("/api/lyrics")
+@RequestMapping("/api/lyric")
 @RestController
 public class SongLyricController {
     @Autowired

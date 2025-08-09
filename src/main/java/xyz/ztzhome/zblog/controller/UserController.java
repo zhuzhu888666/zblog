@@ -15,7 +15,7 @@ import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.IUserService;
 
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RestController
 public class UserController {
     @Autowired
@@ -50,7 +50,7 @@ public class UserController {
         return userService.updateUserSecurity(securityDTO);
     }
 
-    @PostMapping("/avatar")
+    @PostMapping("/updateAvatar")
     public ResponseMessage updateAvatar(@RequestPart("id") String id, @RequestPart("avatar") MultipartFile avatarFile) {
         try {
             long userId = Long.parseLong(id);
@@ -60,7 +60,7 @@ public class UserController {
             return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
         }
     }
-    @GetMapping("/avatar")
+    @GetMapping("/getUserAvatar")
     public ResponseMessage getUserAvatar(@RequestParam("id")long id){
         return userService.getUserAvatar(id);
     }

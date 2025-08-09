@@ -10,7 +10,7 @@ import xyz.ztzhome.zblog.service.IUserRecentlyPlayedService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users/recently-played")
+@RequestMapping("/api/user/recently-played")
 public class UserRecentlyPlayedController {
 
     @Autowired
@@ -35,6 +35,9 @@ public class UserRecentlyPlayedController {
     @PostMapping("/sync")
     public ResponseMessage syncRecentlyPlayed(@RequestParam("userId") long userId,
                                               @RequestBody List<Long> songIds) {
+        for (Long songId : songIds) {
+            System.out.println(songId);
+        }
         return recentlyPlayedService.syncRecentlySongs(userId, songIds);
     }
     /**
@@ -52,6 +55,15 @@ public class UserRecentlyPlayedController {
     public ResponseMessage removeSong(@RequestParam("userId") long userId,
                                       @RequestParam("songId") long songId) {
         return recentlyPlayedService.removeSong(userId, songId);
+    }
+
+    /**
+     * 批量从最近播放移除指定歌曲
+     */
+    @PostMapping("/remove/batch")
+    public ResponseMessage removeSongs(@RequestParam("userId") long userId,
+                                       @RequestBody List<Long> songIds) {
+        return recentlyPlayedService.removeSongs(userId, songIds);
     }
 }
 

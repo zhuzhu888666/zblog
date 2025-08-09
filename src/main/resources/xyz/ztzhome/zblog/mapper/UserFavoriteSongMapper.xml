@@ -27,10 +27,10 @@
         <result property="coverPath" column="cover_path"/>
     </resultMap>
 
-    <!-- 添加收藏歌曲 -->
+    <!-- 添加收藏歌曲 使用数据库原子操作（INSERT IGNORE）-->
     <insert id="insertUserFavoriteSong" parameterType="xyz.ztzhome.zblog.entity.Bean.UserFavoriteSong" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO tb_user_favorite_song (user_id, song_id, favorite_time)
-        VALUES (#{userId}, #{songId}, #{favoriteTime})
+        INSERT IGNORE INTO tb_user_favorite_song (user_id, song_id, favorite_time)
+        VALUES (#{userId}, #{songId}, NOW())
     </insert>
 
     <!-- 取消收藏歌曲 -->

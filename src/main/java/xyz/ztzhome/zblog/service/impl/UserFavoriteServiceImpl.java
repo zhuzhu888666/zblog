@@ -3,6 +3,7 @@ package xyz.ztzhome.zblog.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.ztzhome.zblog.constant.PathCosntant;
@@ -48,28 +49,24 @@ public class UserFavoriteServiceImpl implements IUserFavoriteService {
         try {
             // 检查歌曲是否存在
             if (songMapper.selectSongById(songId) == null) {
-                return new ResponseMessage<>(ResponseConstant.error, "歌曲不存在");
-            }
-            
-            // 检查是否已经收藏
-            if (userFavoriteSongMapper.isUserFavoriteSong(userId, songId)) {
-                return new ResponseMessage<>(ResponseConstant.error, "已经收藏过该歌曲");
+                return new ResponseMessage<>(ResponseConstant.success,"歌曲不存在");
             }
 
-            // 创建收藏记录
             UserFavoriteSong userFavoriteSong = new UserFavoriteSong();
             userFavoriteSong.setUserId(userId);
             userFavoriteSong.setSongId(songId);
-
-            int result = userFavoriteSongMapper.insertUserFavoriteSong(userFavoriteSong);
-            if (result > 0) {
-                return new ResponseMessage<>(ResponseConstant.success, "收藏成功");
-            } else {
-                return new ResponseMessage<>(ResponseConstant.error, "收藏失败");
+            try {
+                int result = userFavoriteSongMapper.insertUserFavoriteSong(userFavoriteSong);
+                return result > 0
+                        ? new ResponseMessage(ResponseConstant.success,"收藏成功")
+                        :new ResponseMessage(ResponseConstant.error,"收藏失败");
+            } catch (DuplicateKeyException e) {
+                // 捕获唯一键冲突异常
+                return new  ResponseMessage(ResponseConstant.success,"您已收藏过该歌曲");
             }
         } catch (Exception e) {
             logger.error("收藏歌曲失败：用户ID={}, 歌曲ID={}", userId, songId, e);
-            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+            return new ResponseMessage<>(ResponseConstant.error,"服务异常");
         }
     }
 

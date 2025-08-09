@@ -15,7 +15,7 @@ import xyz.ztzhome.zblog.service.IUserFavoriteService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users/favorites")
+@RequestMapping("/api/user/favorite")
 public class UserFavoriteController {
 
     @Autowired
@@ -26,15 +26,14 @@ public class UserFavoriteController {
     /**
      * 收藏歌曲
      */
-    @PostMapping("/songs")
+    @PostMapping("/song")
     public ResponseMessage favoriteSong(@RequestBody FavoriteDTO favoriteDTO) {
         return userFavoriteService.favoriteSong(favoriteDTO.getUserId(), favoriteDTO.getSongId());
     }
-
     /**
      * 取消收藏歌曲
      */
-    @PostMapping("/songs/unfavorite")
+    @PostMapping("/song/unfavorite")
     public ResponseMessage unfavoriteSong(@RequestBody FavoriteDTO favoriteDTO) {
         return userFavoriteService.unfavoriteSong(favoriteDTO.getUserId(), favoriteDTO.getSongId());
     }
@@ -42,7 +41,7 @@ public class UserFavoriteController {
     /**
      * 检查用户是否已收藏该歌曲
      */
-    @GetMapping("/songs/check")
+    @GetMapping("/song/check")
     public ResponseMessage<Boolean> isUserFavoriteSong(@RequestParam("userId") long userId, 
                                                       @RequestParam("songId") long songId) {
         return userFavoriteService.isUserFavoriteSong(userId, songId);
@@ -51,7 +50,7 @@ public class UserFavoriteController {
     /**
      * 获取用户收藏的歌曲列表
      */
-    @GetMapping("/songs/list")
+    @GetMapping("/song/list")
     public ResponseMessage<List<SongVO>> getUserFavoriteSongs(@RequestParam("userId") long userId) {
         return userFavoriteService.getUserFavoriteSongs(userId);
     }
@@ -59,7 +58,7 @@ public class UserFavoriteController {
     /**
      * 分页获取用户收藏的歌曲列表
      */
-    @GetMapping("/songs/page")
+    @GetMapping("/song/page")
     public ResponseMessage<PageResponse<SongVO>> getUserFavoriteSongsWithPage(
             @RequestParam("userId") long userId,
             @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,

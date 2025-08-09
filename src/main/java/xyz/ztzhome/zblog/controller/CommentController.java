@@ -13,7 +13,7 @@ import xyz.ztzhome.zblog.service.ICommentService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/comment")
 public class CommentController {
 
     @Autowired

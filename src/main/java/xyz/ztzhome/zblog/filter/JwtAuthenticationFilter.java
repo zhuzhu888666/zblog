@@ -20,8 +20,9 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     private static final Set<String> PUBLIC_ANY_METHOD_PATHS = Collections.unmodifiableSet(
             Set.of(
                     "/test/**",
-                    "/api/users/register",
-                    "/api/users/login",
+                    "/api/user/register",
+                    "/api/user/login",
+                    "/api/user/getUserAvatar",
                     "/api/admin/login",
                     "/api/admin/register"
             )
@@ -30,48 +31,49 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     // 公开的只读路径（仅GET方法放行）
     private static final Set<String> PUBLIC_GET_PATHS = Collections.unmodifiableSet(
             Set.of(
-                    // users
-                    "/api/users/avatar",
-                    // banners
-                    "/api/banners",
-                    "/api/banners/random",
-                    // songs
-                    "/api/songs/*",
-                    "/api/songs/random",
-                    "/api/songs/search",
-                    "/api/songs/search/page",
-                    "/api/songs/searchByStyle/page",
-                    "/api/songs/page",
-                    "/api/songs/url",
-                    "/api/songs/cover-url",
-                    "/api/songs/incrementPlayCount",
-                    // comments
-                    "/api/comments/song",
-                    "/api/comments/song/page",
-                    "/api/comments/replies",
-                    "/api/comments/replies/page",
-                    "/api/comments/user",
-                    "/api/comments/user/page",
-                    "/api/comments/count",
-                    "/api/comments/like/check",
-                    "/api/comments/like/count",
-                    // playlists
-                    "/api/playlists/detail",
-                    "/api/playlists/info",
-                    "/api/playlists/songs",
-                    "/api/playlists/songs/page",
-                    "/api/playlists/search",
-                    "/api/playlists/search/page",
-                    "/api/playlists/hot",
-                    "/api/playlists/favorite/check",
-                    "/api/playlists/favorite/count",
-                    // user favorites (counts and checks)
-                    "/api/users/favorites/songs/check",
-                    "/api/users/favorites/songs/count",
-                    "/api/users/favorites/artists/check",
-                    "/api/users/favorites/artists/followers",
-                    "/api/users/favorites/playlists/check",
-                    "/api/users/favorites/playlists/count",
+                    // user
+                    "/api/user/avatar",
+                    // banner
+                    "/api/banner",
+                    "/api/banner/random",
+                    // song
+                    "/api/song/*",
+                    "/api/song/random",
+                    "/api/song/search",
+                    "/api/song/search/page",
+                    "/api/song/searchByStyle/page",
+                    "/api/song/page",
+                    "/api/song/url",
+                    "/api/song/cover-url",
+                    "/api/song/incrementPlayCount",
+                    // comment
+                    "/api/comment/song",
+                    "/api/comment/song/page",
+                    "/api/comment/replies",
+                    "/api/comment/replies/page",
+                    "/api/comment/user",
+                    "/api/comment/user/page",
+                    "/api/comment/count",
+                    "/api/comment/like/check",
+                    "/api/comment/like/count",
+                    // playlist
+                    "/api/playlist/user",
+                    "/api/playlist/detail",
+                    "/api/playlist/info",
+                    "/api/playlist/songs",
+                    "/api/playlist/songs/page",
+                    "/api/playlist/search",
+                    "/api/playlist/search/page",
+                    "/api/playlist/hot",
+                    "/api/playlist/favorite/check",
+                    "/api/playlist/favorite/count",
+                    // user favorite (counts and check)
+                    "/api/user/favorite/songs/check",
+                    "/api/user/favorite/songs/count",
+                    "/api/user/favorite/artists/check",
+                    "/api/user/favorite/artists/followers",
+                    "/api/user/favorite/playlists/check",
+                    "/api/user/favorite/playlists/count",
                     // lyrics
                     "/api/lyrics",
                     // files
@@ -82,9 +84,9 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     // 普通用户可以访问的路径
     private static final Set<String> USER_PATHS = Collections.unmodifiableSet(
             Set.of(
-                    "/api/users/**",
-                    "/api/users/favorites/**",
-                    "/api/users/recently-played/**",
+                    "/api/user/**",
+                    "/api/user/favorites/**",
+                    "/api/user/recently-played/**",
                     "/api/comments/**",
                     "/api/playlists/**",
                     "/api/lyrics/**"
