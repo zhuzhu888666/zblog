@@ -11,13 +11,13 @@ import xyz.ztzhome.zblog.service.impl.LyricServiceImpl;
 public class SongLyricController {
     @Autowired
     LyricServiceImpl lrcService;
-
-    @GetMapping
+    //获取歌词文本路径.lrc
+    @GetMapping("/getLyric")
     public ResponseMessage getSongLrc(@RequestParam("id")long id) {
         return lrcService.getLrc(id);
     }
     //上传歌曲歌词
-    @PostMapping
+    @PostMapping("/upload")
     public ResponseMessage uploadSongLRC(@RequestParam("id") String id,@RequestParam("lrcFile") MultipartFile lrcFile){
         long songId = Long.parseLong(id);
         return lrcService.uploadLrc(songId,lrcFile);

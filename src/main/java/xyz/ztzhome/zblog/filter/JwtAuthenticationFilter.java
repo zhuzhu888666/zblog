@@ -24,7 +24,14 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                     "/api/user/login",
                     "/api/user/getUserAvatar",
                     "/api/admin/login",
-                    "/api/admin/register"
+                    "/api/admin/register",
+                    "/recently-played-test.html",
+                    "/api/song/cover-url",
+                    "/api/song/search",
+                    // lyric
+                    "/api/lyric/getLyric",
+                    //测试环境
+                    "/**"
             )
     );
 
@@ -74,8 +81,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                     "/api/user/favorite/artists/followers",
                     "/api/user/favorite/playlists/check",
                     "/api/user/favorite/playlists/count",
-                    // lyrics
-                    "/api/lyrics",
+
                     // files
                     "/api/files/download/*"
             )

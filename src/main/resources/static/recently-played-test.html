@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>最近播放测试</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; padding: 20px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 20px; }
+    section { border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+    label { display: inline-block; width: 90px; }
+    input, textarea { width: 100%; padding: 6px 8px; margin: 6px 0; box-sizing: border-box; }
+    button { margin-right: 8px; padding: 6px 12px; }
+    .row { display: grid; grid-template-columns: 120px 1fr; gap: 8px; align-items: center; }
+    pre { white-space: pre-wrap; word-break: break-word; background: #f7f7f7; padding: 10px; border-radius: 6px; }
+    .hint { color: #666; font-size: 12px; }
+  </style>
+  <script>
+    async function http(method, url, body) {
+      const headers = { 'Content-Type': 'application/json' };
+      const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+      const text = await res.text();
+      try { return JSON.parse(text); } catch { return text; }
+    }
+
+    function val(id) { return document.getElementById(id).value.trim(); }
+    function setOut(obj) { document.getElementById('output').textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); }
+
+    // 查询
+    async function getRecentlyPlayed() {
+      const userId = val('userId');
+      if (!userId) return setOut('userId 不能为空');
+      const data = await http('GET', `/api/user/recently-played?userId=${encodeURIComponent(userId)}`);
+      setOut(data);
+    }
+
+    // 添加单条
+    async function addRecentlyPlayed() {
+      const userId = val('userId');
+      const songId = val('songId');
+      if (!userId || !songId) return setOut('userId 和 songId 不能为空');
+      const data = await http('POST', `/api/user/recently-played/add`, { userId: Number(userId), songId: Number(songId) });
+      setOut(data);
+    }
+
+    // 同步（传数组，仅传未在数据库中的歌曲ID）
+    async function syncRecentlyPlayed() {
+      const userId = val('userId');
+      const idsStr = val('songIds');
+      if (!userId) return setOut('userId 不能为空');
+      let ids = [];
+      if (idsStr) {
+        ids = idsStr.split(',').map(s => s.trim()).filter(Boolean).map(Number);
+      }
+      const data = await http('POST', `/api/user/recently-played/sync?userId=${encodeURIComponent(userId)}`, ids);
+      setOut(data);
+    }
+
+    // 清空
+    async function clearAll() {
+      const userId = val('userId');
+      if (!userId) return setOut('userId 不能为空');
+      const data = await http('POST', `/api/user/recently-played/clear?userId=${encodeURIComponent(userId)}`);
+      setOut(data);
+    }
+
+    // 移除单曲
+    async function removeOne() {
+      const userId = val('userId');
+      const songId = val('songId');
+      if (!userId || !songId) return setOut('userId 和 songId 不能为空');
+      const data = await http('POST', `/api/user/recently-played/remove?userId=${encodeURIComponent(userId)}&songId=${encodeURIComponent(songId)}`);
+      setOut(data);
+    }
+
+    // 批量移除
+    async function removeBatch() {
+      const userId = val('userId');
+      const idsStr = val('songIds');
+      if (!userId) return setOut('userId 不能为空');
+      let ids = [];
+      if (idsStr) {
+        ids = idsStr.split(',').map(s => s.trim()).filter(Boolean).map(Number);
+      }
+      const data = await http('POST', `/api/user/recently-played/remove/batch?userId=${encodeURIComponent(userId)}`, ids);
+      setOut(data);
+    }
+  </script>
+  </head>
+  <body>
+    <h1>最近播放 - 测试页面</h1>
+
+    <section>
+      <div class="row">
+        <label for="userId">userId</label>
+        <input id="userId" placeholder="例如：1" />
+      </div>
+      <div class="row">
+        <label for="songId">songId</label>
+        <input id="songId" placeholder="例如：10001" />
+      </div>
+      <div class="row">
+        <label for="songIds">songIds</label>
+        <input id="songIds" placeholder="逗号分隔，例如：10001,10002,10003" />
+      </div>
+      <p class="hint">提示：批量操作的数组会作为 JSON 数组放在请求体中，单条操作使用查询参数。</p>
+      <div>
+        <button onclick="getRecentlyPlayed()">查询最近播放</button>
+        <button onclick="addRecentlyPlayed()">添加一条</button>
+        <button onclick="syncRecentlyPlayed()">同步（批量）</button>
+        <button onclick="removeOne()">移除一条</button>
+        <button onclick="removeBatch()">批量移除</button>
+        <button onclick="clearAll()">清空</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>响应输出</h3>
+      <pre id="output"></pre>
+    </section>
+  </body>
+</html>
+
+
