@@ -15,7 +15,7 @@ import xyz.ztzhome.zblog.service.IUserFavoriteService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user/favorite")
+@RequestMapping("/api/users/favorites")
 public class UserFavoriteController {
 
     @Autowired
@@ -26,7 +26,7 @@ public class UserFavoriteController {
     /**
      * 收藏歌曲
      */
-    @PostMapping("/song")
+    @PostMapping("/songs")
     public ResponseMessage favoriteSong(@RequestBody FavoriteDTO favoriteDTO) {
         return userFavoriteService.favoriteSong(favoriteDTO.getUserId(), favoriteDTO.getSongId());
     }
@@ -34,7 +34,7 @@ public class UserFavoriteController {
     /**
      * 取消收藏歌曲
      */
-    @PostMapping("/song/unfavorite")
+    @PostMapping("/songs/unfavorite")
     public ResponseMessage unfavoriteSong(@RequestBody FavoriteDTO favoriteDTO) {
         return userFavoriteService.unfavoriteSong(favoriteDTO.getUserId(), favoriteDTO.getSongId());
     }
@@ -42,7 +42,7 @@ public class UserFavoriteController {
     /**
      * 检查用户是否已收藏该歌曲
      */
-    @GetMapping("/song/check")
+    @GetMapping("/songs/check")
     public ResponseMessage<Boolean> isUserFavoriteSong(@RequestParam("userId") long userId, 
                                                       @RequestParam("songId") long songId) {
         return userFavoriteService.isUserFavoriteSong(userId, songId);
@@ -51,7 +51,7 @@ public class UserFavoriteController {
     /**
      * 获取用户收藏的歌曲列表
      */
-    @GetMapping("/songs")
+    @GetMapping("/songs/list")
     public ResponseMessage<List<SongVO>> getUserFavoriteSongs(@RequestParam("userId") long userId) {
         return userFavoriteService.getUserFavoriteSongs(userId);
     }
@@ -70,7 +70,7 @@ public class UserFavoriteController {
     /**
      * 获取歌曲被收藏的次数
      */
-    @GetMapping("/song/count")
+    @GetMapping("/songs/count")
     public ResponseMessage<Integer> getSongFavoriteCount(@RequestParam("songId") long songId) {
         return userFavoriteService.getSongFavoriteCount(songId);
     }
@@ -80,7 +80,7 @@ public class UserFavoriteController {
     /**
      * 关注艺术家
      */
-    @PostMapping("/artist")
+    @PostMapping("/artists")
     public ResponseMessage followArtist(@RequestBody FollowDTO followDTO) {
         return userFavoriteService.followArtist(followDTO.getUserId(), followDTO.getArtistId());
     }
@@ -88,7 +88,7 @@ public class UserFavoriteController {
     /**
      * 取消关注艺术家
      */
-    @PostMapping("/artist/unfollow")
+    @PostMapping("/artists/unfollow")
     public ResponseMessage unfollowArtist(@RequestBody FollowDTO followDTO) {
         return userFavoriteService.unfollowArtist(followDTO.getUserId(), followDTO.getArtistId());
     }
@@ -96,7 +96,7 @@ public class UserFavoriteController {
     /**
      * 检查用户是否已关注该艺术家
      */
-    @GetMapping("/artist/check")
+    @GetMapping("/artists/check")
     public ResponseMessage<Boolean> isUserFollowArtist(@RequestParam("userId") long userId, 
                                                       @RequestParam("artistId") long artistId) {
         return userFavoriteService.isUserFollowArtist(userId, artistId);
@@ -105,7 +105,7 @@ public class UserFavoriteController {
     /**
      * 获取用户关注的艺术家列表
      */
-    @GetMapping("/artists")
+    @GetMapping("/artists/list")
     public ResponseMessage<List<Artist>> getUserFollowArtists(@RequestParam("userId") long userId) {
         return userFavoriteService.getUserFollowArtists(userId);
     }
@@ -124,7 +124,7 @@ public class UserFavoriteController {
     /**
      * 获取艺术家的粉丝数量
      */
-    @GetMapping("/artist/followers")
+    @GetMapping("/artists/followers")
     public ResponseMessage<Integer> getArtistFollowerCount(@RequestParam("artistId") long artistId) {
         return userFavoriteService.getArtistFollowerCount(artistId);
     }
@@ -134,7 +134,7 @@ public class UserFavoriteController {
     /**
      * 收藏歌单
      */
-    @PostMapping("/playlist")
+    @PostMapping("/playlists")
     public ResponseMessage favoritePlayList(@RequestBody FavoritePlayListDTO favoritePlayListDTO) {
         return userFavoriteService.favoritePlayList(favoritePlayListDTO.getUserId(), favoritePlayListDTO.getPlayListId());
     }
@@ -142,7 +142,7 @@ public class UserFavoriteController {
     /**
      * 取消收藏歌单
      */
-    @PostMapping("/playlist/unfavorite")
+    @PostMapping("/playlists/unfavorite")
     public ResponseMessage unfavoritePlayList(@RequestBody FavoritePlayListDTO favoritePlayListDTO) {
         return userFavoriteService.unfavoritePlayList(favoritePlayListDTO.getUserId(), favoritePlayListDTO.getPlayListId());
     }
@@ -150,7 +150,7 @@ public class UserFavoriteController {
     /**
      * 检查用户是否已收藏该歌单
      */
-    @GetMapping("/playlist/check")
+    @GetMapping("/playlists/check")
     public ResponseMessage<Boolean> isUserFavoritePlayList(@RequestParam("userId") long userId,
                                                           @RequestParam("playListId") long playListId) {
         return userFavoriteService.isUserFavoritePlayList(userId, playListId);
@@ -159,7 +159,7 @@ public class UserFavoriteController {
     /**
      * 获取用户收藏的歌单列表
      */
-    @GetMapping("/playlists")
+    @GetMapping("/playlists/list")
     public ResponseMessage<List<PlayListVO>> getUserFavoritePlayLists(@RequestParam("userId") long userId) {
         return userFavoriteService.getUserFavoritePlayLists(userId);
     }
@@ -178,7 +178,7 @@ public class UserFavoriteController {
     /**
      * 获取歌单的收藏数量
      */
-    @GetMapping("/playlist/count")
+    @GetMapping("/playlists/count")
     public ResponseMessage<Integer> getPlayListFavoriteCount(@RequestParam("playListId") long playListId) {
         return userFavoriteService.getPlayListFavoriteCount(playListId);
     }

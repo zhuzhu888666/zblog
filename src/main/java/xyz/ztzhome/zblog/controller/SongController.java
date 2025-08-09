@@ -15,11 +15,11 @@ import xyz.ztzhome.zblog.service.impl.SongServiceImpl;
 import java.util.List;
 
 @RestController
-@RequestMapping("/song")
+@RequestMapping("/api/songs")
 public class SongController {
     @Autowired
     SongServiceImpl songService;
-    @PostMapping("/addSong")
+    @PostMapping
     public ResponseMessage addSong(@RequestPart("data") String data, @RequestPart("audioFile") MultipartFile audioFile, @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
         AddSongDTO addSongDTO = new AddSongDTO();
         try {
@@ -31,20 +31,19 @@ public class SongController {
         }
     }
     //根据id查找歌曲
-    @GetMapping("/selectSongById")
-    @PostMapping
-    ResponseMessage<SongVO> getSongById(@RequestParam("id") long id){
+    @GetMapping("/{id}")
+    ResponseMessage<SongVO> getSongById(@PathVariable("id") long id){
         return songService.getSong(id);
     }
 
-    @GetMapping("/selectSongsByName")
+    @GetMapping("/search")
     //根据名称模糊查找
-    ResponseMessage<List<SongVO>> getSongsByName(@RequestParam("songName") String songName){
+    ResponseMessage<List<SongVO>> getSongsByName(@RequestParam("name") String songName){
         return songService.getSongsByName(songName);
     }
 
     //更新歌曲
-    @PostMapping("/updateSong")
+    @PostMapping("/update")
     public ResponseMessage updateSong(@RequestPart("data") String data, @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
         UpdateSongDTO updateSongDTO = new UpdateSongDTO();
         try {
@@ -57,14 +56,13 @@ public class SongController {
     }
 
     //删除歌曲
-    @GetMapping("/deleteSong")
-    @PostMapping
+    @PostMapping("/delete")
     ResponseMessage deleteSongById(@RequestParam("id") long id){
         return songService.deleteSong(id);
     }
 
     //获取歌曲临时路径
-    @GetMapping("/getSongURL")
+    @GetMapping("/url")
     public ResponseMessage getSongURL(@RequestParam("id") long id){
         return songService.getSongURL(id);
     }
@@ -74,7 +72,7 @@ public class SongController {
      * @param id 歌曲id
      * @return 封面url
      */
-    @GetMapping("/getCoverURL")
+    @GetMapping("/cover-url")
     public ResponseMessage getCoverURL(@RequestParam("id") long id) {
         return songService.getCoverURL(id);
     }
@@ -86,9 +84,9 @@ public class SongController {
      * @param pageSize 每页大小，默认10
      * @return 分页结果
      */
-    @GetMapping("/searchByNameWithPage")
+    @GetMapping("/search/page")
     public ResponseMessage<PageResponse<SongVO>> searchByNameWithPage(
-            @RequestParam("songName") String songName,
+            @RequestParam("name") String songName,
             @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
         return songService.getSongsByNameWithPage(songName, pageNum, pageSize);
@@ -100,7 +98,7 @@ public class SongController {
      * @param pageSize 每页大小，默认10
      * @return 分页结果
      */
-    @GetMapping("/getAllSongsWithPage")
+    @GetMapping("/page")
     public ResponseMessage<PageResponse<SongVO>> getAllSongsWithPage(
             @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
@@ -112,7 +110,7 @@ public class SongController {
      * @param limit 查询数量，默认20
      * @return 歌曲列表
      */
-    @GetMapping("/getRandomSongs")
+    @GetMapping("/random")
     public ResponseMessage<List<SongVO>> getRandomSongs(
             @RequestParam(value = "limit", defaultValue = "20") int limit) {
         return songService.getRandomSongs(limit);
@@ -125,7 +123,7 @@ public class SongController {
      * @param pageSize 每页大小，默认10
      * @return 分页结果
      */
-    @GetMapping("/searchByStyleWithPage")
+    @GetMapping("/searchByStyle/page")
     public ResponseMessage<PageResponse<SongVO>> searchByStyleWithPage(
             @RequestParam("style") String style,
             @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,

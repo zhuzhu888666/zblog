@@ -18,7 +18,7 @@ import xyz.ztzhome.zblog.service.ISongPlayListService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/playlist")
+@RequestMapping("/api/playlists")
 public class SongPlayListController {
 
     @Autowired
@@ -29,7 +29,7 @@ public class SongPlayListController {
     /**
      * 创建歌单
      */
-    @PostMapping("/create")
+    @PostMapping
     public ResponseMessage createPlayList(@RequestPart("data") String data, 
                                          @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
         try {
@@ -86,7 +86,7 @@ public class SongPlayListController {
     /**
      * 添加歌曲到歌单
      */
-    @PostMapping("/addSong")
+    @PostMapping("/songs")
     public ResponseMessage addSongToPlayList(@RequestBody AddSongToPlayListDTO addSongToPlayListDTO) {
         return songPlayListService.addSongToPlayList(addSongToPlayListDTO);
     }
@@ -94,7 +94,7 @@ public class SongPlayListController {
     /**
      * 从歌单中移除歌曲
      */
-    @PostMapping("/removeSong")
+    @PostMapping("/songs/remove")
     public ResponseMessage removeSongFromPlayList(@RequestParam("playListId") long playListId,
                                                  @RequestParam("songId") long songId) {
         return songPlayListService.removeSongFromPlayList(playListId, songId);

@@ -10,7 +10,7 @@ import xyz.ztzhome.zblog.service.IUserRecentlyPlayedService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user/recently-played")
+@RequestMapping("/api/users/recently-played")
 public class UserRecentlyPlayedController {
 
     @Autowired
@@ -27,7 +27,7 @@ public class UserRecentlyPlayedController {
     /**
      * 获取最近播放列表
      */
-    @GetMapping("/getRecentlyPlayed")
+    @GetMapping
     public ResponseMessage<List<SongVO>> getRecentlyPlayed(@RequestParam("userId") long userId) {
         return recentlyPlayedService.getRecentlyPlayed(userId);
     }

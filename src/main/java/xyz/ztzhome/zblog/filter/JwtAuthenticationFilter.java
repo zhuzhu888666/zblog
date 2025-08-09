@@ -16,49 +16,84 @@ import java.util.Set;
 
 public class JwtAuthenticationFilter extends GenericFilterBean {
 
-        // 公开路径（无需认证）
-    private static final Set<String> PUBLIC_PATHS = Collections.unmodifiableSet(
+    // 公开路径（无需认证，任意方法）
+    private static final Set<String> PUBLIC_ANY_METHOD_PATHS = Collections.unmodifiableSet(
             Set.of(
                     "/test/**",
-                    "/user/register",
-                    "/user/login",
-                    "/user/getUserAvatar",
-                    "/admin/login",
-                    "/admin/register",
-                    "/song/**",
-                    "/article/getList",
-                    "/article/getDetail/**",
-                    "/comment/getComments/**"
+                    "/api/users/register",
+                    "/api/users/login",
+                    "/api/admin/login",
+                    "/api/admin/register"
+            )
+    );
+
+    // 公开的只读路径（仅GET方法放行）
+    private static final Set<String> PUBLIC_GET_PATHS = Collections.unmodifiableSet(
+            Set.of(
+                    // users
+                    "/api/users/avatar",
+                    // banners
+                    "/api/banners",
+                    "/api/banners/random",
+                    // songs
+                    "/api/songs/*",
+                    "/api/songs/random",
+                    "/api/songs/search",
+                    "/api/songs/search/page",
+                    "/api/songs/searchByStyle/page",
+                    "/api/songs/page",
+                    "/api/songs/url",
+                    "/api/songs/cover-url",
+                    "/api/songs/incrementPlayCount",
+                    // comments
+                    "/api/comments/song",
+                    "/api/comments/song/page",
+                    "/api/comments/replies",
+                    "/api/comments/replies/page",
+                    "/api/comments/user",
+                    "/api/comments/user/page",
+                    "/api/comments/count",
+                    "/api/comments/like/check",
+                    "/api/comments/like/count",
+                    // playlists
+                    "/api/playlists/detail",
+                    "/api/playlists/info",
+                    "/api/playlists/songs",
+                    "/api/playlists/songs/page",
+                    "/api/playlists/search",
+                    "/api/playlists/search/page",
+                    "/api/playlists/hot",
+                    "/api/playlists/favorite/check",
+                    "/api/playlists/favorite/count",
+                    // user favorites (counts and checks)
+                    "/api/users/favorites/songs/check",
+                    "/api/users/favorites/songs/count",
+                    "/api/users/favorites/artists/check",
+                    "/api/users/favorites/artists/followers",
+                    "/api/users/favorites/playlists/check",
+                    "/api/users/favorites/playlists/count",
+                    // lyrics
+                    "/api/lyrics",
+                    // files
+                    "/api/files/download/*"
             )
     );
 
     // 普通用户可以访问的路径
     private static final Set<String> USER_PATHS = Collections.unmodifiableSet(
             Set.of(
-                    "/user/**",
-                    "/music/addToFavorites",
-                    "/music/removeFromFavorites",
-                    "/article/create",
-                    "/article/update/**",
-                    "/article/delete/**",
-                    "/comment/add",
-                    "/comment/delete/**"
+                    "/api/users/**",
+                    "/api/users/favorites/**",
+                    "/api/users/recently-played/**",
+                    "/api/comments/**",
+                    "/api/playlists/**",
+                    "/api/lyrics/**"
             )
     );
 
     // 管理员可以访问的路径
     private static final Set<String> ADMIN_PATHS = Collections.unmodifiableSet(
-            Set.of(
-                    "/admin/dashboard",
-                    "/admin/userList",
-                    "/admin/deleteUser/**",
-                    "/admin/updateUserRole/**",
-                    "/music/upload",
-                    "/music/delete/**",
-                    "/article/approve/**",
-                    "/article/reject/**",
-                    "/system/config"
-            )
+            Set.of("/**")
     );
 
     private final PathMatcher pathMatcher = new AntPathMatcher();
@@ -74,8 +109,15 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         final String contextPath = request.getContextPath();
         final String requestPath = path.substring(contextPath.length());
 
+        // 放行预检请求
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         // 1. 检查是否为公开路径
-        if (isPathAllowed(requestPath, PUBLIC_PATHS)) {
+        if (isPathAllowed(requestPath, PUBLIC_ANY_METHOD_PATHS) ||
+                ("GET".equalsIgnoreCase(request.getMethod()) && isPathAllowed(requestPath, PUBLIC_GET_PATHS))) {
             chain.doFilter(request, response);
             return;
         }
@@ -137,7 +179,9 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                             FilterChain chain, String token, String requestPath) throws IOException, ServletException {
 
         // 检查用户是否有权限访问该路径
-        if (isPathAllowed(requestPath, USER_PATHS) || isPathAllowed(requestPath, PUBLIC_PATHS)) {
+        if (isPathAllowed(requestPath, USER_PATHS)
+                || isPathAllowed(requestPath, PUBLIC_ANY_METHOD_PATHS)
+                || ("GET".equalsIgnoreCase(request.getMethod()) && isPathAllowed(requestPath, PUBLIC_GET_PATHS))) {
             String userId = JwtToken.getAccountFromToken(token);
             request.setAttribute("userId", userId);
             chain.doFilter(request, response);

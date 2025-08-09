@@ -10,13 +10,13 @@ import xyz.ztzhome.zblog.service.IBannerService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/banners")
+@RequestMapping("/api/banners")
 public class BannerController {
 
     @Autowired
     private IBannerService bannerService;
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseMessage<Banner> createBanner(@RequestPart("file") MultipartFile file,
                                                 @RequestParam("title") String title,
                                                 @RequestParam(value = "linkUrl", required = false) String linkUrl,

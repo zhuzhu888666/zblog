@@ -12,7 +12,7 @@ import xyz.ztzhome.zblog.service.impl.AdminServiceImpl;
 
 import java.util.List;
 
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 @RestController
 public class AdminController {
 

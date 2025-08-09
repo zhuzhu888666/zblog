@@ -6,7 +6,7 @@ import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/blog-file")
+@RequestMapping("/api/files")
 public class BlogFileController {
 
     @PostMapping("/upload")

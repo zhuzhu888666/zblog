@@ -6,18 +6,18 @@ import org.springframework.web.multipart.MultipartFile;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.impl.LyricServiceImpl;
 
-@RequestMapping("/lrc")
+@RequestMapping("/api/lyrics")
 @RestController
 public class SongLyricController {
     @Autowired
     LyricServiceImpl lrcService;
 
-    @GetMapping("/getLrc")
+    @GetMapping
     public ResponseMessage getSongLrc(@RequestParam("id")long id) {
         return lrcService.getLrc(id);
     }
     //上传歌曲歌词
-    @PostMapping("/upload")
+    @PostMapping
     public ResponseMessage uploadSongLRC(@RequestParam("id") String id,@RequestParam("lrcFile") MultipartFile lrcFile){
         long songId = Long.parseLong(id);
         return lrcService.uploadLrc(songId,lrcFile);

@@ -15,7 +15,7 @@ import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.IUserService;
 
-@RequestMapping("/user")
+@RequestMapping("/api/users")
 @RestController
 public class UserController {
     @Autowired
@@ -50,7 +50,7 @@ public class UserController {
         return userService.updateUserSecurity(securityDTO);
     }
 
-    @PostMapping("/updateAvatar")
+    @PostMapping("/avatar")
     public ResponseMessage updateAvatar(@RequestPart("id") String id, @RequestPart("avatar") MultipartFile avatarFile) {
         try {
             long userId = Long.parseLong(id);
@@ -60,30 +60,30 @@ public class UserController {
             return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
         }
     }
-    @GetMapping("/getUserAvatar")
+    @GetMapping("/avatar")
     public ResponseMessage getUserAvatar(@RequestParam("id")long id){
         return userService.getUserAvatar(id);
     }
 
-    @PostMapping("/updatePassword")
+    @PostMapping("/password")
     public ResponseMessage updateUserPassword(@RequestBody User user){
         return new ResponseMessage(1,"success");
     }
     
     // 根据账号查询用户
-    @GetMapping("/getUserByAccount")
+    @GetMapping("/by-account")
     public ResponseMessage getUserByAccount(@RequestParam("account") String account) {
         return userService.getUserByAccount(account);
     }
     
     // 根据邮箱查询用户
-    @GetMapping("/getUserByEmail")
+    @GetMapping("/by-email")
     public ResponseMessage getUserByEmail(@RequestParam("email") String email) {
         return userService.getUserByEmail(email);
     }
     
     // 搜索用户（根据账号或邮箱模糊查询）
-    @GetMapping("/searchUsers")
+    @GetMapping("/search")
     public ResponseMessage<PageResponse<User>> searchUsers(
             @RequestParam("keyword") String keyword,
             @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,

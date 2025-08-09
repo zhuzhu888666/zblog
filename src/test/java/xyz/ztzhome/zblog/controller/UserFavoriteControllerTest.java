@@ -92,7 +92,7 @@ public class UserFavoriteControllerTest {
         favoriteDTO.setUserId(testUserId);
         favoriteDTO.setSongId(testSongId);
 
-        mockMvc.perform(post("/user/favorite/song")
+        mockMvc.perform(post("/api/users/favorites/songs")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andDo(print())
@@ -112,13 +112,13 @@ public class UserFavoriteControllerTest {
         favoriteDTO.setSongId(testSongId);
 
         // 先收藏
-        mockMvc.perform(post("/user/favorite/song")
+        mockMvc.perform(post("/api/users/favorites/songs")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andExpect(status().isOk());
 
         // 再取消收藏
-        mockMvc.perform(post("/user/favorite/song/unfavorite")
+        mockMvc.perform(post("/api/users/favorites/songs/unfavorite")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andDo(print())
@@ -134,7 +134,7 @@ public class UserFavoriteControllerTest {
         System.out.println("测试检查收藏状态API");
 
         // 检查未收藏状态
-        mockMvc.perform(get("/user/favorite/song/check")
+        mockMvc.perform(get("/api/users/favorites/songs/check")
                 .param("userId", testUserId.toString())
                 .param("songId", testSongId.toString()))
                 .andDo(print())
@@ -147,12 +147,12 @@ public class UserFavoriteControllerTest {
         favoriteDTO.setUserId(testUserId);
         favoriteDTO.setSongId(testSongId);
 
-        mockMvc.perform(post("/user/favorite/song")
+        mockMvc.perform(post("/api/users/favorites/songs")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/user/favorite/song/check")
+        mockMvc.perform(get("/api/users/favorites/songs/check")
                 .param("userId", testUserId.toString())
                 .param("songId", testSongId.toString()))
                 .andDo(print())
@@ -172,13 +172,13 @@ public class UserFavoriteControllerTest {
         favoriteDTO.setUserId(testUserId);
         favoriteDTO.setSongId(testSongId);
 
-        mockMvc.perform(post("/user/favorite/song")
+        mockMvc.perform(post("/api/users/favorites/songs")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andExpect(status().isOk());
 
         // 获取收藏列表
-        mockMvc.perform(get("/user/favorite/songs")
+        mockMvc.perform(get("/api/users/favorites/songs/list")
                 .param("userId", testUserId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -199,13 +199,13 @@ public class UserFavoriteControllerTest {
         favoriteDTO.setUserId(testUserId);
         favoriteDTO.setSongId(testSongId);
 
-        mockMvc.perform(post("/user/favorite/song")
+        mockMvc.perform(post("/api/users/favorites/songs")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andExpect(status().isOk());
 
         // 分页获取收藏列表
-        mockMvc.perform(get("/user/favorite/songs/page")
+        mockMvc.perform(get("/api/users/favorites/songs/page")
                 .param("userId", testUserId.toString())
                 .param("pageNum", "1")
                 .param("pageSize", "10"))
@@ -225,7 +225,7 @@ public class UserFavoriteControllerTest {
         System.out.println("测试获取歌曲收藏数量API");
 
         // 获取初始收藏数
-        mockMvc.perform(get("/user/favorite/song/count")
+        mockMvc.perform(get("/api/users/favorites/songs/count")
                 .param("songId", testSongId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -237,12 +237,12 @@ public class UserFavoriteControllerTest {
         favoriteDTO.setUserId(testUserId);
         favoriteDTO.setSongId(testSongId);
 
-        mockMvc.perform(post("/user/favorite/song")
+        mockMvc.perform(post("/api/users/favorites/songs")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/user/favorite/song/count")
+        mockMvc.perform(get("/api/users/favorites/songs/count")
                 .param("songId", testSongId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -262,7 +262,7 @@ public class UserFavoriteControllerTest {
         followDTO.setUserId(testUserId);
         followDTO.setArtistId(testArtistId);
 
-        mockMvc.perform(post("/user/favorite/artist")
+        mockMvc.perform(post("/api/users/favorites/artists")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(followDTO)))
                 .andDo(print())
@@ -282,13 +282,13 @@ public class UserFavoriteControllerTest {
         followDTO.setArtistId(testArtistId);
 
         // 先关注
-        mockMvc.perform(post("/user/favorite/artist")
+        mockMvc.perform(post("/api/users/favorites/artists")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(followDTO)))
                 .andExpect(status().isOk());
 
         // 再取消关注
-        mockMvc.perform(post("/user/favorite/artist/unfollow")
+        mockMvc.perform(post("/api/users/favorites/artists/unfollow")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(followDTO)))
                 .andDo(print())
@@ -304,7 +304,7 @@ public class UserFavoriteControllerTest {
         System.out.println("测试检查关注状态API");
 
         // 检查未关注状态
-        mockMvc.perform(get("/user/favorite/artist/check")
+        mockMvc.perform(get("/api/users/favorites/artists/check")
                 .param("userId", testUserId.toString())
                 .param("artistId", testArtistId.toString()))
                 .andDo(print())
@@ -317,12 +317,12 @@ public class UserFavoriteControllerTest {
         followDTO.setUserId(testUserId);
         followDTO.setArtistId(testArtistId);
 
-        mockMvc.perform(post("/user/favorite/artist")
+        mockMvc.perform(post("/api/users/favorites/artists")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(followDTO)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/user/favorite/artist/check")
+        mockMvc.perform(get("/api/users/favorites/artists/check")
                 .param("userId", testUserId.toString())
                 .param("artistId", testArtistId.toString()))
                 .andDo(print())
@@ -342,13 +342,13 @@ public class UserFavoriteControllerTest {
         followDTO.setUserId(testUserId);
         followDTO.setArtistId(testArtistId);
 
-        mockMvc.perform(post("/user/favorite/artist")
+        mockMvc.perform(post("/api/users/favorites/artists")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(followDTO)))
                 .andExpect(status().isOk());
 
         // 获取关注列表
-        mockMvc.perform(get("/user/favorite/artists")
+        mockMvc.perform(get("/api/users/favorites/artists/list")
                 .param("userId", testUserId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -365,7 +365,7 @@ public class UserFavoriteControllerTest {
         System.out.println("测试获取艺术家粉丝数量API");
 
         // 获取初始粉丝数
-        mockMvc.perform(get("/user/favorite/artist/followers")
+        mockMvc.perform(get("/api/users/favorites/artists/followers")
                 .param("artistId", testArtistId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -377,12 +377,12 @@ public class UserFavoriteControllerTest {
         followDTO.setUserId(testUserId);
         followDTO.setArtistId(testArtistId);
 
-        mockMvc.perform(post("/user/favorite/artist")
+        mockMvc.perform(post("/api/users/favorites/artists")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(followDTO)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/user/favorite/artist/followers")
+        mockMvc.perform(get("/api/users/favorites/artists/followers")
                 .param("artistId", testArtistId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -403,7 +403,7 @@ public class UserFavoriteControllerTest {
         favoriteDTO.setUserId(testUserId);
         favoriteDTO.setSongId(testSongId);
 
-        mockMvc.perform(post("/user/favorite/song")
+        mockMvc.perform(post("/api/users/favorites/songs")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andExpect(status().isOk())
@@ -414,44 +414,44 @@ public class UserFavoriteControllerTest {
         followDTO.setUserId(testUserId);
         followDTO.setArtistId(testArtistId);
 
-        mockMvc.perform(post("/user/favorite/artist")
+        mockMvc.perform(post("/api/users/favorites/artists")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(followDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(1));
 
         // 3. 检查状态
-        mockMvc.perform(get("/user/favorite/song/check")
+        mockMvc.perform(get("/api/users/favorites/songs/check")
                 .param("userId", testUserId.toString())
                 .param("songId", testSongId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(true));
 
-        mockMvc.perform(get("/user/favorite/artist/check")
+        mockMvc.perform(get("/api/users/favorites/artists/check")
                 .param("userId", testUserId.toString())
                 .param("artistId", testArtistId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(true));
 
         // 4. 获取列表
-        mockMvc.perform(get("/user/favorite/songs")
+        mockMvc.perform(get("/api/users/favorites/songs/list")
                 .param("userId", testUserId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(1));
 
-        mockMvc.perform(get("/user/favorite/artists")
+        mockMvc.perform(get("/api/users/favorites/artists/list")
                 .param("userId", testUserId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(1));
 
         // 5. 取消收藏和关注
-        mockMvc.perform(post("/user/favorite/song/unfavorite")
+        mockMvc.perform(post("/api/users/favorites/songs/unfavorite")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(favoriteDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(1));
 
-        mockMvc.perform(post("/user/favorite/artist/unfollow")
+        mockMvc.perform(post("/api/users/favorites/artists/unfollow")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(followDTO)))
                 .andExpect(status().isOk())
