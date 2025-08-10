@@ -8,6 +8,7 @@ import xyz.ztzhome.zblog.entity.Bean.Song;
 import xyz.ztzhome.zblog.entity.DTO.AddSongDTO;
 import xyz.ztzhome.zblog.entity.DTO.UpdateSongDTO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.impl.SongServiceImpl;
@@ -27,7 +28,7 @@ public class SongController {
             addSongDTO = mapper.readValue(data, AddSongDTO.class);
             return songService.addSong(addSongDTO, audioFile, coverFile);
         } catch (Exception e) {
-            return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
+            return new ResponseMessage<>(ResponseConstant.error, "接收对象构建失败:" + e.getMessage());
         }
     }
     //根据id查找歌曲
@@ -51,7 +52,7 @@ public class SongController {
             updateSongDTO = mapper.readValue(data, UpdateSongDTO.class);
             return songService.updateSong(updateSongDTO, coverFile);
         } catch (Exception e) {
-            return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
+            return new ResponseMessage<>(ResponseConstant.error, "接收对象构建失败:" + e.getMessage());
         }
     }
 

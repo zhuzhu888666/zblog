@@ -57,7 +57,7 @@ public class UserController {
             System.out.println("转换后用户id:"+userId);
             return userService.updateUserAvatar(userId, avatarFile);
         } catch (Exception e) {
-            return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
+            return new ResponseMessage<>(ResponseConstant.error, "接收对象构建失败:" + e.getMessage());
         }
     }
     @GetMapping("/getUserAvatar")
@@ -67,7 +67,7 @@ public class UserController {
 
     @PostMapping("/password")
     public ResponseMessage updateUserPassword(@RequestBody User user){
-        return new ResponseMessage(1,"success");
+        return new ResponseMessage<>(ResponseConstant.success, "success");
     }
     
     // 根据账号查询用户

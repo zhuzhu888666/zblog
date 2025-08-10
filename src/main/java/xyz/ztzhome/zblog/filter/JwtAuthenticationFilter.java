@@ -19,7 +19,9 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     // 公开路径（无需认证，任意方法）
     private static final Set<String> PUBLIC_ANY_METHOD_PATHS = Collections.unmodifiableSet(
             Set.of(
+                    //test
                     "/test/**",
+                    //
                     "/api/user/register",
                     "/api/user/login",
                     "/api/user/getUserAvatar",

@@ -40,20 +40,20 @@ public class AdminServiceImpl implements IAdminService {
         try {
             if (admin == null || admin.getAccount() == null || admin.getAccount().isEmpty() || 
                 admin.getPassword() == null || admin.getPassword().isEmpty()) {
-                return new ResponseMessage<>(ResponseConstant.error, "缺少必要参数");
+                return ResponseMessage.error("缺少必要参数");
             }
 
             // 检查账号是否已存在
             boolean exists = adminMapper.existsByAccount(admin.getAccount());
             if (exists) {
-                return new ResponseMessage<>(ResponseConstant.error, "账号已存在");
+                return ResponseMessage.error("账号已存在");
             }
 
             // 检查邮箱是否已存在（如果提供了邮箱）
             if (admin.getEmail() != null && !admin.getEmail().isEmpty()) {
                 boolean emailExists = adminMapper.existsByEmail(admin.getEmail());
                 if (emailExists) {
-                    return new ResponseMessage<>(ResponseConstant.error, "邮箱已存在");
+                    return ResponseMessage.error("邮箱已存在");
                 }
             }
 
@@ -62,13 +62,13 @@ public class AdminServiceImpl implements IAdminService {
             
             int result = adminMapper.insertAdmin(admin);
             if (result > 0) {
-                return new ResponseMessage<>(ResponseConstant.success, "注册成功");
+                return ResponseMessage.success("注册成功");
             } else {
-                return new ResponseMessage<>(ResponseConstant.error, "注册失败");
+                return ResponseMessage.error("注册失败");
             }
         } catch (Exception e) {
             logger.error("管理员注册失败", e);
-            return new ResponseMessage<>(ResponseConstant.error, "服务异常");
+            return ResponseMessage.error("服务异常");
         }
     }
 

@@ -11,6 +11,7 @@ import xyz.ztzhome.zblog.entity.DTO.UpdatePlayListDTO;
 import xyz.ztzhome.zblog.entity.VO.PlayListDetailVO;
 import xyz.ztzhome.zblog.entity.VO.PlayListVO;
 import xyz.ztzhome.zblog.entity.VO.SongVO;
+import xyz.ztzhome.zblog.constant.ResponseConstant;
 import xyz.ztzhome.zblog.entity.response.PageResponse;
 import xyz.ztzhome.zblog.entity.response.ResponseMessage;
 import xyz.ztzhome.zblog.service.ISongPlayListService;
@@ -36,7 +37,7 @@ public class SongPlayListController {
             CreatePlayListDTO createPlayListDTO = mapper.readValue(data, CreatePlayListDTO.class);
             return songPlayListService.createPlayList(createPlayListDTO, coverFile);
         } catch (Exception e) {
-            return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
+            return new ResponseMessage<>(ResponseConstant.error, "接收对象构建失败:" + e.getMessage());
         }
     }
 
@@ -67,7 +68,7 @@ public class SongPlayListController {
             UpdatePlayListDTO updatePlayListDTO = mapper.readValue(data, UpdatePlayListDTO.class);
             return songPlayListService.updatePlayList(updatePlayListDTO, coverFile);
         } catch (Exception e) {
-            return new ResponseMessage(0, "接收对象构建失败:" + e.getMessage());
+            return new ResponseMessage<>(ResponseConstant.error, "接收对象构建失败:" + e.getMessage());
         }
     }
 
