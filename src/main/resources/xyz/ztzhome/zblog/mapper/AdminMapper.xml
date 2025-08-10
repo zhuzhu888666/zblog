@@ -6,15 +6,16 @@
 <mapper namespace="xyz.ztzhome.zblog.mapper.AdminMapper">
 
     <!-- 定义 resultMap -->
-    <resultMap id="UserResultMap" type="xyz.ztzhome.zblog.entity.Bean.Admin">
+    <resultMap id="AdminResultMap" type="xyz.ztzhome.zblog.entity.Bean.Admin">
         <result property="id" column="id"/>
         <result property="account" column="account"/>
         <result property="password" column="password"/>
         <result property="email" column="email"/>
     </resultMap>
 
-    <insert id="insertAdmin"  parameterType="xyz.ztzhome.zblog.entity.Bean.Admin" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO tb_user
+    <!-- 插入管理员 -->
+    <insert id="insertAdmin" parameterType="xyz.ztzhome.zblog.entity.Bean.Admin" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_admin
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <!-- 必填字段 -->
             <if test="account != null">account,</if>
@@ -32,24 +33,32 @@
     </insert>
 
     <!-- 根据账号查询 -->
-    <select id="selectByAccount" resultMap="UserResultMap">
-        SELECT * from tb_admin where account =#{account}
+    <select id="selectByAccount" resultMap="AdminResultMap">
+        SELECT * FROM tb_admin WHERE account = #{account}
     </select>
-    <select id="selectByEmail" resultMap="UserResultMap">
-        SELECT * from tb_admin where email = #{email}
+    
+    <!-- 根据邮箱查询 -->
+    <select id="selectByEmail" resultMap="AdminResultMap">
+        SELECT * FROM tb_admin WHERE email = #{email}
     </select>
+    
+    <!-- 检查账号是否存在 -->
     <select id="existsByAccount" resultType="java.lang.Boolean">
-        SELECT * from tb_admin where account=#{account}
+        SELECT COUNT(*) > 0 FROM tb_admin WHERE account = #{account}
     </select>
+    
+    <!-- 检查邮箱是否存在 -->
     <select id="existsByEmail" resultType="java.lang.Boolean">
-        SELECT * from tb_admin where email=#{email}
+        SELECT COUNT(*) > 0 FROM tb_admin WHERE email = #{email}
     </select>
-    <select id="selectAdminById" resultType="xyz.ztzhome.zblog.entity.Bean.Admin">
-        select *from tb_admin where id=#{id}
+    
+    <!-- 根据ID查询管理员 -->
+    <select id="selectAdminById" resultMap="AdminResultMap">
+        SELECT * FROM tb_admin WHERE id = #{id}
     </select>
 
-    <!--更新-->
-    <update id="updateAdmin">
+    <!-- 更新管理员信息 -->
+    <update id="updateAdmin" parameterType="xyz.ztzhome.zblog.entity.Bean.Admin">
         UPDATE tb_admin
         <set>
             <if test="password != null">password = #{password},</if>
@@ -65,14 +74,9 @@
         </where>
     </update>
 
-    <!--删除-->
-    <!-- 删除用户 -->
-    <delete id="deleteAdminById" parameterType="string">
-        DELETE FROM tb_admin
-        WHERE id = #{id}
-    </delete>
-    <delete id="deleteByAccount">
-        SELECT * from tb_user where account=#{account}
+    <!-- 根据ID删除管理员 -->
+    <delete id="deleteAdminById" parameterType="long">
+        DELETE FROM tb_admin WHERE id = #{id}
     </delete>
 
 </mapper>
