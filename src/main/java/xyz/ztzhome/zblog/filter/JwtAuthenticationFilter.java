@@ -29,9 +29,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                     "/api/song/cover-url",
                     "/api/song/search",
                     // lyric
-                    "/api/lyric/getLyric",
-                    //测试环境
-                    "/**"
+                    "/api/lyric/getLyric"
             )
     );
 
@@ -53,6 +51,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                     "/api/song/url",
                     "/api/song/cover-url",
                     "/api/song/incrementPlayCount",
+                    //lyric
+                    "/api/lyric/getLyric",
                     // comment
                     "/api/comment/song",
                     "/api/comment/song/page",
@@ -93,9 +93,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                     "/api/user/**",
                     "/api/user/favorites/**",
                     "/api/user/recently-played/**",
-                    "/api/comments/**",
-                    "/api/playlists/**",
-                    "/api/lyrics/**"
+                    "/api/comment/**",
+                    "/api/playlist/**"
             )
     );
 

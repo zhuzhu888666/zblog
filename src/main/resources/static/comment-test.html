@@ -1023,8 +1023,8 @@
 
             try {
                 const promises = [
-                    fetch(`/user/detail?id=${params.userId}`),
-                    fetch(`/user/detail?id=${params.currentUserId}`)
+                    fetch(`/api/user/getUserAvatar?id=${params.userId}`),
+                    fetch(`/api/user/getUserAvatar?id=${params.currentUserId}`)
                 ];
 
                 const results = await Promise.all(promises);
@@ -1093,8 +1093,8 @@
             
             try {
                 const [commentCountRes, likeCountRes] = await Promise.all([
-                    fetch(`/comment/count?songId=${params.songId}`),
-                    fetch(`/comment/like/count?commentId=1`)
+                    fetch(`/api/comment/count?songId=${params.songId}`),
+                    fetch(`/api/comment/like/count?commentId=1`)
                 ]);
                 
                 const commentCountData = await commentCountRes.json();
@@ -1144,7 +1144,7 @@
             showLoading('addCommentResult');
 
             try {
-                const response = await fetch('/comment/add', {
+                const response = await fetch('/api/comment/add', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1179,7 +1179,7 @@
             showLoading('commentsResult');
 
             try {
-                const url = `/comment/song/page?songId=${params.songId}&currentUserId=${params.currentUserId}&pageNum=${pageNum}&pageSize=${pageSize}`;
+                const url = `/api/comment/song/page?songId=${params.songId}&currentUserId=${params.currentUserId}&pageNum=${pageNum}&pageSize=${pageSize}`;
                 const response = await fetch(url);
                 const result = await response.json();
                 showResult('commentsResult', result, result.code === 1);
@@ -1195,7 +1195,7 @@
             showLoading('commentsResult');
 
             try {
-                const url = `/comment/count?songId=${params.songId}`;
+                const url = `/api/comment/count?songId=${params.songId}`;
                 const response = await fetch(url);
                 const result = await response.json();
                 showResult('commentsResult', result, result.code === 1);
@@ -1226,7 +1226,7 @@
             showLoading('replyResult');
 
             try {
-                const response = await fetch('/comment/reply', {
+                const response = await fetch('/api/comment/reply', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1263,7 +1263,7 @@
             showLoading('likeResult');
 
             try {
-                const response = await fetch('/comment/like', {
+                const response = await fetch('/api/comment/like', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1295,7 +1295,7 @@
             showLoading('likeResult');
 
             try {
-                const response = await fetch('/comment/unlike', {
+                const response = await fetch('/api/comment/unlike', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1323,7 +1323,7 @@
             showLoading('likeResult');
 
             try {
-                const url = `/comment/like/check?commentId=${commentId}&userId=${params.userId}`;
+                const url = `/api/comment/like/check?commentId=${commentId}&userId=${params.userId}`;
                 const response = await fetch(url);
                 const result = await response.json();
                 showResult('likeResult', result, result.code === 1);
@@ -1343,7 +1343,7 @@
             showLoading('likeResult');
 
             try {
-                const url = `/comment/like/count?commentId=${commentId}`;
+                const url = `/api/comment/like/count?commentId=${commentId}`;
                 const response = await fetch(url);
                 const result = await response.json();
                 showResult('likeResult', result, result.code === 1);
@@ -1369,7 +1369,7 @@
             showLoading('deleteResult');
 
             try {
-                const response = await fetch('/comment/delete', {
+                const response = await fetch('/api/comment/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -1397,7 +1397,7 @@
             showLoading('detailResult');
 
             try {
-                const url = `/comment/detail?commentId=${commentId}&currentUserId=${params.currentUserId}`;
+                const url = `/api/comment/detail?commentId=${commentId}&currentUserId=${params.currentUserId}`;
                 const response = await fetch(url);
                 const result = await response.json();
                 showResult('detailResult', result, result.code === 1);
@@ -1419,7 +1419,7 @@
             showLoading('repliesResult');
 
             try {
-                const url = `/comment/replies?commentId=${commentId}&currentUserId=${params.currentUserId}`;
+                const url = `/api/comment/replies?commentId=${commentId}&currentUserId=${params.currentUserId}`;
                 const response = await fetch(url);
                 const result = await response.json();
                 showResult('repliesResult', result, result.code === 1);
@@ -1441,7 +1441,7 @@
             showLoading('userCommentsResult');
 
             try {
-                const url = `/comment/user?userId=${userId}&currentUserId=${params.currentUserId}`;
+                const url = `/api/comment/user?userId=${userId}&currentUserId=${params.currentUserId}`;
                 const response = await fetch(url);
                 const result = await response.json();
                 showResult('userCommentsResult', result, result.code === 1);
@@ -1498,7 +1498,7 @@
             };
 
             try {
-                const response = await fetch('/comment/add', {
+                const response = await fetch('/api/comment/add', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1534,7 +1534,7 @@
             try {
                 showCommentsLoading();
                 
-                const response = await fetch(`/comment/song/page?songId=${params.songId}&currentUserId=${params.currentUserId}&pageNum=${page}&pageSize=${commentPageSize}`);
+                const response = await fetch(`/api/comment/song/page?songId=${params.songId}&currentUserId=${params.currentUserId}&pageNum=${page}&pageSize=${commentPageSize}`);
                 const result = await response.json();
                 
                 if (result.code === 1) {
@@ -1662,7 +1662,7 @@
                 // 加载回复
                 try {
                     const params = getBaseParams();
-                    const response = await fetch(`/comment/replies?commentId=${commentId}&currentUserId=${params.currentUserId}`);
+                    const response = await fetch(`/api/comment/replies?commentId=${commentId}&currentUserId=${params.currentUserId}`);
                     const result = await response.json();
                     
                     if (result.code === 1 && result.data) {
@@ -1693,12 +1693,12 @@
             
             try {
                 // 先检查点赞状态
-                const checkResponse = await fetch(`/comment/like/check?commentId=${commentId}&userId=${params.userId}`);
+                const checkResponse = await fetch(`/api/comment/like/check?commentId=${commentId}&userId=${params.userId}`);
                 const checkResult = await checkResponse.json();
                 
                 if (checkResult.code === 1) {
                     const isLiked = checkResult.data;
-                    const url = isLiked ? '/comment/unlike' : '/comment/like';
+                    const url = isLiked ? '/api/comment/unlike' : '/api/comment/like';
                     
                     const response = await fetch(url, {
                         method: 'POST',
@@ -1745,7 +1745,7 @@
             const params = getBaseParams();
             
             try {
-                const response = await fetch('/comment/reply', {
+                const response = await fetch('/api/comment/reply', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1784,7 +1784,7 @@
             const params = getBaseParams();
             
             try {
-                const response = await fetch('/comment/delete', {
+                const response = await fetch('/api/comment/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'

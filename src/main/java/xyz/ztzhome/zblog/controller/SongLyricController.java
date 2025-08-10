@@ -18,13 +18,13 @@ public class SongLyricController {
     }
     //上传歌曲歌词
     @PostMapping("/upload")
-    public ResponseMessage uploadSongLRC(@RequestParam("id") String id,@RequestParam("lrcFile") MultipartFile lrcFile){
+    public ResponseMessage uploadSongLRC(@RequestParam("id") String id,@RequestPart("lyricFile") MultipartFile lrcFile){
         long songId = Long.parseLong(id);
         return lrcService.uploadLrc(songId,lrcFile);
     }
     //更新歌词
     @PostMapping("/update")
-    public ResponseMessage updateSongLRC(@RequestParam("id") String id,@RequestParam("file") MultipartFile file){
+    public ResponseMessage updateSongLRC(@RequestParam("id") String id,@RequestPart("lyricFile") MultipartFile file){
         long songId = Long.parseLong(id);
         return lrcService.updateLrc(songId,file);
     }

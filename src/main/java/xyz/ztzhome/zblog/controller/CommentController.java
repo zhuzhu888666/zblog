@@ -28,7 +28,6 @@ public class CommentController {
     public ResponseMessage addComment(@RequestBody AddCommentDTO addCommentDTO) {
         return commentService.addComment(addCommentDTO);
     }
-
     /**
      * 回复评论
      */

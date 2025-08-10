@@ -10,7 +10,7 @@
     </parent>
     <groupId>xyz.ztzhome</groupId>
     <artifactId>zblog</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>war</packaging>
     <name>zblog</name>
     <description>zblog</description>

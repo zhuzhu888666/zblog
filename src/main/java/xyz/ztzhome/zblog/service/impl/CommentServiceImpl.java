@@ -18,6 +18,7 @@ import xyz.ztzhome.zblog.mapper.CommentLikeMapper;
 import xyz.ztzhome.zblog.mapper.CommentMapper;
 import xyz.ztzhome.zblog.service.ICommentService;
 import xyz.ztzhome.zblog.service.IUserService;
+import xyz.ztzhome.zblog.service.IMinioService;
 
 import java.util.List;
 
@@ -34,6 +35,37 @@ public class CommentServiceImpl implements ICommentService {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private IMinioService minioService;
+
+    private String buildAvatarUrl(String avatarPath) {
+        if (avatarPath == null || avatarPath.isEmpty()) {
+            return "/images/default.jpg";
+        }
+        String url = minioService.getFileUrl(ResponseConstant.AvatarTimOut, avatarPath);
+        if (url == null || url.startsWith("getURL_error")) {
+            return "/images/default.jpg";
+        }
+        return url;
+    }
+
+    private void applyAvatarUrl(CommentVO commentVO) {
+        if (commentVO == null) return;
+        commentVO.setUserAvatar(buildAvatarUrl(commentVO.getUserAvatar()));
+        if (commentVO.getReplies() != null) {
+            for (CommentVO reply : commentVO.getReplies()) {
+                applyAvatarUrl(reply);
+            }
+        }
+    }
+
+    private void applyAvatarUrl(List<CommentVO> commentVOList) {
+        if (commentVOList == null) return;
+        for (CommentVO vo : commentVOList) {
+            applyAvatarUrl(vo);
+        }
+    }
 
     @Override
     @Transactional
@@ -192,6 +224,7 @@ public class CommentServiceImpl implements ICommentService {
             }
 
             if (targetComment != null) {
+                applyAvatarUrl(targetComment);
                 return new ResponseMessage<>(ResponseConstant.success, "查询成功", targetComment);
             } else {
                 return new ResponseMessage<>(ResponseConstant.error, "评论不存在");
@@ -206,6 +239,7 @@ public class CommentServiceImpl implements ICommentService {
     public ResponseMessage<List<CommentVO>> getCommentsBySongId(long songId, long currentUserId) {
         try {
             List<CommentVO> comments = commentMapper.selectTopCommentsBySongId(songId, currentUserId);
+            applyAvatarUrl(comments);
             return new ResponseMessage<>(ResponseConstant.success, "查询成功", comments);
         } catch (Exception e) {
             logger.error("查询评论失败", e);
@@ -218,6 +252,7 @@ public class CommentServiceImpl implements ICommentService {
         try {
             int offset = (pageNum - 1) * pageSize;
             List<CommentVO> comments = commentMapper.selectTopCommentsBySongIdWithPage(songId, currentUserId, offset, pageSize);
+            applyAvatarUrl(comments);
             int totalCount = commentMapper.countCommentsBySongId(songId);
 
             PageResponse<CommentVO> pageResponse = new PageResponse<>();
@@ -238,6 +273,7 @@ public class CommentServiceImpl implements ICommentService {
     public ResponseMessage<List<CommentVO>> getRepliesByCommentId(long commentId, long currentUserId) {
         try {
             List<CommentVO> replies = commentMapper.selectRepliesByParentId(commentId, currentUserId);
+            applyAvatarUrl(replies);
             return new ResponseMessage<>(ResponseConstant.success, "查询成功", replies);
         } catch (Exception e) {
             logger.error("查询回复失败", e);
@@ -250,6 +286,7 @@ public class CommentServiceImpl implements ICommentService {
         try {
             int offset = (pageNum - 1) * pageSize;
             List<CommentVO> replies = commentMapper.selectRepliesByParentIdWithPage(commentId, currentUserId, offset, pageSize);
+            applyAvatarUrl(replies);
             int totalCount = commentMapper.countRepliesByParentId(commentId);
 
             PageResponse<CommentVO> pageResponse = new PageResponse<>();
@@ -275,6 +312,7 @@ public class CommentServiceImpl implements ICommentService {
             }
 
             List<CommentVO> comments = commentMapper.selectCommentsByUserId(userId, currentUserId);
+            applyAvatarUrl(comments);
             return new ResponseMessage<>(ResponseConstant.success, "查询成功", comments);
         } catch (Exception e) {
             logger.error("查询用户评论失败", e);
@@ -292,6 +330,7 @@ public class CommentServiceImpl implements ICommentService {
 
             int offset = (pageNum - 1) * pageSize;
             List<CommentVO> comments = commentMapper.selectCommentsByUserIdWithPage(userId, currentUserId, offset, pageSize);
+            applyAvatarUrl(comments);
             int totalCount = commentMapper.countCommentsByUserId(userId);
 
             PageResponse<CommentVO> pageResponse = new PageResponse<>();
