@@ -96,13 +96,19 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                     "/api/user/favorites/**",
                     "/api/user/recently-played/**",
                     "/api/comment/**",
-                    "/api/playlist/**"
+                    "/api/playlist/**",
+                    "/api/song/**"
             )
     );
 
     // 管理员可以访问的路径
     private static final Set<String> ADMIN_PATHS = Collections.unmodifiableSet(
-            Set.of("/**")
+            Set.of(
+                    "/**",
+                    "/api/**",
+                    "/api/user/**",
+                    "/api/song/**"
+                    )
     );
 
     private final PathMatcher pathMatcher = new AntPathMatcher();

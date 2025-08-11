@@ -59,7 +59,7 @@ public class SongServiceImpl implements ISongService {
         }
         // 封面URL
         if (song.getCoverPath() == null || song.getCoverPath().isEmpty() || "default.jpg".equals(song.getCoverPath())) {
-            songVO.setCoverPath("/files/image/default_cover.jpg");
+            songVO.setCoverPath("/files/image/default_song_cover.jpg");
         } else {
             String minioPath = PathCosntant.SONG_COVER_PATH + song.getCoverPath();
             String url = minioService.getFileUrl(60*24, minioPath);

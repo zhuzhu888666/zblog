@@ -20,7 +20,8 @@ import java.util.List;
 public class SongController {
     @Autowired
     SongServiceImpl songService;
-    @PostMapping
+
+    @PostMapping("/addSong")
     public ResponseMessage addSong(@RequestPart("data") String data, @RequestPart("audioFile") MultipartFile audioFile, @RequestPart(value = "coverFile", required = false) MultipartFile coverFile) {
         AddSongDTO addSongDTO = new AddSongDTO();
         try {

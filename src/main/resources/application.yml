@@ -1,6 +1,8 @@
 server:
   port: 8080
   address: 0.0.0.0
+  jetty:
+    connection-idle-timeout: 8000
 
 spring:
   # 配置数据源
